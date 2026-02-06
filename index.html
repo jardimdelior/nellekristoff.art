@@ -9,30 +9,36 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  background: #ffffff;
+  background: #fff;
   color: #111;
+  line-height: 1.5;
+  animation: fadein .7s ease;
 }
 
 header {
   text-align: center;
-  padding: 110px 20px 40px;
+  padding: 120px 20px 50px;
 }
 
 h1 {
   font-weight: 500;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   margin: 0;
+  font-size: 26px;
+  text-transform: uppercase;
 }
 
-.subtitle {
-  margin-top: 12px;
+.subtitle, .sub {
+  margin-top: 14px;
   opacity: 0.55;
+  font-size: 14px;
+  letter-spacing: 0.3px;
 }
 
 .gallery {
   max-width: 1200px;
-  margin: auto;
-  padding: 20px;
+  margin: 0 auto;
+  padding: 30px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 34px;
@@ -54,9 +60,10 @@ h1 {
 }
 
 .caption {
-  margin-top: 10px;
-  font-size: 14px;
-  opacity: 0.75;
+  margin-top: 12px;
+  font-size: 13px;
+  opacity: 0.7;
+  letter-spacing: 0.2px;
   display: flex;
   justify-content: space-between;
 }
@@ -64,14 +71,20 @@ h1 {
 button {
   background: none;
   border: 1px solid #111;
-  padding: 6px 10px;
+  padding: 7px 12px;
   font-size: 12px;
   cursor: pointer;
+  border-radius: 999px;
 }
 
 button:hover {
   background: #111;
-  color: white;
+  color: #fff;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* lightbox */
