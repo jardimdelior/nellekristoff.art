@@ -8,39 +8,97 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
   background: #ffffff;
   color: #111;
 }
 
 header {
-  padding: 60px 20px;
   text-align: center;
+  padding: 70px 20px 40px;
 }
 
 h1 {
   font-weight: 500;
   letter-spacing: 2px;
+  margin: 0;
+}
+
+.subtitle {
+  margin-top: 12px;
+  opacity: 0.6;
 }
 
 .gallery {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-  padding: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 28px;
 }
 
-.gallery img {
+.card {
+  cursor: pointer;
+}
+
+.card img {
   width: 100%;
-  height: auto;
   display: block;
+  transition: transform .35s ease, opacity .35s ease;
+}
+
+.card:hover img {
+  transform: scale(1.02);
+  opacity: 0.95;
+}
+
+.caption {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.75;
+  display: flex;
+  justify-content: space-between;
+}
+
+button {
+  background: none;
+  border: 1px solid #111;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #111;
+  color: white;
+}
+
+/* lightbox */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox img {
+  max-width: 92%;
+  max-height: 92%;
+}
+
+.lightbox.open {
+  display: flex;
 }
 
 footer {
   text-align: center;
-  padding: 40px;
-  font-size: 14px;
-  opacity: 0.6;
+  padding: 60px 20px;
+  font-size: 13px;
+  opacity: .5;
 }
 </style>
 </head>
@@ -49,18 +107,57 @@ footer {
 
 <header>
   <h1>Nelle Kristoff</h1>
-  <p>Selected works for sale</p>
+  <div class="subtitle">Selected Works</div>
 </header>
 
 <section class="gallery">
-  <img src="images/work1.jpg">
-  <img src="images/work2.jpg">
-  <img src="images/work3.jpg">
+
+  <div class="card">
+    <img src="images/work1.jpg" onclick="openLightbox(this.src)">
+    <div class="caption">
+      <span>Work Title 1</span>
+      <button onclick="contact()">Inquire</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="images/work2.jpg" onclick="openLightbox(this.src)">
+    <div class="caption">
+      <span>Work Title 2</span>
+      <button onclick="contact()">Inquire</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="images/work3.jpg" onclick="openLightbox(this.src)">
+    <div class="caption">
+      <span>Work Title 3</span>
+      <button onclick="contact()">Inquire</button>
+    </div>
+  </div>
+
 </section>
 
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightboxImg">
+</div>
+
 <footer>
-© 2026 Nelle Kristoff
+© 2026 Nelle Kristoff — All rights reserved
 </footer>
+
+<script>
+function openLightbox(src){
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('open');
+}
+function contact(){
+  window.location = "mailto:youremail@example.com";
+}
+</script>
 
 </body>
 </html>
