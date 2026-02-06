@@ -12,7 +12,10 @@ body {
   background: #fff;
   color: #111;
   line-height: 1.5;
-  animation: fadein 3.4s cubic-bezier(0.22, 1, 0.36, 1) .2s forwards;
+  opacity: 0; } /* start hidden */
+
+  html.ready body {
+  animation: fadein 2.6s ease-in-out forwards;
 }
 
 header {
@@ -50,6 +53,7 @@ h1 {
 
 .card img {
   width: 100%;
+  height: auto;
   display: block;
   transition: transform .4s ease, opacity .4s ease;
 }
@@ -83,13 +87,13 @@ button:hover {
 }
 
 @keyframes fadein {
-  0%   { opacity: 0;   transform: translateY(20px); }
-  50%  { opacity: 0.5; transform: translateY(10px); }
-  100% { opacity: 1;   transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body { animation: none !important; }
+  html.ready body { animation: none !important; }
+  body { opacity: 1 !important; }
 }
 
 /* lightbox */
@@ -175,6 +179,12 @@ function closeLightbox(){
 function contact(){
   window.location = "mailto:youremail@example.com";
 }
+</script>
+
+<script>
+  window.addEventListener("load", () => {
+    document.documentElement.classList.add("ready");
+  });
 </script>
 
 </body>
