@@ -255,7 +255,7 @@ footer {
       <span>Untitled 1 Unveiling soon</span>
 
       <div class="actions">
-        <a href="mailto:nellekristoff@gmail.com" class="inquire-btn">Inquire</a>
+        <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
         <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
       </div>
 
@@ -268,7 +268,7 @@ footer {
       <span>Untitled 2 Unveiling soon</span>
 
       <div class="actions">
-        <a href="mailto:nellekristoff@gmail.com" class="inquire-btn">Inquire</a>
+        <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
         <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
       </div>
 
@@ -281,7 +281,7 @@ footer {
       <span>Untitled 3 Unveiling soon</span>
 
       <div class="actions">
-        <a href="mailto:nellekristoff@gmail.com" class="inquire-btn">Inquire</a>
+        <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
         <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
       </div>
 
@@ -368,8 +368,9 @@ document.querySelector('.film').addEventListener('click', (e) => {
   else if (x > rect.width * 0.66) setFilm(currentIndex + 1);
 });
 
-function contact(){
-  window.location = "mailto:nellekristoff@gmail.com";
+function contact(e){
+  if (e) e.preventDefault();
+  window.location.href = "mailto:nellekristoff@gmail.com";
 }
 </script>
 
