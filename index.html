@@ -84,7 +84,9 @@ h1{
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
-/* main film roll */
+/* =========================
+   Film roll
+========================= */
 .film-main{
   width:min(96vw, 1400px);
   height:min(62vh, 720px);
@@ -105,30 +107,39 @@ h1{
   transform-style:preserve-3d;
   user-select:none;
 }
-.film-img{
+
+.film-img-wrap{
   position:absolute;
   max-width:68%;
   max-height:82%;
-  object-fit:contain;
-
-  background:#fff;
-  padding:16px;
-
-  box-shadow:
-    inset 0 0 28px rgba(0,0,0,.16),
-    0 14px 50px rgba(0,0,0,.35);
-
-  border-radius:2px;
+  width:68%;
+  height:82%;
+  display:grid;
+  place-items:center;
+  transform-style:preserve-3d;
   transition:transform .55s cubic-bezier(.2,.9,.2,1), opacity .55s cubic-bezier(.2,.9,.2,1), filter .55s cubic-bezier(.2,.9,.2,1);
   will-change:transform, opacity, filter;
 }
+
+.film-img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#fff;
+  padding:16px;
+  box-shadow:
+    inset 0 0 28px rgba(0,0,0,.16),
+    0 14px 50px rgba(0,0,0,.35);
+  border-radius:2px;
+}
+
+.film-img-wrap.film-current{ cursor:pointer; }
 
 /* center flat */
 .film-current{
   transform:translateZ(130px) scale(1);
   opacity:1;
   filter:none;
-  cursor:pointer;
 }
 
 /* sides bent like film roll */
@@ -143,7 +154,7 @@ h1{
   filter:saturate(.9) contrast(.95);
 }
 
-/* Film arrows (for phone + desktop) */
+/* Film arrows */
 .film-arrows{
   position:absolute;
   inset:0;
@@ -188,7 +199,37 @@ h1{
   backdrop-filter:blur(6px);
 }
 
-/* gallery grid */
+/* =========================
+   Moving noise overlay (Option 1)
+   Put your PNG at: images/noise.png
+========================= */
+.noise{
+  position:absolute;
+  inset:-240px;
+  background-image:url("images/Untitled1.png");
+  background-repeat:repeat;
+  background-size:520px 520px;
+  opacity:0.16;
+  animation:noiseMove 0.18s steps(2) infinite;
+  pointer-events:none;
+  mix-blend-mode:overlay;
+}
+
+.film-img-wrap .noise{
+  opacity:0.14; /* slightly softer on the big roll */
+}
+
+@keyframes noiseMove{
+  0%   { transform:translate(0,0); }
+  25%  { transform:translate(-40px, 25px); }
+  50%  { transform:translate(-10px,-30px); }
+  75%  { transform:translate(30px, 10px); }
+  100% { transform:translate(0,0); }
+}
+
+/* =========================
+   Gallery
+========================= */
 .gallery{
   max-width:1200px;
   margin:0 auto;
@@ -197,7 +238,11 @@ h1{
   grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
   gap:34px;
 }
-.card{ cursor:pointer; }
+.card{ cursor:pointer; position:relative; }
+.card .media{
+  position:relative;
+  overflow:hidden;
+}
 .card img{
   width:100%;
   height:auto;
@@ -284,7 +329,8 @@ footer{
 @media (prefers-reduced-motion: reduce){
   html.ready body{ animation:none !important; }
   body{ opacity:1 !important; }
-  .film-img, .card img{ transition:none !important; }
+  .film-img-wrap, .card img{ transition:none !important; }
+  .noise{ animation:none !important; }
 }
 </style>
 </head>
@@ -310,32 +356,48 @@ footer{
 <!-- MAIN PAGE FILM ROLL -->
 <div class="film-main" id="filmMain">
   <div class="film" id="film" aria-label="Artwork film roll">
-    <img class="film-img film-prev" id="filmPrev" alt="" />
-    <img class="film-img film-current" id="filmCurrent" alt="Open artwork" />
-    <img class="film-img film-next" id="filmNext" alt="" />
+
+    <div class="film-img-wrap film-prev" id="wrapPrev" aria-hidden="true">
+      <img class="film-img" id="filmPrev" alt="" />
+      <div class="noise"></div>
+    </div>
+
+    <div class="film-img-wrap film-current" id="wrapCurrent">
+      <img class="film-img" id="filmCurrent" alt="Open artwork" />
+      <div class="noise"></div>
+    </div>
+
+    <div class="film-img-wrap film-next" id="wrapNext" aria-hidden="true">
+      <img class="film-img" id="filmNext" alt="" />
+      <div class="noise"></div>
+    </div>
+
   </div>
 
-  <!-- phone + desktop arrows (press & hold) -->
+  <!-- phone + desktop arrows -->
   <div class="film-arrows" aria-hidden="false">
-    <button class="film-arrow" id="arrowLeft" aria-label="Previous artwork (press and hold)">
+    <button class="film-arrow" id="arrowLeft" aria-label="Previous artwork">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M15 18l-6-6 6-6"/>
       </svg>
     </button>
 
-    <button class="film-arrow" id="arrowRight" aria-label="Next artwork (press and hold)">
+    <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M9 6l6 6-6 6"/>
       </svg>
     </button>
   </div>
 
-  <div class="film-hint">Hold ◀︎ / ▶︎ (or arrow keys) • Click the center image to enlarge</div>
+  <div class="film-hint">Click ◀︎ / ▶︎ to move • Hold to glide • Arrow keys work • Click the center image to enlarge</div>
 </div>
 
 <section class="gallery">
   <div class="card">
-    <img src="images/Untitled1.png" onclick="openLightbox(this.src)" alt="Untitled 1" />
+    <div class="media">
+      <img src="images/Untitled1.png" onclick="openLightbox(this.src)" alt="Untitled 1" />
+      <div class="noise"></div>
+    </div>
     <div class="caption">
       <span>Untitled 1 Unveiling soon</span>
       <div class="actions">
@@ -346,7 +408,10 @@ footer{
   </div>
 
   <div class="card">
-    <img src="images/Untitled2.png" onclick="openLightbox(this.src)" alt="Untitled 2" />
+    <div class="media">
+      <img src="images/Untitled2.png" onclick="openLightbox(this.src)" alt="Untitled 2" />
+      <div class="noise"></div>
+    </div>
     <div class="caption">
       <span>Untitled 2 Unveiling soon</span>
       <div class="actions">
@@ -357,7 +422,10 @@ footer{
   </div>
 
   <div class="card">
-    <img src="images/Untitled3.png" onclick="openLightbox(this.src)" alt="Untitled 3" />
+    <div class="media">
+      <img src="images/Untitled3.png" onclick="openLightbox(this.src)" alt="Untitled 3" />
+      <div class="noise"></div>
+    </div>
     <div class="caption">
       <span>Untitled 3 Unveiling soon</span>
       <div class="actions">
@@ -448,31 +516,26 @@ function closeLightbox(){
 }
 
 /* Click center film image to open */
-document.getElementById('filmCurrent').addEventListener('click', (e) => {
+document.getElementById('wrapCurrent').addEventListener('click', (e) => {
   e.stopPropagation();
   if (!gallerySources.length) collectGallerySources();
   if (!gallerySources.length) return;
   openLightbox(gallerySources[currentIndex]);
 });
 
-/* ===== "Breathing" roll control (smooth/inertial) =====
-   - Desktop: move mouse left/right gently; it "glides" like slow motion breathing.
-   - Phone: press & hold arrows to roll.
-   - Keyboard: hold ArrowLeft / ArrowRight to roll.
-*/
+/* ===== Film control (CLICK moves, HOLD glides) ===== */
 const filmMain = document.getElementById('filmMain');
 
-let target = 0;        // target index position (float)
+let target = 0;        // target position (float)
 let pos = 0;           // current position (float)
-let velocity = 0;      // movement velocity
+let velocity = 0;      // inertia
 let rafId = null;
 
-const stepPerSecond = 1.05;      // how fast it can roll when fully engaged
-const responsiveness = 0.14;     // how quickly it follows the target (0..1)
-const damping = 0.86;            // inertia damping (0..1)
+const stepPerSecond = 1.2;      // speed while holding
+const responsiveness = 0.18;     // follow strength
+const damping = 0.84;            // inertia damping
 
-let mouseEngage = 0;             // -1..+1 based on pointer position
-let holdDir = 0;                // -1, 0, +1 when holding arrows
+let holdDir = 0;                 // -1, 0, +1
 
 function startLoop(){
   if (rafId) return;
@@ -484,21 +547,17 @@ function stopLoop(){
   rafId = null;
 }
 
-function loop(ts){
-  // Convert engagement (mouse/hold) into target drift
-  // Hold arrows takes priority
-  const engage = holdDir !== 0 ? holdDir : mouseEngage;
+function loop(){
+  // drift target while holding
+  if (holdDir !== 0){
+    target += holdDir * (stepPerSecond / 60);
+  }
 
-  // drift target smoothly (float index)
-  target += engage * (stepPerSecond / 60);
-
-  // spring toward target with a gentle "breathing" feel
+  // spring toward target
   const diff = target - pos;
   velocity = (velocity * damping) + (diff * responsiveness);
   pos += velocity;
 
-  // Only update the visible film when we cross to a new integer index
-  // (Keeps it stable and avoids jitter)
   if (!gallerySources.length) collectGallerySources();
   const total = gallerySources.length || 0;
   if (total){
@@ -506,81 +565,63 @@ function loop(ts){
     if (idx !== currentIndex) setFilm(idx);
   }
 
-  // Keep running while there's engagement or motion still happening
   const stillMoving = Math.abs(velocity) > 0.0008;
-  const engaged = Math.abs(engage) > 0.001;
+  const engaged = holdDir !== 0;
 
   if (engaged || stillMoving){
     rafId = requestAnimationFrame(loop);
   } else {
-    // snap to nearest index when at rest
     pos = Math.round(pos);
     target = pos;
     stopLoop();
   }
 }
 
-/* Mouse move engagement */
-filmMain.addEventListener('mousemove', (e) => {
+/* Click arrows = one step (REAL move) */
+function stepOnce(dir){
+  if (!gallerySources.length) collectGallerySources();
   if (!gallerySources.length) return;
 
-  const rect = filmMain.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const ratio = x / rect.width; // 0..1
+  target = Math.round(target + dir);
+  pos = target;                 // immediate snap feels like "literal move"
+  setFilm(target);
+  velocity = 0;
+}
 
-  // Map to -1..+1 and soften center to feel "breathing"
-  // left edge -> -1, center -> 0, right edge -> +1
-  let v = (ratio - 0.5) * 2;
-  // deadzone in the center
-  const dead = 0.18;
-  if (Math.abs(v) < dead) v = 0;
-  else v = (v - Math.sign(v) * dead) / (1 - dead);
-
-  mouseEngage = v * 0.9; // slightly gentler
-  startLoop();
-});
-
-filmMain.addEventListener('mouseleave', () => {
-  mouseEngage = 0;
-  startLoop(); // lets it glide to rest
-});
-
-/* Touch: allow tap (no swipe needed), arrows handle rolling */
-filmMain.addEventListener('touchstart', () => {
-  // no-op; keep simple
-}, { passive:true });
-
-/* Press & hold arrows (mouse + touch) */
+/* Press & hold arrows = continuous glide */
 function bindHold(btn, dir){
-  const start = (e) => {
+  let holding = false;
+
+  const down = (e) => {
     e.preventDefault();
+    holding = true;
+
+    // click-step immediately
+    stepOnce(dir);
+
+    // then allow glide if still holding
     holdDir = dir;
     startLoop();
   };
-  const end = (e) => {
+
+  const up = (e) => {
     e.preventDefault();
+    if (!holding) return;
+    holding = false;
     holdDir = 0;
     startLoop(); // glide to rest
   };
 
-  btn.addEventListener('pointerdown', start);
-  btn.addEventListener('pointerup', end);
-  btn.addEventListener('pointercancel', end);
-  btn.addEventListener('pointerleave', end);
+  btn.addEventListener('pointerdown', down);
+  btn.addEventListener('pointerup', up);
+  btn.addEventListener('pointercancel', up);
+  btn.addEventListener('pointerleave', up);
 }
+
 bindHold(document.getElementById('arrowLeft'), -1);
 bindHold(document.getElementById('arrowRight'), +1);
 
-/* Keyboard hold */
-let keyLeft = false, keyRight = false;
-
-function updateHoldFromKeys(){
-  if (keyLeft && !keyRight) holdDir = -1;
-  else if (keyRight && !keyLeft) holdDir = +1;
-  else holdDir = 0;
-  startLoop();
-}
-
+/* Keyboard */
 window.addEventListener('keydown', (e) => {
   const lb = document.getElementById('lightbox');
   if (lb.classList.contains('open')) {
@@ -588,20 +629,30 @@ window.addEventListener('keydown', (e) => {
     return;
   }
 
-  if (e.key === 'ArrowLeft'){ keyLeft = true; updateHoldFromKeys(); }
-  if (e.key === 'ArrowRight'){ keyRight = true; updateHoldFromKeys(); }
+  if (e.key === 'ArrowLeft'){
+    // immediate step and allow holding
+    stepOnce(-1);
+    holdDir = -1;
+    startLoop();
+  }
+  if (e.key === 'ArrowRight'){
+    stepOnce(+1);
+    holdDir = +1;
+    startLoop();
+  }
 });
 
 window.addEventListener('keyup', (e) => {
-  if (e.key === 'ArrowLeft'){ keyLeft = false; updateHoldFromKeys(); }
-  if (e.key === 'ArrowRight'){ keyRight = false; updateHoldFromKeys(); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight'){
+    holdDir = 0;
+    startLoop();
+  }
 });
 
 /* Init */
 window.addEventListener('load', () => {
   collectGallerySources();
   setFilm(0);
-  // initialize float positions so animation is stable
   pos = currentIndex;
   target = pos;
 });
@@ -609,3 +660,4 @@ window.addEventListener('load', () => {
 
 </body>
 </html>
+
