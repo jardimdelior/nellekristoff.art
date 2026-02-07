@@ -122,6 +122,34 @@ footer {
   font-size: 13px;
   opacity: .5;
 }
+
+.inquire-btn{
+    padding: 8px 14px;
+    font-size: 13px;
+    border: 1px solid #000;
+    background: transparent;
+    color: #000;
+    text-decoration: none;
+    border-radius: 4px;
+  }
+  .inquire-btn:hover{
+    background:#000;
+    color:#fff;
+  }
+  .collect-btn{
+    padding: 8px 14px;
+    font-size: 13px;
+    border: 1px solid #000;
+    background: transparent;
+    color: #000;
+    text-decoration: none;
+    border-radius: 4px;
+  }
+  .collect-btn:hover{
+    background:#000;
+    color:#fff;
+  }
+
 </style>
 </head>
 
@@ -140,9 +168,9 @@ footer {
       <span>Untitled 1</span>
 
       <div class="actions">
-        <button onclick="contact('nellekristoff@gmail.com')">Inquire</button>
-        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
-      </div>
+  <a href="mailto:nellekristoff@gmail.com" class="inquire-btn">Inquire</a>
+  <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
+</div>
 
     </div>
   </div>
@@ -152,10 +180,10 @@ footer {
     <div class="caption">
       <span>Untitled 2</span>
 
-      <div class="actions">
-        <button onclick="contact('nellekristoff@gmail.com')">Inquire</button>
-        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
-      </div>
+     <div class="actions">
+  <a href="mailto:nellekristoff@gmail.com" class="inquire-btn">Inquire</a>
+  <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
+</div>
 
     </div>
   </div>
@@ -165,10 +193,10 @@ footer {
     <div class="caption">
       <span>Untitled 3</span>
 
-      <div class="actions">
-        <button onclick="contact('nellekristoff@gmail.com')">Inquire</button>
-        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
-      </div>
+     <div class="actions">
+  <a href="mailto:nellekristoff@gmail.com" class="inquire-btn">Inquire</a>
+  <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
+</div>
 
     </div>
   </div>
@@ -192,7 +220,7 @@ function closeLightbox(){
   document.getElementById('lightbox').classList.remove('open');
 }
 function contact(){
-  window.location = "mailto:youremail@example.com";
+  window.location = "mailto:nellekristoff@gmail.com";
 }
 </script>
 
