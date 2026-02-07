@@ -15,11 +15,14 @@
     --radius:2px;
 
     /* sizes tuned so you see 3 slides on desktop */
-    --slideW: clamp(220px, 38vw, 520px);
-    --slideH: clamp(320px, 58vh, 720px);
-    --gap: 26px;
-    --pad: 16px;
-  }
+    /* A3 landscape ratio */
+  --a3: 420 / 297;
+
+  /* mobile-safe sizing */
+  --slideW: clamp(240px, 84vw, 560px);
+  --gap: 18px;
+  --pad: 14px;
+}
 
   html, body { height:100%; }
   body{
@@ -36,11 +39,11 @@
   html.ready body{ animation:fadein 1.9s ease-in-out forwards; }
   body.noscroll{ overflow:hidden; }
 
-  header{
-    position:relative;
-    text-align:center;
-    padding:clamp(22px,5vh,60px) 20px 10px;
-  }
+ header{
+  position:relative;
+  text-align:center;
+  padding: 18px 20px 8px;   /* less vertical space */
+}
   h1{
     font-weight:500;
     letter-spacing:3px;
@@ -57,17 +60,17 @@
 
   /* hamburger */
   .menu-btn{
-    position:absolute;
-    top:16px;
-    right:16px;
-    width:44px;
-    height:44px;
-    border:0;
-    background:transparent;
-    cursor:pointer;
-    padding:10px;
-    z-index:30;
-  }
+  position:absolute;
+  top: 32px;                /* aligns with title line */
+  right:16px;
+  width:44px;
+  height:44px;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  padding:10px;
+  z-index:30;
+}
   .menu-btn span{
     display:block;
     height:2px;
@@ -123,19 +126,21 @@ main{
 
   .film-viewport{
     width:100%;
-    height:var(--slideH);
+    height:auto;
     overflow:hidden;
     display:grid;
     place-items:center;
     position:relative;
     touch-action:manipulation;
     perspective: 1200px;
+    padding: 6px 0;
   }
 
   .film-track{
     display:flex;
     align-items:center;
     justify-content:center;
+    width: 100%;
     gap:var(--gap);
     transform:translateX(0);
     will-change:transform;
@@ -143,15 +148,16 @@ main{
   }
 
   .slide{
-    width:var(--slideW);
-    height:calc(var(--slideH) * 0.92);
-    position:relative;
-    display:grid;
-    place-items:center;
-    transform-style:preserve-3d;
-    transition:transform .55s cubic-bezier(.2,.9,.2,1), opacity .55s cubic-bezier(.2,.9,.2,1), filter .55s cubic-bezier(.2,.9,.2,1);
-    perspective:1200px;
-  }
+  width: var(--slideW);
+  aspect-ratio: var(--a3);    /* IMPORTANT: A3 shape */
+  height: auto;
+  position:relative;
+  display:grid;
+  place-items:center;
+  transform-style:preserve-3d;
+  transition:transform .55s cubic-bezier(.2,.9,.2,1), opacity .55s cubic-bezier(.2,.9,.2,1), filter .55s cubic-bezier(.2,.9,.2,1);
+  perspective:1200px;
+}
 
   .slide.is-current{
     transform:translateZ(120px) scale(1.02);
@@ -244,26 +250,25 @@ main{
   .details{
   width: var(--slideW);
   max-width: 92vw;
-  margin: 10px auto 0;
-  padding: 10px 6px 0;
+  margin: 8px auto 0;       /* less gap */
+  padding: 8px 0 0;
   display:flex;
   justify-content:center;
 }
   
 .details-row{
-  width: 100%;
+  width:100%;
   display:flex;
   align-items:center;
-  justify-content:center;   /* center everything */
-  gap: 12px;                /* keep close */
-  flex-wrap: wrap;
+  justify-content:center;
+  gap: 10px;                /* tighter */
+  flex-wrap:nowrap;         /* keep one line on most screens */
 }
   .meta{
   display:flex;
   align-items:baseline;
   gap:8px;
-  flex-wrap:wrap;
-  justify-content:center;
+  white-space:nowrap;
 }
   .title{
     font-size:14px;
@@ -278,11 +283,11 @@ main{
     margin:0;
     white-space:nowrap;
   }
-  .actions{
+  
+.actions{
   display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  justify-content:center;   /* NOT far right */
+  gap:8px;
+  white-space:nowrap;
 }
   .inquire-btn,.collect-btn{
     padding:8px 14px;
@@ -325,8 +330,8 @@ main{
 
   footer{
   text-align:center;
-  padding:34px 20px 36px;
-  font-size:13px;
+  padding: 22px 20px 26px;
+  font-size:12.5px;
   opacity:.5;
 }
 
@@ -337,7 +342,14 @@ main{
     body{ opacity:1 !important; }
     .slide{ transition:none !important; }
     .noise{ animation:none !important; }
+    .details-row{ flex-wrap:wrap; }
+    .max-width{ transition:340px; }
+    :root{
+    --slideW: 78vw;
+    --gap: 12px;
+    --pad: 12px;
   }
+
 </style>
 </head>
 
