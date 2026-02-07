@@ -145,6 +145,64 @@ button:hover {
   pointer-events: auto;
 }
 
+/* Film strip container */
+.film{
+  width: min(96vw, 1400px);
+  height: min(88vh, 900px);
+  display: grid;
+  place-items: center;
+  position: relative;
+  perspective: 1200px;      /* depth */
+  transform-style: preserve-3d;
+}
+
+/* shared image style */
+.film-img{
+  position: absolute;
+  max-width: 68%;
+  max-height: 82%;
+  object-fit: contain;
+
+  background:
+  linear-gradient(transparent, rgba(0,0,0,.03)),
+  #fff;
+  padding: 14px;
+  box-shadow: 0 14px 50px rgba(0,0,0,.35);
+
+  border-radius: 2px;
+  transition: transform .35s ease, opacity .35s ease, filter .35s ease;
+  user-select: none;
+  pointer-events: none; /* clicks go to .film */
+}
+
+/* center = flat, crisp */
+.film-current{
+  transform: translateZ(120px) scale(1);
+  opacity: 1;
+  filter: none;
+}
+
+/* left/right = film roll bend */
+.film-prev{
+  transform:
+    translateX(-55%)
+    translateZ(0px)
+    rotateY(55deg)
+    scale(.92);
+  opacity: .65;
+  filter: saturate(.9) contrast(.95);
+}
+
+.film-next{
+  transform:
+    translateX(55%)
+    translateZ(0px)
+    rotateY(-55deg)
+    scale(.92);
+  opacity: .65;
+  filter: saturate(.9) contrast(.95);
+}
+
 footer {
   text-align: center;
   padding: 60px 20px;
@@ -194,7 +252,7 @@ footer {
   <div class="card">
     <img src="images/work1.jpg" onclick="openLightbox(this.src)">
     <div class="caption">
-      <span>Untitled 1</span>
+      <span>Untitled 1 Unveiling soon</span>
 
       <div class="actions">
         <a href="mailto:nellekristoff@gmail.com" class="inquire-btn">Inquire</a>
@@ -207,7 +265,7 @@ footer {
   <div class="card">
     <img src="images/work2.jpg" onclick="openLightbox(this.src)">
     <div class="caption">
-      <span>Untitled 2</span>
+      <span>Untitled 2 Unveiling soon</span>
 
       <div class="actions">
         <a href="mailto:nellekristoff@gmail.com" class="inquire-btn">Inquire</a>
@@ -220,7 +278,7 @@ footer {
   <div class="card">
     <img src="images/work3.jpg" onclick="openLightbox(this.src)">
     <div class="caption">
-      <span>Untitled 3</span>
+      <span>Untitled 3 Unveiling soon</span>
 
       <div class="actions">
         <a href="mailto:nellekristoff@gmail.com" class="inquire-btn">Inquire</a>
@@ -233,7 +291,11 @@ footer {
 </section>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lightboxImg" onclick="event.stopPropagation()">
+  <div class="film" onclick="event.stopPropagation()">
+    <img class="film-img film-prev" id="filmPrev" alt="">
+    <img class="film-img film-current" id="filmCurrent" alt="">
+    <img class="film-img film-next" id="filmNext" alt="">
+  </div>
 </div>
 
 <footer>
@@ -241,8 +303,40 @@ footer {
 </footer>
 
 <script>
+let gallerySources = [];
+let currentIndex = 0;
+
+function collectGallerySources(){
+  // collect all gallery images in order
+  gallerySources = Array.from(document.querySelectorAll('.gallery .card img'))
+    .map(img => img.getAttribute('src'));
+}
+
+// Call once after page load
+window.addEventListener('load', () => {
+  collectGallerySources();
+});
+
+function setFilm(index){
+  if (!gallerySources.length) collectGallerySources();
+
+  const total = gallerySources.length;
+  currentIndex = ((index % total) + total) % total;
+
+  const prevIndex = (currentIndex - 1 + total) % total;
+  const nextIndex = (currentIndex + 1) % total;
+
+  document.getElementById('filmPrev').src = gallerySources[prevIndex];
+  document.getElementById('filmCurrent').src = gallerySources[currentIndex];
+  document.getElementById('filmNext').src = gallerySources[nextIndex];
+}
+
 function openLightbox(src){
-  document.getElementById('lightboxImg').src = src;
+  if (!gallerySources.length) collectGallerySources();
+
+  const idx = gallerySources.indexOf(src);
+  setFilm(idx >= 0 ? idx : 0);
+
   document.getElementById('lightbox').classList.add('open');
   document.body.classList.add('noscroll');
 }
@@ -251,6 +345,28 @@ function closeLightbox(){
   document.getElementById('lightbox').classList.remove('open');
   document.body.classList.remove('noscroll');
 }
+
+// Keyboard navigation (optional but perfect for this)
+window.addEventListener('keydown', (e) => {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') setFilm(currentIndex - 1);
+  if (e.key === 'ArrowRight') setFilm(currentIndex + 1);
+});
+
+// Click left/right image zones to navigate
+document.querySelector('.film').addEventListener('click', (e) => {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+
+  if (x < rect.width * 0.33) setFilm(currentIndex - 1);
+  else if (x > rect.width * 0.66) setFilm(currentIndex + 1);
+});
 
 function contact(){
   window.location = "mailto:nellekristoff@gmail.com";
