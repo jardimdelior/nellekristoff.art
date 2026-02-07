@@ -1,1 +1,143 @@
-Links
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Posts — Nelle Kristoff</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif; background:#EFE7DC; color:#2F2A26; line-height:1.7; }
+  .wrap{ max-width:980px; margin:0 auto; padding:44px 20px 70px; }
+  a{ color:inherit; }
+  h1{ margin:0 0 10px; letter-spacing:2px; text-transform:uppercase; font-weight:500; }
+  .grid{ display:grid; grid-template-columns:1fr; gap:16px; margin-top:18px; }
+  .card{ padding:18px; background:rgba(255,255,255,.55); border:1px solid rgba(47,42,38,.14); border-radius:14px; }
+  label{ display:block; font-size:13px; opacity:.75; margin-bottom:6px; }
+  input, textarea{
+    width:100%; box-sizing:border-box;
+    border:1px solid rgba(47,42,38,.18);
+    border-radius:12px;
+    padding:12px 12px;
+    font:inherit;
+    background:rgba(255,255,255,.85);
+    color:inherit;
+  }
+  textarea{ min-height:180px; resize:vertical; }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px; }
+  button{
+    border:1px solid #000;
+    background:transparent;
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  button:hover{ background:#000; color:#fff; }
+  .muted{ opacity:.65; font-size:13px; }
+  .post{ margin:0; }
+  .post h3{ margin:0 0 6px; font-weight:500; }
+  .post small{ opacity:.6; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Posts</h1>
+    <p class="muted">Public posts page (clean). Below is a private draft editor (saved only in this browser).</p>
+
+    <div class="grid">
+      <div class="card">
+        <p class="muted"><strong>Public posts (placeholder)</strong> — we can later make these load from a simple file.</p>
+        <div id="publicPosts" class="muted">No public posts yet.</div>
+      </div>
+
+      <div class="card">
+        <p><strong>Draft editor (private)</strong></p>
+        <label>Title</label>
+        <input id="t" placeholder="New post title" />
+
+        <label style="margin-top:12px;">Text</label>
+        <textarea id="b" placeholder="Write your post here..."></textarea>
+
+        <div class="row">
+          <button onclick="saveDraft()">Save draft</button>
+          <button onclick="clearDraft()">Clear</button>
+          <span class="muted" id="status"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <p><strong>Saved drafts (this device)</strong></p>
+        <div id="drafts"></div>
+      </div>
+    </div>
+
+    <a class="muted" href="index.html">← Back to works</a>
+  </div>
+
+<script>
+  const key = "nk_drafts_v1";
+
+  function now(){
+    return new Date().toISOString().slice(0,10);
+  }
+
+  function loadAll(){
+    try{ return JSON.parse(localStorage.getItem(key) || "[]"); }
+    catch{ return []; }
+  }
+
+  function saveAll(arr){
+    localStorage.setItem(key, JSON.stringify(arr));
+    renderDrafts();
+  }
+
+  function saveDraft(){
+    const title = document.getElementById("t").value.trim();
+    const body = document.getElementById("b").value.trim();
+    if(!title || !body){
+      document.getElementById("status").textContent = "Add title + text.";
+      return;
+    }
+    const arr = loadAll();
+    arr.unshift({ title, body, date: now() });
+    saveAll(arr);
+    document.getElementById("status").textContent = "Saved.";
+  }
+
+  function clearDraft(){
+    document.getElementById("t").value = "";
+    document.getElementById("b").value = "";
+    document.getElementById("status").textContent = "";
+  }
+
+  function removeDraft(i){
+    const arr = loadAll();
+    arr.splice(i,1);
+    saveAll(arr);
+  }
+
+  function renderDrafts(){
+    const arr = loadAll();
+    const el = document.getElementById("drafts");
+    if(!arr.length){
+      el.innerHTML = "<p class='muted'>No drafts saved yet.</p>";
+      return;
+    }
+    el.innerHTML = arr.map((p,i)=>`
+      <div class="post" style="margin-bottom:14px;">
+        <h3>${escapeHtml(p.title)}</h3>
+        <small>${escapeHtml(p.date)}</small>
+        <p style="white-space:pre-wrap; margin:10px 0 10px;">${escapeHtml(p.body)}</p>
+        <div class="row">
+          <button onclick="removeDraft(${i})">Delete</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  renderDrafts();
+</script>
+</body>
+</html>
