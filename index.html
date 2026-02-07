@@ -58,6 +58,11 @@ h1 {
   cursor: pointer;
 }
 
+.card, .caption, .actions {
+  position: relative;
+  z-index: 1;
+}
+
 .card img {
   width: 100%;
   height: auto;
@@ -115,6 +120,7 @@ button:hover {
   align-items: center;
   justify-content: center;
   cursor: zoom-out;
+  z-index: 9999;  /* fixed */
 }
 
 .lightbox img {
@@ -127,6 +133,7 @@ button:hover {
 
 .lightbox.open {
   display: flex;
+  pointer-events: auto;
 }
 
 footer {
@@ -217,7 +224,7 @@ footer {
 </section>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lightboxImg">
+  <img id="lightboxImg" onclick="event.stopPropagation()">
 </div>
 
 <footer>
