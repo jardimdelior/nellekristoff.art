@@ -11,16 +11,21 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
   background: #EFE7DC;
   color: #2F2A26;
-  line-height: 4;
-  opacity: 0; } /* start hidden */
+  line-height: 1.6;  /* important */
+  opacity: 0; /* start hidden */
+}
 
-  html.ready body {
+html.ready body {
   animation: fadein 2.6s ease-in-out forwards;
+}
+
+body.noscroll {
+  overflow: hidden;
 }
 
 header {
   text-align: center;
-  padding: 120px 20px 50px;
+  padding: clamp(32px, 8vh, 90px) 20px 24px;
 }
 
 h1 {
@@ -56,6 +61,8 @@ h1 {
   height: auto;
   display: block;
   transition: transform .4s ease, opacity .4s ease;
+  max-height: 80vh;
+  object-fit: contain;
 }
 
 .card:hover img {
@@ -105,11 +112,15 @@ button:hover {
   display: none;
   align-items: center;
   justify-content: center;
+  cursor: zoom-out;
 }
 
 .lightbox img {
-  max-width: 92%;
-  max-height: 92%;
+  width: auto;
+  height: auto;
+  max-width: min(92vw, 1400px);
+  max-height: 92vh;
+  object-fit: contain;
 }
 
 .lightbox.open {
@@ -215,10 +226,14 @@ footer {
 function openLightbox(src){
   document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('open');
+  document.body.classList.add('noscroll');
 }
+
 function closeLightbox(){
   document.getElementById('lightbox').classList.remove('open');
+  document.body.classList.remove('noscroll');
 }
+
 function contact(){
   window.location = "mailto:nellekristoff@gmail.com";
 }
@@ -226,7 +241,7 @@ function contact(){
 
 <script>
   window.addEventListener("load", () => {
-    document.documentElement.classList.add("ready");
+    document.documentElement.classList.add("ready");  /* controls my smooth fade-in */
   });
 </script>
 
