@@ -60,7 +60,7 @@ h1 {
 
 .card, .caption, .actions {
   position: relative;
-  z-index: 1;
+  z-index: 0;
 }
 
 .card img {
@@ -120,7 +120,8 @@ button:hover {
   align-items: center;
   justify-content: center;
   cursor: zoom-out;
-  z-index: 9999;  /* fixed */
+  z-index: 2147483647;  /* fixed */
+  isolation: isolate;
 }
 
 .lightbox img {
