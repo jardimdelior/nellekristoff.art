@@ -2,336 +2,336 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Nelle Kristoff — Art Portfolio</title>
+<title>Nelle Kristoff — Art</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <style>
-/* base */
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
-  background:#EFE7DC;
-  color:#2F2A26;
-  line-height:1.6;
-  opacity:0; /* start hidden */
-}
-html.ready body{ animation:fadein 2.6s ease-in-out forwards; }
-body.noscroll{ overflow:hidden; }
+  :root{
+    --bg: #EFE7DC;
+    --ink: #2F2A26;
+    --card: #FFFFFF;
+    --shadow: 0 14px 50px rgba(0,0,0,.35);
+    --inset: inset 0 0 28px rgba(0,0,0,.16);
+    --radius: 2px;
+    --gap: 22px;
+    --slideW: clamp(260px, 56vw, 620px);
+    --slideH: clamp(320px, 58vh, 720px);
+  }
 
-header{
-  position:relative;
-  text-align:center;
-  padding:clamp(28px,6vh,70px) 20px 8px;
-}
-h1{
-  font-weight:500;
-  letter-spacing:3px;
-  margin:0 0 4px;
-  font-size:26px;
-  text-transform:uppercase;
-}
-.subtitle{
-  margin:6px 0 10px;
-  opacity:.55;
-  font-size:14px;
-  letter-spacing:.3px;
-}
+  /* Page layout that resizes cleanly + footer stays correct */
+  html, body { height: 100%; }
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.6;
 
-/* hamburger menu */
-.menu-btn{
-  position:absolute;
-  top:18px;
-  right:18px;
-  width:44px;
-  height:44px;
-  border:0;
-  background:transparent;
-  cursor:pointer;
-  padding:10px;
-}
-.menu-btn span{
-  display:block;
-  height:2px;
-  background:#2F2A26;
-  margin:6px 0;
-  border-radius:2px;
-  opacity:.9;
-}
-.menu{
-  position:absolute;
-  top:62px;
-  right:18px;
-  background:rgba(239,231,220,.96);
-  border:1px solid rgba(47,42,38,.18);
-  border-radius:12px;
-  padding:10px;
-  display:none;
-  min-width:170px;
-  box-shadow:0 14px 40px rgba(0,0,0,.12);
-  backdrop-filter:blur(6px);
-  z-index:10;
-}
-.menu.open{ display:block; }
-.menu a{
-  display:block;
-  padding:10px 12px;
-  text-decoration:none;
-  color:#2F2A26;
-  font-size:13px;
-  letter-spacing:.2px;
-  opacity:.9;
-  border-radius:10px;
-}
-.menu a:hover{ background:rgba(47,42,38,.08); }
+    display:flex;
+    flex-direction:column;
 
-/* =========================
-   Film roll
-========================= */
-.film-main{
-  width:min(96vw, 1400px);
-  height:min(62vh, 720px);
-  margin:0 auto;
-  display:grid;
-  place-items:center;
-  padding:6px 0 6px;
-  position:relative; /* for arrows */
-  touch-action:manipulation;
-}
-.film{
-  width:100%;
-  height:100%;
-  display:grid;
-  place-items:center;
-  position:relative;
-  perspective:1200px;
-  transform-style:preserve-3d;
-  user-select:none;
-}
+    opacity:0;
+  }
+  html.ready body{ animation:fadein 2.2s ease-in-out forwards; }
+  body.noscroll{ overflow:hidden; }
 
-.film-img-wrap{
-  position:absolute;
-  max-width:68%;
-  max-height:82%;
-  width:68%;
-  height:82%;
-  display:grid;
-  place-items:center;
-  transform-style:preserve-3d;
-  transition:transform .55s cubic-bezier(.2,.9,.2,1), opacity .55s cubic-bezier(.2,.9,.2,1), filter .55s cubic-bezier(.2,.9,.2,1);
-  will-change:transform, opacity, filter;
-}
+  header{
+    position:relative;
+    text-align:center;
+    padding: clamp(22px, 5vh, 60px) 20px 10px;
+  }
+  h1{
+    font-weight:500;
+    letter-spacing:3px;
+    margin:0 0 4px;
+    font-size:26px;
+    text-transform:uppercase;
+  }
+  .subtitle{
+    margin:6px 0 0;
+    opacity:.55;
+    font-size:14px;
+    letter-spacing:.3px;
+  }
 
-.film-img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  background:#fff;
-  padding:16px;
-  box-shadow:
-    inset 0 0 28px rgba(0,0,0,.16),
-    0 14px 50px rgba(0,0,0,.35);
-  border-radius:2px;
-}
+  /* Hamburger */
+  .menu-btn{
+    position:absolute;
+    top:16px;
+    right:16px;
+    width:44px;
+    height:44px;
+    border:0;
+    background:transparent;
+    cursor:pointer;
+    padding:10px;
+    z-index:30;
+  }
+  .menu-btn span{
+    display:block;
+    height:2px;
+    background:var(--ink);
+    margin:6px 0;
+    border-radius:2px;
+    opacity:.9;
+  }
 
-.film-img-wrap.film-current{ cursor:pointer; }
+  /* Menu as a top bar under the title (not a right-side square) */
+  .menu{
+    width:min(720px, 92vw);
+    margin: 14px auto 0;
+    border-radius: 14px;
+    border: 1px solid rgba(47,42,38,.16);
+    background: rgba(239,231,220,.92);
+    box-shadow: 0 14px 40px rgba(0,0,0,.10);
+    backdrop-filter: blur(8px);
 
-/* center flat */
-.film-current{
-  transform:translateZ(130px) scale(1);
-  opacity:1;
-  filter:none;
-}
+    display:none;
+    padding: 8px;
+    z-index:20;
+  }
+  .menu.open{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+  .menu a{
+    display:inline-block;
+    padding:10px 14px;
+    text-decoration:none;
+    color:var(--ink);
+    font-size:13px;
+    letter-spacing:.2px;
+    opacity:.9;
+    border-radius: 12px;
+  }
+  .menu a:hover{ background:rgba(47,42,38,.08); }
 
-/* sides bent like film roll */
-.film-prev{
-  transform:translateX(-56%) rotateY(60deg) scale(.92);
-  opacity:.62;
-  filter:saturate(.9) contrast(.95);
-}
-.film-next{
-  transform:translateX(56%) rotateY(-60deg) scale(.92);
-  opacity:.62;
-  filter:saturate(.9) contrast(.95);
-}
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap: 14px;
+  }
 
-/* Film arrows */
-.film-arrows{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 10px;
-}
-.film-arrow{
-  pointer-events:auto;
-  width:52px;
-  height:52px;
-  border-radius:999px;
-  border:1px solid rgba(47,42,38,.28);
-  background:rgba(239,231,220,.78);
-  backdrop-filter:blur(6px);
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  box-shadow:0 10px 24px rgba(0,0,0,.14);
-  transition:transform .2s ease, background .2s ease, opacity .2s ease;
-  opacity:.92;
-}
-.film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.03); }
-.film-arrow:active{ transform:scale(.98); }
-.film-arrow svg{ width:18px; height:18px; }
+  /* ===== Film section ===== */
+  .film-main{
+    width:min(96vw, 1400px);
+    margin: 0 auto;
+    padding: 10px 0 0;
+    position:relative;
+  }
 
-.film-hint{
-  position:absolute;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:12px;
-  opacity:.55;
-  letter-spacing:.2px;
-  text-align:center;
-  padding:6px 10px;
-  border-radius:999px;
-  background:rgba(239,231,220,.62);
-  border:1px solid rgba(47,42,38,.12);
-  backdrop-filter:blur(6px);
-}
+  /* viewport holds the moving track */
+  .film-viewport{
+    width:100%;
+    height: var(--slideH);
+    overflow:hidden;
+    position:relative;
+    display:grid;
+    place-items:center;
+    touch-action: manipulation;
+  }
 
-/* =========================
-   Moving noise overlay (Option 1)
-   Put your PNG at: images/noise.png
-========================= */
-.noise{
-  position:absolute;
-  inset:-240px;
-  background-image:url("images/Untitled1.png");
-  background-repeat:repeat;
-  background-size:520px 520px;
-  opacity:0.16;
-  animation:noiseMove 0.18s steps(2) infinite;
-  pointer-events:none;
-  mix-blend-mode:overlay;
-}
+  .film-track{
+    display:flex;
+    align-items:center;
+    gap: var(--gap);
+    transform: translateX(0);
+    will-change: transform;
+  }
 
-.film-img-wrap .noise{
-  opacity:0.14; /* slightly softer on the big roll */
-}
+  /* Each slide wrapper (so we can bend sides) */
+  .slide{
+    width: var(--slideW);
+    height: calc(var(--slideH) * 0.92);
+    display:grid;
+    place-items:center;
+    position:relative;
+    transform-style:preserve-3d;
+    transition: transform .55s cubic-bezier(.2,.9,.2,1), opacity .55s cubic-bezier(.2,.9,.2,1), filter .55s cubic-bezier(.2,.9,.2,1);
+  }
 
-@keyframes noiseMove{
-  0%   { transform:translate(0,0); }
-  25%  { transform:translate(-40px, 25px); }
-  50%  { transform:translate(-10px,-30px); }
-  75%  { transform:translate(30px, 10px); }
-  100% { transform:translate(0,0); }
-}
+  /* center */
+  .slide.is-current{
+    transform: translateZ(120px) scale(1.02);
+    opacity:1;
+    filter:none;
+    cursor:pointer;
+  }
 
-/* =========================
-   Gallery
-========================= */
-.gallery{
-  max-width:1200px;
-  margin:0 auto;
-  padding:12px 30px 30px;
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-  gap:34px;
-}
-.card{ cursor:pointer; position:relative; }
-.card .media{
-  position:relative;
-  overflow:hidden;
-}
-.card img{
-  width:100%;
-  height:auto;
-  display:block;
-  transition:transform .4s ease, opacity .4s ease;
-  max-height:80vh;
-  object-fit:contain;
-}
-.card:hover img{
-  transform:scale(1.035);
-  opacity:.96;
-}
-.caption{
-  margin-top:12px;
-  font-size:13px;
-  opacity:.7;
-  letter-spacing:.2px;
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:center;
-}
-.actions{ display:flex; gap:10px; }
+  /* sides (film bend look) */
+  .slide.is-prev{
+    transform: translateX(-2%) rotateY(58deg) scale(.92);
+    opacity:.62;
+    filter:saturate(.9) contrast(.96);
+  }
+  .slide.is-next{
+    transform: translateX(2%) rotateY(-58deg) scale(.92);
+    opacity:.62;
+    filter:saturate(.9) contrast(.96);
+  }
 
-.inquire-btn,.collect-btn{
-  padding:8px 14px;
-  font-size:13px;
-  border:1px solid #000;
-  background:transparent;
-  color:#000;
-  text-decoration:none;
-  border-radius:4px;
-}
-.inquire-btn:hover,.collect-btn:hover{
-  background:#000;
-  color:#fff;
-}
+  /* Image “print” styling like lightbox */
+  .slide img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    background: var(--card);
+    padding:16px;
+    border-radius: var(--radius);
+    box-shadow: var(--inset), var(--shadow);
+    display:block;
+    position:relative;
+    z-index:2;
+  }
 
-/* SINGLE image lightbox */
-.lightbox{
-  position:fixed;
-  inset:0;
-  width:100vw;
-  height:100vh;
-  background:rgba(0,0,0,.9);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  cursor:zoom-out;
-  z-index:2147483647;
-  isolation:isolate;
-}
-.lightbox.open{ display:flex; }
-.lightbox img{
-  width:auto;
-  height:auto;
-  max-width:min(92vw, 1400px);
-  max-height:92vh;
-  object-fit:contain;
+  /* Noise overlay ONLY inside photos */
+  .noise{
+    position:absolute;
+    inset: -220px;
+    background-image: url("images/noise.png"); /* <-- add your clean noise file here */
+    background-repeat: repeat;
+    background-size: 520px 520px;
+    opacity: 0.16;
+    animation: noiseMove 0.18s steps(2) infinite;
+    pointer-events:none;
+    mix-blend-mode: overlay;
+    z-index:3;
+  }
 
-  background:#fff;
-  padding:16px;
+  @keyframes noiseMove{
+    0%   { transform:translate(0,0); }
+    25%  { transform:translate(-40px, 25px); }
+    50%  { transform:translate(-10px,-30px); }
+    75%  { transform:translate(30px, 10px); }
+    100% { transform:translate(0,0); }
+  }
 
-  box-shadow:
-    inset 0 0 28px rgba(0,0,0,.16),
-    0 14px 50px rgba(0,0,0,.35);
+  /* Arrows always visible (desktop + mobile) */
+  .film-arrows{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    pointer-events:none;
+    padding: 0 10px;
+    z-index:25;
+  }
+  .film-arrow{
+    pointer-events:auto;
+    width:52px;
+    height:52px;
+    border-radius:999px;
+    border:1px solid rgba(47,42,38,.28);
+    background:rgba(239,231,220,.78);
+    backdrop-filter:blur(6px);
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    box-shadow:0 10px 24px rgba(0,0,0,.14);
+    transition:transform .2s ease, background .2s ease, opacity .2s ease;
+    opacity:.96;
+  }
+  .film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.03); }
+  .film-arrow:active{ transform:scale(.98); }
+  .film-arrow svg{ width:18px; height:18px; }
 
-  border-radius:2px;
-  cursor:auto;
-}
+  .film-hint{
+    width:fit-content;
+    margin: 10px auto 0;
+    font-size:12px;
+    opacity:.55;
+    letter-spacing:.2px;
+    text-align:center;
+    padding:6px 10px;
+    border-radius:999px;
+    background:rgba(239,231,220,.62);
+    border:1px solid rgba(47,42,38,.12);
+    backdrop-filter:blur(6px);
+  }
 
-footer{
-  text-align:center;
-  padding:60px 20px;
-  font-size:13px;
-  opacity:.5;
-}
+  /* ===== Under-film details (title + buttons) ===== */
+  .details{
+    width:min(860px, 92vw);
+    margin: 8px auto 0;
+    text-align:center;
+    padding-bottom: 10px;
+  }
+  .details .title{
+    font-size: 14px;
+    letter-spacing: .2px;
+    opacity: .84;
+    margin: 0;
+  }
+  .details .status{
+    font-size: 13px;
+    opacity: .65;
+    margin: 6px 0 12px;
+  }
+  .actions{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .inquire-btn,.collect-btn{
+    padding:8px 14px;
+    font-size:13px;
+    border:1px solid #000;
+    background:transparent;
+    color:#000;
+    text-decoration:none;
+    border-radius:4px;
+  }
+  .inquire-btn:hover,.collect-btn:hover{
+    background:#000;
+    color:#fff;
+  }
 
-@keyframes fadein{
-  from{ opacity:0; }
-  to{ opacity:1; }
-}
+  /* ===== Lightbox (single image only) ===== */
+  .lightbox{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.92);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    cursor:zoom-out;
+    z-index:2147483647;
+  }
+  .lightbox.open{ display:flex; }
+  .lightbox img{
+    width:auto;
+    height:auto;
+    max-width:min(92vw, 1400px);
+    max-height:92vh;
+    object-fit:contain;
 
-@media (prefers-reduced-motion: reduce){
-  html.ready body{ animation:none !important; }
-  body{ opacity:1 !important; }
-  .film-img-wrap, .card img{ transition:none !important; }
-  .noise{ animation:none !important; }
-}
+    background:#fff;
+    padding:16px;
+
+    box-shadow: var(--inset), var(--shadow);
+    border-radius: var(--radius);
+
+    cursor:auto;
+  }
+
+  footer{
+    text-align:center;
+    padding: 44px 20px 46px;
+    font-size:13px;
+    opacity:.5;
+  }
+
+  @keyframes fadein{
+    from{ opacity:0; }
+    to{ opacity:1; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html.ready body{ animation:none !important; }
+    body{ opacity:1 !important; }
+    .slide{ transition:none !important; }
+    .noise{ animation:none !important; }
+  }
 </style>
 </head>
 
@@ -341,7 +341,6 @@ footer{
   <h1>Nelle Kristoff</h1>
   <div class="subtitle">Selected Works</div>
 
-  <!-- hamburger -->
   <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
@@ -353,158 +352,85 @@ footer{
   </nav>
 </header>
 
-<!-- MAIN PAGE FILM ROLL -->
-<div class="film-main" id="filmMain">
-  <div class="film" id="film" aria-label="Artwork film roll">
+<main>
+  <!-- Film roll -->
+  <section class="film-main" aria-label="Featured works">
+    <div class="film-viewport" id="filmViewport">
+      <div class="film-track" id="filmTrack">
+        <!-- JS renders 3 slides here -->
+      </div>
 
-    <div class="film-img-wrap film-prev" id="wrapPrev" aria-hidden="true">
-      <img class="film-img" id="filmPrev" alt="" />
-      <div class="noise"></div>
-    </div>
+      <div class="film-arrows" aria-hidden="false">
+        <button class="film-arrow" id="arrowLeft" aria-label="Previous artwork">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
 
-    <div class="film-img-wrap film-current" id="wrapCurrent">
-      <img class="film-img" id="filmCurrent" alt="Open artwork" />
-      <div class="noise"></div>
-    </div>
-
-    <div class="film-img-wrap film-next" id="wrapNext" aria-hidden="true">
-      <img class="film-img" id="filmNext" alt="" />
-      <div class="noise"></div>
-    </div>
-
-  </div>
-
-  <!-- phone + desktop arrows -->
-  <div class="film-arrows" aria-hidden="false">
-    <button class="film-arrow" id="arrowLeft" aria-label="Previous artwork">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M15 18l-6-6 6-6"/>
-      </svg>
-    </button>
-
-    <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M9 6l6 6-6 6"/>
-      </svg>
-    </button>
-  </div>
-
-  <div class="film-hint">Click ◀︎ / ▶︎ to move • Hold to glide • Arrow keys work • Click the center image to enlarge</div>
-</div>
-
-<section class="gallery">
-  <div class="card">
-    <div class="media">
-      <img src="images/Untitled1.png" onclick="openLightbox(this.src)" alt="Untitled 1" />
-      <div class="noise"></div>
-    </div>
-    <div class="caption">
-      <span>Untitled 1 Unveiling soon</span>
-      <div class="actions">
-        <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener">Collect</a>
+        <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </button>
       </div>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="media">
-      <img src="images/Untitled2.png" onclick="openLightbox(this.src)" alt="Untitled 2" />
-      <div class="noise"></div>
-    </div>
-    <div class="caption">
-      <span>Untitled 2 Unveiling soon</span>
+    <div class="film-hint">Click ◀︎ / ▶︎ to move • Hold to glide • Arrow keys work • Click the center image to enlarge</div>
+
+    <!-- Under-film details -->
+    <div class="details">
+      <p class="title" id="workTitle">Untitled 1</p>
+      <p class="status" id="workStatus">Unveiling soon</p>
       <div class="actions">
         <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener">Collect</a>
+        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
       </div>
     </div>
-  </div>
+  </section>
+</main>
 
-  <div class="card">
-    <div class="media">
-      <img src="images/Untitled3.png" onclick="openLightbox(this.src)" alt="Untitled 3" />
-      <div class="noise"></div>
-    </div>
-    <div class="caption">
-      <span>Untitled 3 Unveiling soon</span>
-      <div class="actions">
-        <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener">Collect</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SINGLE IMAGE LIGHTBOX -->
+<!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <img id="lightboxImg" alt="" onclick="event.stopPropagation()" />
 </div>
 
 <footer>
-© 2026 Nelle Kristoff — All rights reserved
+  © 2026 Nelle Kristoff — All rights reserved
 </footer>
 
 <script>
-/* ===== Smooth fade-in ===== */
-window.addEventListener("load", () => {
-  document.documentElement.classList.add("ready");
-});
+/* Fade-in */
+window.addEventListener("load", () => document.documentElement.classList.add("ready"));
 
-/* ===== Menu ===== */
+/* Menu */
 const menuBtn = document.getElementById('menuBtn');
 const menu = document.getElementById('menu');
-
-function toggleMenu(){
-  const isOpen = menu.classList.toggle('open');
-  menuBtn.setAttribute('aria-expanded', String(isOpen));
-}
 menuBtn.addEventListener('click', (e) => {
   e.stopPropagation();
-  toggleMenu();
+  const open = menu.classList.toggle('open');
+  menuBtn.setAttribute('aria-expanded', String(open));
 });
 document.addEventListener('click', () => {
   menu.classList.remove('open');
   menuBtn.setAttribute('aria-expanded', 'false');
 });
 
-/* ===== Contact ===== */
+/* Contact */
 function contact(e){
   if (e) e.preventDefault();
   window.location.href = "mailto:nellekristoff@gmail.com";
 }
 
-/* ===== Film roll data ===== */
-let gallerySources = [];
+/* Works (3 only) */
+const works = [
+  { src: "images/Untitled1.png", title: "Untitled 1", status: "Unveiling soon", collect: "https://collect.nellekristoff.art" },
+  { src: "images/Untitled2.png", title: "Untitled 2", status: "Unveiling soon", collect: "https://collect.nellekristoff.art" },
+  { src: "images/Untitled3.png", title: "Untitled 3", status: "Unveiling soon", collect: "https://collect.nellekristoff.art" },
+];
+
 let currentIndex = 0;
 
-function collectGallerySources(){
-  gallerySources = Array.from(document.querySelectorAll('.gallery .card img'))
-    .map(img => img.getAttribute('src'))
-    .filter(Boolean);
-}
-
-/* Wrap index safely */
-function wrapIndex(i, total){
-  return ((i % total) + total) % total;
-}
-
-function setFilm(index){
-  if (!gallerySources.length) collectGallerySources();
-  const total = gallerySources.length;
-  if (!total) return;
-
-  currentIndex = wrapIndex(index, total);
-
-  const prevIndex = wrapIndex(currentIndex - 1, total);
-  const nextIndex = wrapIndex(currentIndex + 1, total);
-
-  document.getElementById('filmPrev').src = gallerySources[prevIndex];
-  document.getElementById('filmCurrent').src = gallerySources[currentIndex];
-  document.getElementById('filmNext').src = gallerySources[nextIndex];
-}
-
-/* ===== Single-image lightbox ===== */
+/* Lightbox */
 function openLightbox(src){
   document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('open');
@@ -514,150 +440,152 @@ function closeLightbox(){
   document.getElementById('lightbox').classList.remove('open');
   document.body.classList.remove('noscroll');
 }
-
-/* Click center film image to open */
-document.getElementById('wrapCurrent').addEventListener('click', (e) => {
-  e.stopPropagation();
-  if (!gallerySources.length) collectGallerySources();
-  if (!gallerySources.length) return;
-  openLightbox(gallerySources[currentIndex]);
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox();
 });
 
-/* ===== Film control (CLICK moves, HOLD glides) ===== */
-const filmMain = document.getElementById('filmMain');
+/* Render 3 slides: prev, current, next */
+const track = document.getElementById('filmTrack');
+const viewport = document.getElementById('filmViewport');
 
-let target = 0;        // target position (float)
-let pos = 0;           // current position (float)
-let velocity = 0;      // inertia
-let rafId = null;
-
-const stepPerSecond = 1.2;      // speed while holding
-const responsiveness = 0.18;     // follow strength
-const damping = 0.84;            // inertia damping
-
-let holdDir = 0;                 // -1, 0, +1
-
-function startLoop(){
-  if (rafId) return;
-  rafId = requestAnimationFrame(loop);
-}
-function stopLoop(){
-  if (!rafId) return;
-  cancelAnimationFrame(rafId);
-  rafId = null;
+function wrap(i){
+  const n = works.length;
+  return ((i % n) + n) % n;
 }
 
-function loop(){
-  // drift target while holding
-  if (holdDir !== 0){
-    target += holdDir * (stepPerSecond / 60);
-  }
-
-  // spring toward target
-  const diff = target - pos;
-  velocity = (velocity * damping) + (diff * responsiveness);
-  pos += velocity;
-
-  if (!gallerySources.length) collectGallerySources();
-  const total = gallerySources.length || 0;
-  if (total){
-    const idx = wrapIndex(Math.round(pos), total);
-    if (idx !== currentIndex) setFilm(idx);
-  }
-
-  const stillMoving = Math.abs(velocity) > 0.0008;
-  const engaged = holdDir !== 0;
-
-  if (engaged || stillMoving){
-    rafId = requestAnimationFrame(loop);
-  } else {
-    pos = Math.round(pos);
-    target = pos;
-    stopLoop();
-  }
+function updateDetails(){
+  const w = works[currentIndex];
+  document.getElementById('workTitle').textContent = w.title;
+  document.getElementById('workStatus').textContent = w.status;
+  document.getElementById('collectBtn').href = w.collect;
 }
 
-/* Click arrows = one step (REAL move) */
-function stepOnce(dir){
-  if (!gallerySources.length) collectGallerySources();
-  if (!gallerySources.length) return;
+function renderSlides(){
+  const prev = wrap(currentIndex - 1);
+  const next = wrap(currentIndex + 1);
 
-  target = Math.round(target + dir);
-  pos = target;                 // immediate snap feels like "literal move"
-  setFilm(target);
-  velocity = 0;
+  track.innerHTML = `
+    <div class="slide is-prev" aria-hidden="true">
+      <img src="${works[prev].src}" alt="${works[prev].title}">
+      <div class="noise"></div>
+    </div>
+
+    <div class="slide is-current" id="centerSlide" tabindex="0" aria-label="Open ${works[currentIndex].title}">
+      <img src="${works[currentIndex].src}" alt="${works[currentIndex].title}">
+      <div class="noise"></div>
+    </div>
+
+    <div class="slide is-next" aria-hidden="true">
+      <img src="${works[next].src}" alt="${works[next].title}">
+      <div class="noise"></div>
+    </div>
+  `;
+
+  // open lightbox when clicking the center slide
+  const center = document.getElementById('centerSlide');
+  center.addEventListener('click', () => openLightbox(works[currentIndex].src));
+  center.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[currentIndex].src);
+  });
+
+  updateDetails();
 }
 
-/* Press & hold arrows = continuous glide */
-function bindHold(btn, dir){
-  let holding = false;
+/* Movement animation: translate track, then swap indices, then re-render */
+let animating = false;
 
-  const down = (e) => {
-    e.preventDefault();
-    holding = true;
-
-    // click-step immediately
-    stepOnce(dir);
-
-    // then allow glide if still holding
-    holdDir = dir;
-    startLoop();
-  };
-
-  const up = (e) => {
-    e.preventDefault();
-    if (!holding) return;
-    holding = false;
-    holdDir = 0;
-    startLoop(); // glide to rest
-  };
-
-  btn.addEventListener('pointerdown', down);
-  btn.addEventListener('pointerup', up);
-  btn.addEventListener('pointercancel', up);
-  btn.addEventListener('pointerleave', up);
+function stepPx(){
+  const slide = track.querySelector('.slide');
+  if (!slide) return 0;
+  const gap = parseFloat(getComputedStyle(track).gap || "0");
+  return slide.getBoundingClientRect().width + gap;
 }
 
-bindHold(document.getElementById('arrowLeft'), -1);
-bindHold(document.getElementById('arrowRight'), +1);
+function move(dir){
+  if (animating) return;
+  animating = true;
 
-/* Keyboard */
-window.addEventListener('keydown', (e) => {
-  const lb = document.getElementById('lightbox');
-  if (lb.classList.contains('open')) {
-    if (e.key === 'Escape') closeLightbox();
+  const step = stepPx();
+  if (!step){
+    animating = false;
     return;
   }
 
-  if (e.key === 'ArrowLeft'){
-    // immediate step and allow holding
-    stepOnce(-1);
-    holdDir = -1;
-    startLoop();
-  }
-  if (e.key === 'ArrowRight'){
-    stepOnce(+1);
-    holdDir = +1;
-    startLoop();
-  }
+  track.style.transition = 'transform 420ms cubic-bezier(.2,.9,.2,1)';
+  track.style.transform = `translateX(${dir * -step}px)`; // dir +1 moves left visually
+
+  const onEnd = () => {
+    track.removeEventListener('transitionend', onEnd);
+
+    currentIndex = wrap(currentIndex + dir);
+
+    // reset instantly (no transition), re-render centered
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0)';
+    renderSlides();
+
+    // allow next movement
+    requestAnimationFrame(() => {
+      animating = false;
+    });
+  };
+  track.addEventListener('transitionend', onEnd);
+}
+
+/* Click arrows (visible on desktop + mobile) */
+document.getElementById('arrowLeft').addEventListener('click', (e) => {
+  e.preventDefault();
+  move(-1);
+});
+document.getElementById('arrowRight').addEventListener('click', (e) => {
+  e.preventDefault();
+  move(+1);
 });
 
-window.addEventListener('keyup', (e) => {
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight'){
-    holdDir = 0;
-    startLoop();
-  }
+/* Hold to glide */
+let holdTimer = null;
+function bindHold(id, dir){
+  const btn = document.getElementById(id);
+
+  const start = (e) => {
+    e.preventDefault();
+    move(dir);
+    holdTimer = setInterval(() => move(dir), 520);
+  };
+  const end = (e) => {
+    e.preventDefault();
+    if (holdTimer) clearInterval(holdTimer);
+    holdTimer = null;
+  };
+
+  btn.addEventListener('pointerdown', start);
+  btn.addEventListener('pointerup', end);
+  btn.addEventListener('pointercancel', end);
+  btn.addEventListener('pointerleave', end);
+}
+bindHold('arrowLeft', -1);
+bindHold('arrowRight', +1);
+
+/* Keyboard arrows */
+window.addEventListener('keydown', (e) => {
+  const lbOpen = document.getElementById('lightbox').classList.contains('open');
+  if (lbOpen) return;
+
+  if (e.key === 'ArrowLeft') move(-1);
+  if (e.key === 'ArrowRight') move(+1);
+});
+
+/* Keep layout stable on resize */
+window.addEventListener('resize', () => {
+  // re-render so the step measurement stays correct after resize
+  renderSlides();
 });
 
 /* Init */
 window.addEventListener('load', () => {
-  collectGallerySources();
-  setFilm(0);
-  pos = currentIndex;
-  target = pos;
+  renderSlides();
 });
 </script>
 
 </body>
 </html>
-
