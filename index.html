@@ -129,9 +129,13 @@ button:hover {
   max-width: min(92vw, 1400px);
   max-height: 92vh;
   object-fit: contain;
-  background: white;          /* frame base */
-  padding: 9px;              /* frame thickness */
-  box-shadow: 0 10px 40px rgba(0,0,0,.4);  /* gallery depth */
+  background: #f8f4ee;                        /* frame base */
+  padding: 14px;                               /* frame thickness */
+  box-shadow: 0 14px 50px rgba(0,0,0,.35);  /* gallery depth */
+  border-radius: 2px;
+  box-shadow:                        /* inner edge + depth */
+    0 0 0 1px rgba(0,0,0,.10),    /* inner edge line */
+    0 14px 50px rgba(0,0,0,.35); /* outer shadow */
 }
 
 .lightbox.open {
