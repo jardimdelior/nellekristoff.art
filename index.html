@@ -1,227 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>Nelle Kristoff — Art Portfolio</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-    background: #EFE7DC;
-    color: #2F2A26;
-    line-height: 1.6;
-    opacity: 0;
-  }
+/* base */
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  background:#EFE7DC;
+  color:#2F2A26;
+  line-height:1.6;
+  opacity:0; /* start hidden */
+}
+html.ready body{ animation:fadein 2.6s ease-in-out forwards; }
 
-  html.ready body { animation: fadein 2.6s ease-in-out forwards; }
-  body.noscroll { overflow: hidden; }
+body.noscroll{ overflow:hidden; }
 
-  header {
-    text-align: center;
-    padding: clamp(28px, 6vh, 70px) 20px 8px;
-  }
+header{
+  position:relative;
+  text-align:center;
+  padding:clamp(28px,6vh,70px) 20px 8px;
+}
+h1{
+  font-weight:500;
+  letter-spacing:3px;
+  margin:0;
+  margin-bottom:4px;
+  font-size:26px;
+  text-transform:uppercase;
+}
+.subtitle,.sub{
+  margin-top:6px;
+  margin-bottom:10px;
+  opacity:.55;
+  font-size:14px;
+  letter-spacing:.3px;
+}
 
-  h1 {
-    font-weight: 500;
-    letter-spacing: 3px;
-    margin: 0 0 4px 0;
-    font-size: 26px;
-    text-transform: uppercase;
-  }
+/* hamburger menu */
+.menu-btn{
+  position:absolute;
+  top:18px;
+  right:18px;
+  width:44px;
+  height:44px;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  padding:10px;
+}
+.menu-btn span{
+  display:block;
+  height:2px;
+  background:#2F2A26;
+  margin:6px 0;
+  border-radius:2px;
+  opacity:.9;
+}
+.menu{
+  position:absolute;
+  top:62px;
+  right:18px;
+  background:rgba(239,231,220,.96);
+  border:1px solid rgba(47,42,38,.18);
+  border-radius:12px;
+  padding:10px;
+  display:none;
+  min-width:170px;
+  box-shadow:0 14px 40px rgba(0,0,0,.12);
+  backdrop-filter:blur(6px);
+  z-index:10;
+}
+.menu.open{ display:block; }
+.menu a{
+  display:block;
+  padding:10px 12px;
+  text-decoration:none;
+  color:#2F2A26;
+  font-size:13px;
+  letter-spacing:.2px;
+  opacity:.9;
+  border-radius:10px;
+}
+.menu a:hover{ background:rgba(47,42,38,.08); }
 
-  .subtitle {
-    margin: 6px 0;
-    opacity: 0.55;
-    font-size: 14px;
-    letter-spacing: 0.3px;
-  }
+/* main film roll (always visible on main page) */
+.film-main{
+  width:min(96vw, 1400px);
+  height:min(62vh, 720px);
+  margin:0 auto;
+  display:grid;
+  place-items:center;
+  padding:6px 0 6px;
+}
+.film{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+  position:relative;
+  perspective:1200px;
+  transform-style:preserve-3d;
+  cursor:ew-resize;
+  user-select:none;
+}
+.film-img{
+  position:absolute;
+  max-width:68%;
+  max-height:82%;
+  object-fit:contain;
 
-  .gallery {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 12px 30px 30px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 34px;
-  }
+  background:#fff;
+  padding:16px;
 
-  .card img {
-    width: 100%;
-    height: auto;
-    display: block;
-    transition: transform .4s ease, opacity .4s ease;
-    max-height: 80vh;
-    object-fit: contain;
-    cursor: pointer;
-  }
+  /* smokey mat + depth */
+  box-shadow:
+    inset 0 0 28px rgba(0,0,0,.16),
+    0 14px 50px rgba(0,0,0,.35);
 
-  .card:hover img { transform: scale(1.035); opacity: 0.96; }
+  border-radius:2px;
+  transition:transform .35s ease, opacity .35s ease, filter .35s ease;
+}
 
-  .caption {
-    margin-top: 12px;
-    font-size: 13px;
-    opacity: 0.7;
-    letter-spacing: 0.2px;
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
+/* center flat */
+.film-current{
+  transform:translateZ(130px) scale(1);
+  opacity:1;
+  filter:none;
+  cursor:pointer;
+}
 
-  .inquire-btn, .collect-btn{
-    padding: 8px 14px;
-    font-size: 13px;
-    border: 1px solid #000;
-    background: transparent;
-    color: #000;
-    text-decoration: none;
-    border-radius: 4px;
-    display: inline-block;
-    white-space: nowrap;
-  }
-  .inquire-btn:hover, .collect-btn:hover{
-    background:#000;
-    color:#fff;
-  }
+/* sides bent like film roll */
+.film-prev{
+  transform:translateX(-56%) rotateY(60deg) scale(.92);
+  opacity:.62;
+  filter:saturate(.9) contrast(.95);
+}
+.film-next{
+  transform:translateX(56%) rotateY(-60deg) scale(.92);
+  opacity:.62;
+  filter:saturate(.9) contrast(.95);
+}
 
-  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) {
-    html.ready body { animation: none !important; }
-    body { opacity: 1 !important; }
-  }
+/* gallery grid */
+.gallery{
+  max-width:1200px;
+  margin:0 auto;
+  padding:12px 30px 30px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+  gap:34px;
+}
+.card{ cursor:pointer; }
+.card img{
+  width:100%;
+  height:auto;
+  display:block;
+  transition:transform .4s ease, opacity .4s ease;
+  max-height:80vh;
+  object-fit:contain;
+}
+.card:hover img{
+  transform:scale(1.035);
+  opacity:.96;
+}
+.caption{
+  margin-top:12px;
+  font-size:13px;
+  opacity:.7;
+  letter-spacing:.2px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+}
+.actions{ display:flex; gap:10px; }
 
-  /* Lightbox */
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.92);
-    display: none;
-    z-index: 2147483647;
-  }
-  .lightbox.open { display: grid; }
+.inquire-btn,.collect-btn{
+  padding:8px 14px;
+  font-size:13px;
+  border:1px solid #000;
+  background:transparent;
+  color:#000;
+  text-decoration:none;
+  border-radius:4px;
+}
+.inquire-btn:hover,.collect-btn:hover{
+  background:#000;
+  color:#fff;
+}
 
-  /* Layout inside lightbox: viewer + strip */
-  .lb-inner{
-    height: 100vh;
-    display: grid;
-    grid-template-rows: 1fr auto;
-    align-items: center;
-    justify-items: center;
-    padding: 20px 18px 14px;
-    gap: 14px;
-  }
+/* SINGLE image lightbox (click outside closes) */
+.lightbox{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  background:rgba(0,0,0,.9);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  cursor:zoom-out;
+  z-index:2147483647;
+  isolation:isolate;
+}
+.lightbox.open{ display:flex; }
+.lightbox img{
+  width:auto;
+  height:auto;
+  max-width:min(92vw, 1400px);
+  max-height:92vh;
+  object-fit:contain;
 
-  /* Big framed image */
-  .viewer{
-    width: min(96vw, 1400px);
-    height: min(78vh, 860px);
-    display: grid;
-    place-items: center;
-    position: relative;
-    cursor: zoom-out; /* click outside image closes, click image doesn't */
-  }
+  background:#fff;
+  padding:16px;
 
-  .viewer img{
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+  box-shadow:
+    inset 0 0 28px rgba(0,0,0,.16),
+    0 14px 50px rgba(0,0,0,.35);
 
-    /* FRAME */
-    background: #f8f4ee;
-    padding: 14px;
-    border-radius: 2px;
-    box-shadow:
-      inset 0 0 28px rgba(0,0,0,.16),
-      0 0 0 1px rgba(0,0,0,.10),
-      0 14px 50px rgba(0,0,0,.45);
-  }
+  border-radius:2px;
+  cursor:auto;
+}
 
-  /* Invisible left/right click zones for navigation */
-  .nav-zone{
-    position: absolute;
-    inset: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-  .nav-zone > div{
-    cursor: pointer;
-  }
-  .nav-zone > div:nth-child(2){
-    cursor: default; /* center area does nothing */
-  }
+footer{
+  text-align:center;
+  padding:60px 20px;
+  font-size:13px;
+  opacity:.5;
+}
 
-  /* Close button */
-  .lb-close{
-    position: fixed;
-    top: 18px;
-    right: 18px;
-    width: 44px;
-    height: 44px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.6);
-    background: rgba(0,0,0,.35);
-    color: #fff;
-    font-size: 26px;
-    line-height: 1;
-    display: grid;
-    place-items: center;
-    z-index: 2147483648;
-    cursor: pointer;
-  }
-  .lb-close:hover{ background: rgba(255,255,255,.12); }
+@keyframes fadein{
+  from{ opacity:0; }
+  to{ opacity:1; }
+}
 
-  /* Horizontal filmstrip */
-  .filmstrip{
-    width: min(96vw, 1400px);
-    padding: 10px 8px;
-    border-radius: 12px;
-    background: rgba(255,255,255,.06);
-    box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset;
-    overflow-x: auto;
-    overflow-y: hidden;
-    display: flex;
-    gap: 10px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .thumb{
-    flex: 0 0 auto;
-    width: 94px;
-    height: 64px;
-    border-radius: 8px;
-    overflow: hidden;
-    scroll-snap-align: center;
-    position: relative;
-    cursor: pointer;
-    opacity: .75;
-    transform: translateZ(0);
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.08);
-  }
-
-  .thumb img{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .thumb.active{
-    opacity: 1;
-    border-color: rgba(255,255,255,.55);
-    box-shadow: 0 0 0 2px rgba(255,255,255,.22);
-  }
-
-  footer {
-    text-align: center;
-    padding: 60px 20px;
-    font-size: 13px;
-    opacity: .5;
-  }
+@media (prefers-reduced-motion: reduce){
+  html.ready body{ animation:none !important; }
+  body{ opacity:1 !important; }
+  .film-img, .card img{ transition:none !important; }
+}
 </style>
 </head>
 
@@ -230,162 +251,185 @@
 <header>
   <h1>Nelle Kristoff</h1>
   <div class="subtitle">Selected Works</div>
+
+  <!-- hamburger -->
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  <nav class="menu" id="menu" aria-label="Site menu">
+    <a href="#about">About</a>
+    <a href="#" onclick="contact(event)">Contact</a>
+    <a href="#posts">Posts</a>
+  </nav>
 </header>
+
+<!-- MAIN PAGE FILM ROLL -->
+<div class="film-main" id="filmMain">
+  <div class="film" id="film">
+    <img class="film-img film-prev" id="filmPrev" alt="">
+    <img class="film-img film-current" id="filmCurrent" alt="Open artwork">
+    <img class="film-img film-next" id="filmNext" alt="">
+  </div>
+</div>
 
 <section class="gallery">
   <div class="card">
-    <img src="images/work1.jpg" alt="Untitled 1" onclick="openLightbox(this.src)" />
+    <img src="images/work1.jpg" onclick="openLightbox(this.src)" alt="Untitled 1">
     <div class="caption">
       <span>Untitled 1 Unveiling soon</span>
       <div class="actions">
         <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-        <a href="https://collect.nellekristoff.art" target="_blank" rel="noopener" class="collect-btn">Collect</a>
+        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <img src="images/work2.jpg" alt="Untitled 2" onclick="openLightbox(this.src)" />
+    <img src="images/work2.jpg" onclick="openLightbox(this.src)" alt="Untitled 2">
     <div class="caption">
       <span>Untitled 2 Unveiling soon</span>
       <div class="actions">
         <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-        <a href="https://collect.nellekristoff.art" target="_blank" rel="noopener" class="collect-btn">Collect</a>
+        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <img src="images/work3.jpg" alt="Untitled 3" onclick="openLightbox(this.src)" />
+    <img src="images/work3.jpg" onclick="openLightbox(this.src)" alt="Untitled 3">
     <div class="caption">
       <span>Untitled 3 Unveiling soon</span>
       <div class="actions">
         <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-        <a href="https://collect.nellekristoff.art" target="_blank" rel="noopener" class="collect-btn">Collect</a>
+        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Lightbox -->
+<!-- SINGLE IMAGE LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <button class="lb-close" type="button" aria-label="Close"
-          onclick="closeLightbox(); event.stopPropagation();">×</button>
-
-  <div class="lb-inner" onclick="event.stopPropagation()">
-    <!-- Viewer -->
-    <div class="viewer" id="viewer">
-      <img id="viewerImg" alt="Artwork" />
-      <!-- click zones for navigation -->
-      <div class="nav-zone" aria-hidden="true">
-        <div id="zonePrev" title="Previous"></div>
-        <div></div>
-        <div id="zoneNext" title="Next"></div>
-      </div>
-    </div>
-
-    <!-- Filmstrip thumbnails -->
-    <div class="filmstrip" id="filmstrip" aria-label="Thumbnails"></div>
-  </div>
+  <img id="lightboxImg" alt="" onclick="event.stopPropagation()">
 </div>
 
-<footer>© 2026 Nelle Kristoff — All rights reserved</footer>
+<footer>
+© 2026 Nelle Kristoff — All rights reserved
+</footer>
 
 <script>
-  let gallerySources = [];
-  let currentIndex = 0;
+/* ===== Menu ===== */
+const menuBtn = document.getElementById('menuBtn');
+const menu = document.getElementById('menu');
 
+function toggleMenu(){
+  const isOpen = menu.classList.toggle('open');
+  menuBtn.setAttribute('aria-expanded', String(isOpen));
+}
+menuBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleMenu();
+});
+document.addEventListener('click', () => {
+  menu.classList.remove('open');
+  menuBtn.setAttribute('aria-expanded', 'false');
+});
+
+/* ===== Contact (JS) ===== */
+function contact(e){
+  if (e) e.preventDefault();
+  window.location.href = "mailto:nellekristoff@gmail.com";
+}
+
+/* ===== Film roll data ===== */
+let gallerySources = [];
+let currentIndex = 0;
+
+function collectGallerySources(){
+  gallerySources = Array.from(document.querySelectorAll('.gallery .card img'))
+    .map(img => img.getAttribute('src'));
+}
+
+function setFilm(index){
+  if (!gallerySources.length) collectGallerySources();
+  const total = gallerySources.length;
+  if (!total) return;
+
+  currentIndex = ((index % total) + total) % total;
+
+  const prevIndex = (currentIndex - 1 + total) % total;
+  const nextIndex = (currentIndex + 1) % total;
+
+  document.getElementById('filmPrev').src = gallerySources[prevIndex];
+  document.getElementById('filmCurrent').src = gallerySources[currentIndex];
+  document.getElementById('filmNext').src = gallerySources[nextIndex];
+}
+
+/* ===== Single-image lightbox ===== */
+function openLightbox(src){
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.classList.add('noscroll');
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.classList.remove('noscroll');
+}
+
+/* Click center film image to open */
+document.getElementById('filmCurrent').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (!gallerySources.length) collectGallerySources();
+  if (!gallerySources.length) return;
+  openLightbox(gallerySources[currentIndex]);
+});
+
+/* ===== Roll with mouse movement ===== */
+let lastRollTime = 0;
+const rollDelayMs = 220;
+
+document.getElementById('filmMain').addEventListener('mousemove', (e) => {
+  if (!gallerySources.length) return;
+
+  const now = Date.now();
+  if (now - lastRollTime < rollDelayMs) return;
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const ratio = x / rect.width;
+
+  if (ratio < 0.33) {
+    setFilm(currentIndex - 1);
+    lastRollTime = now;
+  } else if (ratio > 0.66) {
+    setFilm(currentIndex + 1);
+    lastRollTime = now;
+  }
+});
+
+/* Keyboard (optional) */
+window.addEventListener('keydown', (e) => {
   const lb = document.getElementById('lightbox');
-  const viewerImg = document.getElementById('viewerImg');
-  const filmstrip = document.getElementById('filmstrip');
-
-  function collectGallerySources() {
-    // store absolute src so indexOf(this.src) always matches
-    gallerySources = Array.from(document.querySelectorAll('.gallery .card img'))
-      .map(img => img.src);
-  }
-
-  function buildFilmstrip() {
-    filmstrip.innerHTML = '';
-    gallerySources.forEach((src, i) => {
-      const btn = document.createElement('div');
-      btn.className = 'thumb';
-      btn.dataset.index = String(i);
-
-      const im = document.createElement('img');
-      im.src = src;
-      im.alt = `Thumbnail ${i + 1}`;
-      btn.appendChild(im);
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        setIndex(i, true);
-      });
-
-      filmstrip.appendChild(btn);
-    });
-  }
-
-  function setIndex(index, scrollThumb = false) {
-    const total = gallerySources.length;
-    if (!total) return;
-
-    currentIndex = ((index % total) + total) % total;
-    const src = gallerySources[currentIndex];
-
-    // main image
-    viewerImg.src = src;
-
-    // active thumb styling
-    const thumbs = Array.from(filmstrip.querySelectorAll('.thumb'));
-    thumbs.forEach((t, i) => t.classList.toggle('active', i === currentIndex));
-
-    // keep active thumbnail in view
-    if (scrollThumb) {
-      const active = thumbs[currentIndex];
-      if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
-  }
-
-  function openLightbox(src) {
-    if (!gallerySources.length) collectGallerySources();
-    if (!filmstrip.children.length) buildFilmstrip();
-
-    const idx = gallerySources.indexOf(src);
-    setIndex(idx >= 0 ? idx : 0, true);
-
-    lb.classList.add('open');
-    document.body.classList.add('noscroll');
-  }
-
-  function closeLightbox() {
-    lb.classList.remove('open');
-    document.body.classList.remove('noscroll');
-  }
-
-  // overlay click closes, inner stops propagation (already)
-  // keyboard navigation
-  window.addEventListener('keydown', (e) => {
-    if (!lb.classList.contains('open')) return;
+  if (lb.classList.contains('open')) {
     if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft') setIndex(currentIndex - 1, true);
-    if (e.key === 'ArrowRight') setIndex(currentIndex + 1, true);
-  });
-
-  // click zones (prev/next)
-  document.getElementById('zonePrev').addEventListener('click', () => setIndex(currentIndex - 1, true));
-  document.getElementById('zoneNext').addEventListener('click', () => setIndex(currentIndex + 1, true));
-
-  // init
-  window.addEventListener('load', () => {
-    collectGallerySources();
-    document.documentElement.classList.add('ready');
-  });
-
-  function contact(e) {
-    if (e) e.preventDefault();
-    window.location.href = "mailto:nellekristoff@gmail.com";
+    return;
   }
+  if (!gallerySources.length) return;
+  if (e.key === 'ArrowLeft') setFilm(currentIndex - 1);
+  if (e.key === 'ArrowRight') setFilm(currentIndex + 1);
+});
+
+/* Init */
+window.addEventListener('load', () => {
+  collectGallerySources();
+  setFilm(0);
+});
+</script>
+
+<script>
+window.addEventListener("load", () => {
+  document.documentElement.classList.add("ready"); /* controls smooth fade-in */
+});
 </script>
 
 </body>
