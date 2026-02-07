@@ -42,13 +42,22 @@
  header{
   position:relative;
   text-align:center;
-  padding: 18px 20px 8px;   /* less vertical space */
+  padding: 18px 16px 8px;   /* less vertical space */
 }
+
+/* horizontal title + burger row */
+.title-row{
+  display:inline-flex;          /* keeps it centered as a unit */
+  align-items:center;
+  justify-content:center;
+  gap: 14px;                    /* space between text and burger */
+}
+
   h1{
     font-weight:500;
     letter-spacing:3px;
-    margin:0 0 4px;
-    font-size:26px;
+    margin:0;
+    font-size:29px;
     text-transform:uppercase;
   }
   .subtitle{
@@ -60,22 +69,25 @@
 
   /* hamburger */
   .menu-btn{
-  position:absolute;
+  position:static;
   top: 32px;                /* aligns with title line */
   right:16px;
-  width:44px;
-  height:44px;
+  width:40px;
+  height:40px;
   border:0;
   background:transparent;
   cursor:pointer;
-  padding:10px;
+  padding:8px;
   z-index:30;
+  display:inline-flex;
+  flex-direction:column;
+  justify-content:center;
 }
   .menu-btn span{
     display:block;
     height:2px;
     background:var(--ink);
-    margin:6px 0;
+    margin:4px 0;
     border-radius:2px;
     opacity:.9;
   }
@@ -227,6 +239,8 @@ main{
     padding:0 10px;
     z-index:25;
   }
+
+  /* the single arrow button */
   .film-arrow{
     pointer-events:auto;
     width:52px;
@@ -241,10 +255,16 @@ main{
     box-shadow:0 10px 24px rgba(0,0,0,.14);
     transition:transform .2s ease, background .2s ease;
     opacity:.96;
+    position:absolute;
+    /* PLACE BETWEEN LEFT + MIDDLE */
+  left: calc(50% - (var(--slideW) / 2) - (var(--gap) / 2));
+  top: 50%;
+  transform: translate(-50%, -50%);
   }
-  .film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.03); }
-  .film-arrow:active{ transform:scale(.98); }
-  .film-arrow svg{ width:18px; height:18px; }
+
+  document.getElementById('centerSlide').addEventListener('click', () => openLightboxByIndex(currentIndex));
+const left = document.getElementById('leftSlide');
+left.addEventListener('click', () => openLightboxByIndex(prev));
 
   /* ===== Under center artwork: horizontal row ===== */
   .details{
@@ -355,12 +375,15 @@ main{
 
 <body>
 <header>
-  <h1>Nelle Kristoff</h1>
-  <div class="subtitle">Selected Works</div>
+  <div class="title-row">
+    <h1>Nelle Kristoff</h1>
 
-  <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <div class="subtitle">Selected Works</div>
 
   <nav class="menu" id="menu" aria-label="Site menu">
     <a href="about.html">About</a>
@@ -373,13 +396,6 @@ main{
   <section class="film-main" aria-label="Featured works">
     <div class="film-viewport" id="filmViewport">
       <div class="film-track" id="filmTrack"></div>
-
-      <div class="film-arrows" aria-hidden="false">
-        <button class="film-arrow" id="arrowLeft" aria-label="Previous artwork">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 18l-6-6 6-6"/>
-          </svg>
-        </button>
 
         <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -544,7 +560,6 @@ function move(dir){
 }
 
 /* Buttons */
-document.getElementById('arrowLeft').addEventListener('click', (e) => { e.preventDefault(); move(-1); });
 document.getElementById('arrowRight').addEventListener('click', (e) => { e.preventDefault(); move(+1); });
 
 /* Hold to glide */
@@ -566,7 +581,6 @@ function bindHold(id, dir){
   btn.addEventListener('pointercancel', end);
   btn.addEventListener('pointerleave', end);
 }
-bindHold('arrowLeft', -1);
 bindHold('arrowRight', +1);
 
 /* Keyboard arrows */
