@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Nelle Kristoff — Art Portfolio</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <style>
 /* base */
@@ -16,7 +16,6 @@ body{
   opacity:0; /* start hidden */
 }
 html.ready body{ animation:fadein 2.6s ease-in-out forwards; }
-
 body.noscroll{ overflow:hidden; }
 
 header{
@@ -27,14 +26,12 @@ header{
 h1{
   font-weight:500;
   letter-spacing:3px;
-  margin:0;
-  margin-bottom:4px;
+  margin:0 0 4px;
   font-size:26px;
   text-transform:uppercase;
 }
-.subtitle,.sub{
-  margin-top:6px;
-  margin-bottom:10px;
+.subtitle{
+  margin:6px 0 10px;
   opacity:.55;
   font-size:14px;
   letter-spacing:.3px;
@@ -87,7 +84,7 @@ h1{
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
-/* main film roll (always visible on main page) */
+/* main film roll */
 .film-main{
   width:min(96vw, 1400px);
   height:min(62vh, 720px);
@@ -95,6 +92,8 @@ h1{
   display:grid;
   place-items:center;
   padding:6px 0 6px;
+  position:relative; /* for arrows */
+  touch-action:manipulation;
 }
 .film{
   width:100%;
@@ -104,7 +103,6 @@ h1{
   position:relative;
   perspective:1200px;
   transform-style:preserve-3d;
-  cursor:ew-resize;
   user-select:none;
 }
 .film-img{
@@ -116,13 +114,13 @@ h1{
   background:#fff;
   padding:16px;
 
-  /* smokey mat + depth */
   box-shadow:
     inset 0 0 28px rgba(0,0,0,.16),
     0 14px 50px rgba(0,0,0,.35);
 
   border-radius:2px;
-  transition:transform .35s ease, opacity .35s ease, filter .35s ease;
+  transition:transform .55s cubic-bezier(.2,.9,.2,1), opacity .55s cubic-bezier(.2,.9,.2,1), filter .55s cubic-bezier(.2,.9,.2,1);
+  will-change:transform, opacity, filter;
 }
 
 /* center flat */
@@ -143,6 +141,51 @@ h1{
   transform:translateX(56%) rotateY(-60deg) scale(.92);
   opacity:.62;
   filter:saturate(.9) contrast(.95);
+}
+
+/* Film arrows (for phone + desktop) */
+.film-arrows{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 10px;
+}
+.film-arrow{
+  pointer-events:auto;
+  width:52px;
+  height:52px;
+  border-radius:999px;
+  border:1px solid rgba(47,42,38,.28);
+  background:rgba(239,231,220,.78);
+  backdrop-filter:blur(6px);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.14);
+  transition:transform .2s ease, background .2s ease, opacity .2s ease;
+  opacity:.92;
+}
+.film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.03); }
+.film-arrow:active{ transform:scale(.98); }
+.film-arrow svg{ width:18px; height:18px; }
+
+.film-hint{
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:12px;
+  opacity:.55;
+  letter-spacing:.2px;
+  text-align:center;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(239,231,220,.62);
+  border:1px solid rgba(47,42,38,.12);
+  backdrop-filter:blur(6px);
 }
 
 /* gallery grid */
@@ -193,7 +236,7 @@ h1{
   color:#fff;
 }
 
-/* SINGLE image lightbox (click outside closes) */
+/* SINGLE image lightbox */
 .lightbox{
   position:fixed;
   inset:0;
@@ -266,43 +309,60 @@ footer{
 
 <!-- MAIN PAGE FILM ROLL -->
 <div class="film-main" id="filmMain">
-  <div class="film" id="film">
-    <img class="film-img film-prev" id="filmPrev" alt="">
-    <img class="film-img film-current" id="filmCurrent" alt="Open artwork">
-    <img class="film-img film-next" id="filmNext" alt="">
+  <div class="film" id="film" aria-label="Artwork film roll">
+    <img class="film-img film-prev" id="filmPrev" alt="" />
+    <img class="film-img film-current" id="filmCurrent" alt="Open artwork" />
+    <img class="film-img film-next" id="filmNext" alt="" />
   </div>
+
+  <!-- phone + desktop arrows (press & hold) -->
+  <div class="film-arrows" aria-hidden="false">
+    <button class="film-arrow" id="arrowLeft" aria-label="Previous artwork (press and hold)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+
+    <button class="film-arrow" id="arrowRight" aria-label="Next artwork (press and hold)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 6l6 6-6 6"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="film-hint">Hold ◀︎ / ▶︎ (or arrow keys) • Click the center image to enlarge</div>
 </div>
 
 <section class="gallery">
   <div class="card">
-    <img src="images/work1.jpg" onclick="openLightbox(this.src)" alt="Untitled 1">
+    <img src="images/Untitled1.png" onclick="openLightbox(this.src)" alt="Untitled 1" />
     <div class="caption">
       <span>Untitled 1 Unveiling soon</span>
       <div class="actions">
         <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
+        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener">Collect</a>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <img src="images/work2.jpg" onclick="openLightbox(this.src)" alt="Untitled 2">
+    <img src="images/Untitled2.png" onclick="openLightbox(this.src)" alt="Untitled 2" />
     <div class="caption">
       <span>Untitled 2 Unveiling soon</span>
       <div class="actions">
         <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
+        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener">Collect</a>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <img src="images/work3.jpg" onclick="openLightbox(this.src)" alt="Untitled 3">
+    <img src="images/Untitled3.png" onclick="openLightbox(this.src)" alt="Untitled 3" />
     <div class="caption">
       <span>Untitled 3 Unveiling soon</span>
       <div class="actions">
         <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn">Collect</a>
+        <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener">Collect</a>
       </div>
     </div>
   </div>
@@ -310,7 +370,7 @@ footer{
 
 <!-- SINGLE IMAGE LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lightboxImg" alt="" onclick="event.stopPropagation()">
+  <img id="lightboxImg" alt="" onclick="event.stopPropagation()" />
 </div>
 
 <footer>
@@ -318,6 +378,11 @@ footer{
 </footer>
 
 <script>
+/* ===== Smooth fade-in ===== */
+window.addEventListener("load", () => {
+  document.documentElement.classList.add("ready");
+});
+
 /* ===== Menu ===== */
 const menuBtn = document.getElementById('menuBtn');
 const menu = document.getElementById('menu');
@@ -335,7 +400,7 @@ document.addEventListener('click', () => {
   menuBtn.setAttribute('aria-expanded', 'false');
 });
 
-/* ===== Contact (JS) ===== */
+/* ===== Contact ===== */
 function contact(e){
   if (e) e.preventDefault();
   window.location.href = "mailto:nellekristoff@gmail.com";
@@ -347,7 +412,13 @@ let currentIndex = 0;
 
 function collectGallerySources(){
   gallerySources = Array.from(document.querySelectorAll('.gallery .card img'))
-    .map(img => img.getAttribute('src'));
+    .map(img => img.getAttribute('src'))
+    .filter(Boolean);
+}
+
+/* Wrap index safely */
+function wrapIndex(i, total){
+  return ((i % total) + total) % total;
 }
 
 function setFilm(index){
@@ -355,10 +426,10 @@ function setFilm(index){
   const total = gallerySources.length;
   if (!total) return;
 
-  currentIndex = ((index % total) + total) % total;
+  currentIndex = wrapIndex(index, total);
 
-  const prevIndex = (currentIndex - 1 + total) % total;
-  const nextIndex = (currentIndex + 1) % total;
+  const prevIndex = wrapIndex(currentIndex - 1, total);
+  const nextIndex = wrapIndex(currentIndex + 1, total);
 
   document.getElementById('filmPrev').src = gallerySources[prevIndex];
   document.getElementById('filmCurrent').src = gallerySources[currentIndex];
@@ -384,51 +455,155 @@ document.getElementById('filmCurrent').addEventListener('click', (e) => {
   openLightbox(gallerySources[currentIndex]);
 });
 
-/* ===== Roll with mouse movement ===== */
-let lastRollTime = 0;
-const rollDelayMs = 220;
+/* ===== "Breathing" roll control (smooth/inertial) =====
+   - Desktop: move mouse left/right gently; it "glides" like slow motion breathing.
+   - Phone: press & hold arrows to roll.
+   - Keyboard: hold ArrowLeft / ArrowRight to roll.
+*/
+const filmMain = document.getElementById('filmMain');
 
-document.getElementById('filmMain').addEventListener('mousemove', (e) => {
+let target = 0;        // target index position (float)
+let pos = 0;           // current position (float)
+let velocity = 0;      // movement velocity
+let rafId = null;
+
+const stepPerSecond = 1.05;      // how fast it can roll when fully engaged
+const responsiveness = 0.14;     // how quickly it follows the target (0..1)
+const damping = 0.86;            // inertia damping (0..1)
+
+let mouseEngage = 0;             // -1..+1 based on pointer position
+let holdDir = 0;                // -1, 0, +1 when holding arrows
+
+function startLoop(){
+  if (rafId) return;
+  rafId = requestAnimationFrame(loop);
+}
+function stopLoop(){
+  if (!rafId) return;
+  cancelAnimationFrame(rafId);
+  rafId = null;
+}
+
+function loop(ts){
+  // Convert engagement (mouse/hold) into target drift
+  // Hold arrows takes priority
+  const engage = holdDir !== 0 ? holdDir : mouseEngage;
+
+  // drift target smoothly (float index)
+  target += engage * (stepPerSecond / 60);
+
+  // spring toward target with a gentle "breathing" feel
+  const diff = target - pos;
+  velocity = (velocity * damping) + (diff * responsiveness);
+  pos += velocity;
+
+  // Only update the visible film when we cross to a new integer index
+  // (Keeps it stable and avoids jitter)
+  if (!gallerySources.length) collectGallerySources();
+  const total = gallerySources.length || 0;
+  if (total){
+    const idx = wrapIndex(Math.round(pos), total);
+    if (idx !== currentIndex) setFilm(idx);
+  }
+
+  // Keep running while there's engagement or motion still happening
+  const stillMoving = Math.abs(velocity) > 0.0008;
+  const engaged = Math.abs(engage) > 0.001;
+
+  if (engaged || stillMoving){
+    rafId = requestAnimationFrame(loop);
+  } else {
+    // snap to nearest index when at rest
+    pos = Math.round(pos);
+    target = pos;
+    stopLoop();
+  }
+}
+
+/* Mouse move engagement */
+filmMain.addEventListener('mousemove', (e) => {
   if (!gallerySources.length) return;
 
-  const now = Date.now();
-  if (now - lastRollTime < rollDelayMs) return;
-
-  const rect = e.currentTarget.getBoundingClientRect();
+  const rect = filmMain.getBoundingClientRect();
   const x = e.clientX - rect.left;
-  const ratio = x / rect.width;
+  const ratio = x / rect.width; // 0..1
 
-  if (ratio < 0.33) {
-    setFilm(currentIndex - 1);
-    lastRollTime = now;
-  } else if (ratio > 0.66) {
-    setFilm(currentIndex + 1);
-    lastRollTime = now;
-  }
+  // Map to -1..+1 and soften center to feel "breathing"
+  // left edge -> -1, center -> 0, right edge -> +1
+  let v = (ratio - 0.5) * 2;
+  // deadzone in the center
+  const dead = 0.18;
+  if (Math.abs(v) < dead) v = 0;
+  else v = (v - Math.sign(v) * dead) / (1 - dead);
+
+  mouseEngage = v * 0.9; // slightly gentler
+  startLoop();
 });
 
-/* Keyboard (optional) */
+filmMain.addEventListener('mouseleave', () => {
+  mouseEngage = 0;
+  startLoop(); // lets it glide to rest
+});
+
+/* Touch: allow tap (no swipe needed), arrows handle rolling */
+filmMain.addEventListener('touchstart', () => {
+  // no-op; keep simple
+}, { passive:true });
+
+/* Press & hold arrows (mouse + touch) */
+function bindHold(btn, dir){
+  const start = (e) => {
+    e.preventDefault();
+    holdDir = dir;
+    startLoop();
+  };
+  const end = (e) => {
+    e.preventDefault();
+    holdDir = 0;
+    startLoop(); // glide to rest
+  };
+
+  btn.addEventListener('pointerdown', start);
+  btn.addEventListener('pointerup', end);
+  btn.addEventListener('pointercancel', end);
+  btn.addEventListener('pointerleave', end);
+}
+bindHold(document.getElementById('arrowLeft'), -1);
+bindHold(document.getElementById('arrowRight'), +1);
+
+/* Keyboard hold */
+let keyLeft = false, keyRight = false;
+
+function updateHoldFromKeys(){
+  if (keyLeft && !keyRight) holdDir = -1;
+  else if (keyRight && !keyLeft) holdDir = +1;
+  else holdDir = 0;
+  startLoop();
+}
+
 window.addEventListener('keydown', (e) => {
   const lb = document.getElementById('lightbox');
   if (lb.classList.contains('open')) {
     if (e.key === 'Escape') closeLightbox();
     return;
   }
-  if (!gallerySources.length) return;
-  if (e.key === 'ArrowLeft') setFilm(currentIndex - 1);
-  if (e.key === 'ArrowRight') setFilm(currentIndex + 1);
+
+  if (e.key === 'ArrowLeft'){ keyLeft = true; updateHoldFromKeys(); }
+  if (e.key === 'ArrowRight'){ keyRight = true; updateHoldFromKeys(); }
+});
+
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft'){ keyLeft = false; updateHoldFromKeys(); }
+  if (e.key === 'ArrowRight'){ keyRight = false; updateHoldFromKeys(); }
 });
 
 /* Init */
 window.addEventListener('load', () => {
   collectGallerySources();
   setFilm(0);
-});
-</script>
-
-<script>
-window.addEventListener("load", () => {
-  document.documentElement.classList.add("ready"); /* controls smooth fade-in */
+  // initialize float positions so animation is stable
+  pos = currentIndex;
+  target = pos;
 });
 </script>
 
