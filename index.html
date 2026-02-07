@@ -52,6 +52,8 @@ header{
   align-items:center;
   justify-content:center;
   gap:14px;
+  position:relative;
+  z-index:9999;
 }
 
 /* Title */
@@ -71,25 +73,26 @@ h1{
 
 /* Burger - always visible */
 .menu-btn{
-  width:40px;
-  height:40px;
+  width:44px;
+  height:44px;
   border:0;
   background:transparent;
   cursor:pointer;
-  padding:8px;
+  padding:10px;
   display:inline-flex;
   flex-direction:column;
   justify-content:center;
-  align-items:stretch;
+  gap:6px;                 /* consistent spacing */
   z-index:9999;
 }
+
 .menu-btn span{
   display:block;
+  width:100%;              /* IMPORTANT */
   height:2px;
-  background:var(--ink);
-  margin:4px 0;
+  background:#2F2A26;      /* hard-coded so it can’t become transparent */
   border-radius:2px;
-  opacity:.9;
+  opacity:1;               /* IMPORTANT */
 }
 
 /* Menu bar under title */
