@@ -21,7 +21,7 @@
 
   /* slide sizing */
   --slideW: clamp(210px, 78vw, 620px);
-  --gap: 14px;
+  --gap: 0px;
   --pad: 14px;
 
   /* film area */
@@ -180,7 +180,7 @@ main{
 
 /* LEFT (clear, clickable) */
 .slide.is-prev{
-  transform: translateX(-22%) translateZ(-40px) rotateY(62deg) scale(.92);
+  transform: translateX(-12%) translateZ(-40px) rotateY(62deg) scale(.92);
   opacity:1;
   filter:none;
   cursor:pointer;
@@ -188,7 +188,7 @@ main{
 
 /* RIGHT (softer) */
 .slide.is-next{
-  transform: translateX(22%) translateZ(-60px) rotateY(-62deg) scale(.92);
+  transform: translateX(12%) translateZ(-60px) rotateY(-62deg) scale(.92);
   opacity:.62;
   filter:saturate(.9) contrast(.96);
 }
@@ -198,7 +198,7 @@ main{
   width:100%;
   height:100%;
   background:var(--card);
-  padding:var(--pad);
+  padding:0;
   border-radius:var(--radius);
   box-shadow:var(--inset), var(--shadow);
   overflow:hidden;
@@ -365,7 +365,7 @@ footer{
 @media (max-width: 520px){
   :root{
     --slideW: 88vw;     /* center stays fully visible */
-    --gap: 10px;
+    --gap: 0px;
     --pad: 10px;
     --maxFilmH: 72vh;
     /* A3 landscape ratio */
@@ -387,6 +387,7 @@ footer{
     /* A3 landscape ratio */
     --a3: 420 / 297;
     --a3ratio: calc(420 / 297);
+    --gap: 0px;
   }
 }
 
