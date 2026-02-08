@@ -162,7 +162,9 @@ main{
   transform-style:preserve-3d;
 }
 
-.slide{
+.slide{ 
+  transform: translateZ(0); 
+  opacity:1;
   width: var(--slideW);
   aspect-ratio: var(--a3);
   max-height: calc(var(--maxFilmH) - 20px);
@@ -542,8 +544,8 @@ const works = [
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 let currentIndex = 0;
-let settledLeft = false; // false = center in middle, true = center parked left
-let animating = false;
+
+works.forEach(w => { const i = new Image(); i.src = w.src; });
 
 const track = document.getElementById('filmTrack');
 
@@ -571,61 +573,52 @@ function updateDetails(){
 function renderSlides(){
   const prev = wrap(currentIndex - 1);
   const next = wrap(currentIndex + 1);
-  const next2 = wrap(currentIndex + 2);
 
-  // When settledLeft=false:
-  //   left = prev, center = current, right = next
-  //
-  // When settledLeft=true (after one click):
-  //   left = current, center = next, right = next2
-  //
-  // That makes the “center image” appear to move left and STAY there.
-
-  const leftIndex   = settledLeft ? currentIndex : prev;
-  const centerIndex = settledLeft ? next : currentIndex;
-  const rightIndex  = settledLeft ? next2 : next;
-
+  // Step 1: inject slides with NO is-prev/is-current/is-next classes yet
   track.innerHTML = `
-    <div class="slide is-prev" id="leftSlide" tabindex="0" aria-label="Open ${works[leftIndex].title}">
+    <div class="slide" id="leftSlide" tabindex="0">
       <div class="print">
-        <img src="${works[leftIndex].src}" alt="${works[leftIndex].title}">
+        <img src="${works[prev].src}" alt="${works[prev].title}">
         <div class="noise"></div>
       </div>
     </div>
 
-    <div class="slide is-current" id="centerSlide" tabindex="0" aria-label="Open ${works[centerIndex].title}">
+    <div class="slide" id="centerSlide" tabindex="0">
       <div class="print">
-        <img src="${works[centerIndex].src}" alt="${works[centerIndex].title}">
+        <img src="${works[currentIndex].src}" alt="${works[currentIndex].title}">
         <div class="noise"></div>
       </div>
     </div>
 
-    <div class="slide is-next" aria-hidden="true">
+    <div class="slide" id="rightSlide" aria-hidden="true">
       <div class="print">
-        <img src="${works[rightIndex].src}" alt="${works[rightIndex].title}">
+        <img src="${works[next].src}" alt="${works[next].title}">
         <div class="noise"></div>
       </div>
     </div>
   `;
 
-  // Click opens correct images
-  document.getElementById('centerSlide').addEventListener('click', () => openLightbox(works[centerIndex].src));
-  document.getElementById('centerSlide').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[centerIndex].src);
-  });
+  // Step 2: next frame → apply classes so CSS transitions animate
+  requestAnimationFrame(() => {
+    const left = document.getElementById('leftSlide');
+    const center = document.getElementById('centerSlide');
+    const right = document.getElementById('rightSlide');
 
-  const left = document.getElementById('leftSlide');
-  left.addEventListener('click', () => openLightbox(works[leftIndex].src));
-  left.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[leftIndex].src);
-  });
+    left.classList.add('is-prev');
+    center.classList.add('is-current');
+    right.classList.add('is-next');
 
-  // The “currentIndex” should only advance when we settle into left (first click)
-  // so that your whole gallery progresses.
-  if (settledLeft){
-    currentIndex = wrap(currentIndex + 1);
-    settledLeft = false; // IMPORTANT: next click returns the new center back to middle
-  }
+    // click opens correct images
+    center.addEventListener('click', () => openLightbox(works[currentIndex].src));
+    center.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') openLightbox(works[currentIndex].src);
+    });
+
+    left.addEventListener('click', () => openLightbox(works[prev].src));
+    left.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') openLightbox(works[prev].src);
+    });
+  });
 
   updateDetails();
 }
@@ -646,13 +639,8 @@ window.addEventListener('keydown', (e) => {
 
 /* movement */
 function move(){
-  if (animating) return;
-  animating = true;
-
-  settledLeft = true;
+  currentIndex = wrap(currentIndex + 1);
   renderSlides();
-
-  setTimeout(() => { animating = false; }, 220);
 }
 
 /* right arrow = next */
