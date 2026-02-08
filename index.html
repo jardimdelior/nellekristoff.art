@@ -14,7 +14,7 @@
   --inset:inset 0 0 28px rgba(0,0,0,.14);
   --radius:2px;
 
-  /* A3 landscape ratio */
+  /* A3 landscape ratio (never deform) */
   --a3: 420 / 297;
 
   /* spacing + paper margin */
@@ -25,12 +25,15 @@
   --frameW: min(96vw, 1200px);
   --frameH: 72vh;
 
-  /* slide sizing (A3 preserved by aspect-ratio) */
+  /* slide sizing */
   --slideW: clamp(220px, 52vw, 620px);
 
-  /* 3D tweaks */
+  /* 3D leporelo */
   --persp: 1200px;
   --sideShift: 12%;
+  --sideRot: 64deg;
+  --sideZ: -80px;
+  --centerZ: 170px;
 }
 
 html, body{ height:100%; }
@@ -42,7 +45,7 @@ body{
   line-height:1.6;
   opacity:0;
 }
-html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
+html.ready body{ animation:fadein 2.6s ease-in-out forwards; }
 body.noscroll{ overflow:hidden; }
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
@@ -139,16 +142,15 @@ main{
   align-items:center;
 }
 
-/* This is the “film area container” that scales properly */
+/* container that scales with device */
 .film-viewport{
   width: var(--frameW);
   display:flex;
   flex-direction:column;
   align-items:center;
-  perspective: var(--persp); /* keep 3D perspective stable */
 }
 
-/* Bordered frame that contains the 3-slide group */
+/* bordered “film area” */
 .film-frame{
   width:100%;
   height: var(--frameH);
@@ -156,14 +158,16 @@ main{
   border-radius:18px;
   background:rgba(255,255,255,.18);
   box-shadow:0 10px 30px rgba(0,0,0,.08);
-  overflow:hidden;                 /* IMPORTANT: group never spills out */
+  overflow:hidden;
   display:grid;
   place-items:center;
   position:relative;
   padding: clamp(10px, 2.2vw, 18px);
+
+  /* IMPORTANT for leporelo depth */
+  perspective: var(--persp);
 }
 
-/* group wrapper (extra safety for clipping/centering) */
 .film-group{
   width:100%;
   height:100%;
@@ -172,7 +176,6 @@ main{
   overflow:hidden;
 }
 
-/* track */
 .film-track{
   display:flex;
   align-items:center;
@@ -182,7 +185,7 @@ main{
   transform-style:preserve-3d;
 }
 
-/* slides (A3 always preserved) */
+/* slides */
 .slide{
   flex: 0 0 auto;
   width: var(--slideW);
@@ -198,25 +201,38 @@ main{
     filter    650ms cubic-bezier(.18,.9,.2,1);
 }
 
+/* z-index order so leporelo reads correctly */
+.slide.is-prev{ z-index:2; }
+.slide.is-current{ z-index:3; }
+.slide.is-next{ z-index:1; }
+
 /* CENTER (flat/front) */
 .slide.is-current{
-  transform: translateZ(140px) scale(1.03);
+  transform: translateZ(var(--centerZ)) scale(1.02);
   opacity:1;
   filter:none;
   cursor:pointer;
 }
 
-/* LEFT (clear + clickable) */
+/* LEFT (folded back but clear) */
 .slide.is-prev{
-  transform: translateX(calc(-1 * var(--sideShift))) translateZ(-40px) rotateY(62deg) scale(.92);
+  transform:
+    translateX(calc(-1 * var(--sideShift)))
+    translateZ(var(--sideZ))
+    rotateY(var(--sideRot))
+    scale(.92);
   opacity:1;
   filter:none;
   cursor:pointer;
 }
 
-/* RIGHT (soft) */
+/* RIGHT (folded back, softer) */
 .slide.is-next{
-  transform: translateX(var(--sideShift)) translateZ(-60px) rotateY(-62deg) scale(.92);
+  transform:
+    translateX(var(--sideShift))
+    translateZ(var(--sideZ))
+    rotateY(calc(-1 * var(--sideRot)))
+    scale(.92);
   opacity:.62;
   filter:saturate(.9) contrast(.96);
   cursor:pointer;
@@ -238,11 +254,11 @@ main{
 .print img{
   width:100%;
   height:100%;
-  object-fit:contain; /* no distortion */
+  object-fit:contain; /* never crop/deform */
   display:block;
 }
 
-/* noise inside print */
+/* noise */
 .noise{
   position:absolute;
   inset:0;
@@ -262,7 +278,7 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* arrow UNDER the film area, left corner */
+/* arrow UNDER film area, left corner */
 .arrow-under{
   width: 100%;
   margin: 10px 0 0;
@@ -287,7 +303,7 @@ main{
 .film-arrow:active{ transform:scale(.98); }
 .film-arrow svg{ width:18px; height:18px; }
 
-/* buttons (base) */
+/* buttons base */
 .inquire-btn,.collect-btn{
   padding:8px 14px;
   font-size:13px;
@@ -299,7 +315,7 @@ main{
 }
 .inquire-btn:hover,.collect-btn:hover{ background:#000; color:#fff; }
 
-/* lightbox */
+/* LIGHTBOX (never crop) */
 .lightbox{
   position:fixed;
   inset:0;
@@ -314,22 +330,31 @@ main{
 
 .lb-card{
   width:100%;
-  max-width: min(92vw, 1400px);
-  max-height: 92vh;
+  max-width: min(94vw, 1400px);
+  max-height: 94vh;
   display:flex;
   flex-direction:column;
   justify-content:center;
   gap:12px;
 }
 
-/* image area */
+/* print in lightbox: height is AUTO, image drives size, never crop */
 .lightbox .print{
   width:100%;
-  max-height: 76vh;        /* leaves room for details */
+  height:auto;
+  max-height: 82vh;
   padding: var(--pad);
 }
 
-/* details row: meta | close | actions */
+/* IMPORTANT: image itself has max sizes, so no cropping */
+.lightbox .print img{
+  width:100%;
+  height:auto;
+  max-height: 82vh;
+  object-fit:contain;
+}
+
+/* details: meta | close | actions */
 .lb-details{
   display:grid;
   grid-template-columns: 1fr auto 1fr;
@@ -337,7 +362,6 @@ main{
   gap:14px;
   color:#EFE7DC;
 }
-
 .lb-meta{
   display:flex;
   align-items:baseline;
@@ -382,7 +406,6 @@ main{
   color:#000;
 }
 
-/* footer */
 footer{
   text-align:center;
   padding: 18px 20px 22px;
@@ -390,14 +413,15 @@ footer{
   opacity:.5;
 }
 
-/* MOBILE PORTRAIT */
-@media (max-width: 520px){
+/* MOBILE portrait */
+@media (max-width:520px){
   :root{
     --frameW: 92vw;
     --frameH: 72vh;
-    --slideW: 88vw;    /* center always fully visible */
+    --slideW: 88vw;       /* center fully visible */
     --gap: 8px;
     --sideShift: 10%;
+    --sideRot: 62deg;
   }
 
   .lb-details{
@@ -405,25 +429,20 @@ footer{
     grid-template-areas:
       "meta close"
       "actions actions";
-    align-items:center;
   }
   .lb-meta{ grid-area: meta; }
   .lb-close{ grid-area: close; justify-self:end; }
   .lb-actions{ grid-area: actions; justify-content:flex-start; }
 }
 
-/* MOBILE LANDSCAPE (phone rotated) */
+/* MOBILE landscape (rotated phone) */
 @media (orientation: landscape) and (max-height: 520px){
   :root{
     --frameH: 66vh;
-    --slideW: 64vw;    /* keep center visible; sides still present */
+    --slideW: 64vw;
     --sideShift: 9%;
+    --sideRot: 60deg;
   }
-}
-
-/* SHORT SCREENS */
-@media (max-height: 650px){
-  :root{ --frameH: 68vh; }
 }
 
 /* reduced motion */
@@ -456,9 +475,8 @@ footer{
 
 <main>
   <section class="film-main" aria-label="Featured works">
-
-    <div class="film-viewport" id="filmViewport">
-      <div class="film-frame" id="filmFrame">
+    <div class="film-viewport">
+      <div class="film-frame">
         <div class="film-group">
           <div class="film-track" id="filmTrack">
             <div class="slide is-prev" id="slideL" tabindex="0" aria-label="Open left work">
@@ -485,7 +503,6 @@ footer{
         </div>
       </div>
 
-      <!-- Arrow attached UNDER film area, left corner -->
       <div class="arrow-under">
         <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -494,7 +511,6 @@ footer{
         </button>
       </div>
     </div>
-
   </section>
 </main>
 
@@ -615,13 +631,13 @@ function closeLightbox(){
   document.body.classList.remove('noscroll');
 }
 
-/* Lightbox click behavior: dark bg closes, card does NOT */
+/* Lightbox click behavior */
 const lightbox = document.getElementById('lightbox');
 const lbCard = document.getElementById('lbCard');
 const lbClose = document.getElementById('lbClose');
 
-lightbox.addEventListener('click', closeLightbox);
-lbCard.addEventListener('click', (e) => e.stopPropagation());
+lightbox.addEventListener('click', closeLightbox);            // dark background closes
+lbCard.addEventListener('click', (e) => e.stopPropagation()); // image/card does not close
 lbClose.addEventListener('click', closeLightbox);
 
 window.addEventListener('keydown', (e) => {
@@ -639,12 +655,12 @@ function bindSlideClicks(){
   slides[2].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(rightIndexNow); };
 }
 
-/* FEATHER carousel advance (right arrow) */
+/* Feather leporelo advance */
 function advance(){
   if (animating) return;
   animating = true;
 
-  // LEFT->CENTER, CENTER->RIGHT, RIGHT->LEFT
+  // animate roles: LEFT->CENTER, CENTER->RIGHT, RIGHT->LEFT
   slides[0].el.className = 'slide is-current';
   slides[1].el.className = 'slide is-next';
   slides[2].el.className = 'slide is-prev';
@@ -653,7 +669,9 @@ function advance(){
     if (e.propertyName !== 'transform') return;
     slides[0].el.removeEventListener('transitionend', done);
 
+    // rotate the slide references
     slides = [ slides[2], slides[0], slides[1] ];
+
     centerIndex = wrap(centerIndex + 1);
 
     setImages();
@@ -666,7 +684,6 @@ function advance(){
   slides[0].el.addEventListener('transitionend', done);
 }
 
-/* arrow click */
 document.getElementById('arrowRight').addEventListener('click', (e) => {
   e.preventDefault();
   advance();
@@ -690,8 +707,7 @@ let holdTimer = null;
 
 /* keyboard */
 window.addEventListener('keydown', (e) => {
-  const lbOpen = document.getElementById('lightbox').classList.contains('open');
-  if (lbOpen) return;
+  if (document.getElementById('lightbox').classList.contains('open')) return;
   if (e.key === 'ArrowRight') advance();
 });
 
