@@ -24,7 +24,7 @@
   --gap: 14px;
   --pad: 14px;
 
-  --maxFilmH: 83vh;
+  --maxFilmH: 99vh;
 }
 
 /* base */
@@ -141,14 +141,14 @@ main{
 
 .film-viewport{
   width:100%;
-  max-height: var(--maxFilmH);
-  overflow:hidden;
+  height: var(--maxFilmH);     /* IMPORTANT: fixed film area height */
+  overflow:hidden;            /* clips anything outside */
   display:grid;
   place-items:center;
   position:relative;
   touch-action:manipulation;
   perspective:1200px;
-  padding: 6px 0;
+  padding: 10px 0;            /* breathing room inside */
 }
 
 .film-track{
@@ -165,7 +165,7 @@ main{
 .slide{
   width: var(--slideW);
   aspect-ratio: var(--a3);
-  height:auto;
+  max-height: calc(var(--maxFilmH) - 20px);
   position:relative;
   display:grid;
   place-items:center;
@@ -241,11 +241,12 @@ main{
 /* container that always stays centered vertically */
 .arrow-slot{
   position:absolute;
-  top:50%;
-  left: max(16px, 4vw);     /* always near left side */
-  transform: translateY(-50%);
+  left: 12px;        /* left corner */
+  bottom: 12px;      /* under film area content */
+  top: auto;
+  transform: none;
   z-index:50;
-  pointer-events:none;
+  pointer-events:none;  /* so only button is clickable */
 }
 
 /* the button itself */
@@ -265,7 +266,7 @@ main{
   opacity:.96;
 }
 
-.film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.03); }
+.film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.04); }
 .film-arrow:active{ transform:scale(.98); }
 .film-arrow svg{ width:18px; height:18px; }
 
@@ -382,9 +383,7 @@ footer{
 
 /* short screens / landscape phones */
 @media (max-height: 650px){
-  :root{
-    --maxFilmH: 62vh;
-  }
+  :root{ --maxFilmH: 68vh; }
 }
 
 /* reduced motion */
