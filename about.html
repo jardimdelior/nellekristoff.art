@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <title>Nelle Kristoff — Art Portfolio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="Cache-Control" content="no-store" />
 
 <style>
 :root{
@@ -15,31 +14,16 @@
   --inset:inset 0 0 28px rgba(0,0,0,.14);
   --radius:2px;
 
-  /* A3 landscape ratio - never deform */
-  --a3w: 420;
-  --a3h: 297;
-  --a3ratio: calc(var(--a3w) / var(--a3h));
+  /* A3 landscape ratio */
+  --a3: 420 / 297;
 
-  /* film sizing */
-  --frameW: min(96vw, 1200px);
-  --frameH: 70vh;
-  --framePad: clamp(10px, 2.2vw, 18px);
-
-  /* slide sizing (JS will set --slideW dynamically) */
-  --slideW: 520px;
-
-  /* paper margin inside print */
+  /* slide sizing */
+  --slideW: clamp(210px, 52vw, 620px);
+  --gap: clamp(4px, 1vw, 12px);
   --pad: clamp(10px, 1.6vw, 16px);
 
-  /* leporelo */
-  --persp: 1300px;
-  --sideRot: 64deg;
-  --sideZ: -110px;
-  --centerZ: 190px;
-  --sideShift: 12%;
-
-  /* “connected margins” (negative = overlap slightly) */
-  --gap: clamp(-10px, -0.6vw, -2px);
+  /* film area */
+  --maxFilmH: 78vh;
 }
 
 /* base */
@@ -52,7 +36,7 @@ body{
   line-height:1.6;
   opacity:0;
 }
-html.ready body{ animation:fadein 2.2s ease-in-out forwards; }
+html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
 body.noscroll{ overflow:hidden; }
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
@@ -131,56 +115,64 @@ h1{
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
+/* main */
 main{
   width:100%;
   display:flex;
   flex-direction:column;
   align-items:center;
+  gap:12px;
+  padding-bottom: 12px;
 }
 
-/* ===== FILM AREA ===== */
+/* film */
+.film-main{
+  width:min(96vw, 1400px);
+  margin:0 auto;
+  position:relative;
+}
+
 .film-viewport{
-  width: var(--frameW);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  width:100%;
+  height: var(--maxFilmH);
+  display:grid;
+  place-items:center;
+  position:relative;
+  touch-action:manipulation;
+  perspective:1200px;
+  padding: 10px 0;
 }
 
+/* FILM FRAME (bordered container) */
 .film-frame{
-  width:100%;
-  height: var(--frameH);
+  width:min(96vw, 1200px);
+  height:min(var(--maxFilmH), 78vh);
   border:1px solid rgba(47,42,38,.16);
   border-radius:18px;
   background:rgba(255,255,255,.18);
   box-shadow:0 10px 30px rgba(0,0,0,.08);
-  overflow:hidden;                 /* nothing may spill out */
-  position:relative;
-  padding: var(--framePad);
-
-  /* leporelo depth */
-  perspective: var(--persp);
-}
-
-.film-group{
-  width:100%;
-  height:100%;
+  overflow:hidden;                 /* keeps everything inside */
   display:grid;
   place-items:center;
-  overflow:hidden;
+  position:relative;
+  padding: clamp(10px, 2.2vw, 18px);
 }
 
 .film-track{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap: var(--gap);                 /* “connected margins” */
+  width:100%;
+  gap: var(--gap);
   transform-style:preserve-3d;
 }
 
-/* slides */
+/* slide + transitions */
 .slide{
-  flex: 0 0 auto;
+  flex: 0 0 auto;                  /* prevents flex from shrinking */
   width: var(--slideW);
+  aspect-ratio: var(--a3);
+  max-height: calc(min(var(--maxFilmH), 78vh) - 40px);
   display:grid;
   place-items:center;
   transform-style:preserve-3d;
@@ -189,50 +181,36 @@ main{
     transform 650ms cubic-bezier(.18,.9,.2,1),
     opacity   650ms cubic-bezier(.18,.9,.2,1),
     filter    650ms cubic-bezier(.18,.9,.2,1);
+}
+
+/* CENTER (flat/front) */
+.slide.is-current{
+  transform: translateZ(140px) scale(1.03);
+  opacity:1;
+  filter:none;
   cursor:pointer;
 }
 
-/* ensure clickable in 3D */
-.slide, .print, .print img{ pointer-events:auto; }
-
-/* z order for leporelo reading */
-.slide.is-prev{ z-index:2; }
-.slide.is-current{ z-index:3; }
-.slide.is-next{ z-index:1; }
-
-/* center/front */
-.slide.is-current{
-  transform: translateZ(var(--centerZ)) scale(1.02);
-  opacity:1;
-  filter:none;
-}
-
-/* left bent */
+/* LEFT (clear, clickable) */
 .slide.is-prev{
-  transform:
-    translateX(calc(-1 * var(--sideShift)))
-    translateZ(var(--sideZ))
-    rotateY(var(--sideRot))
-    scale(.92);
+  transform: translateX(-12%) translateZ(-40px) rotateY(62deg) scale(.92);
   opacity:1;
   filter:none;
+  cursor:pointer;
 }
 
-/* right bent */
+/* RIGHT (softer) */
 .slide.is-next{
-  transform:
-    translateX(var(--sideShift))
-    translateZ(var(--sideZ))
-    rotateY(calc(-1 * var(--sideRot)))
-    scale(.92);
-  opacity:.75;
-  filter:saturate(.92) contrast(.98);
+  transform: translateX(12%) translateZ(-60px) rotateY(-62deg) scale(.92);
+  opacity:.62;
+  filter:saturate(.9) contrast(.96);
+  cursor:pointer;
 }
 
-/* Print area keeps A3 and never crops */
+/* print */
 .print{
   width:100%;
-  aspect-ratio: calc(var(--a3w) / var(--a3h));
+  height:100%;
   background:var(--card);
   padding:var(--pad);
   border-radius:var(--radius);
@@ -245,55 +223,40 @@ main{
 .print img{
   width:100%;
   height:100%;
-  object-fit:contain;
+  object-fit:contain;              /* no distortion */
   display:block;
-  decoding: async;
 }
 
-/* title attached under each image (inside the white margin zone) */
-.label{
-  position:absolute;
-  left: 12px;
-  bottom: 10px;
-  font-size:13px;
-  letter-spacing:.2px;
-  opacity:.65;
-  background:rgba(255,255,255,.65);
-  border:1px solid rgba(47,42,38,.12);
-  padding:6px 10px;
-  border-radius:999px;
-  backdrop-filter: blur(6px);
-  pointer-events:none;
-}
-
-/* noise (lighter CPU) */
+/* noise inside print */
 .noise{
   position:absolute;
   inset:0;
   background-image:url("images/noise.png");
   background-repeat:repeat;
   background-size:520px 520px;
-  opacity:.13;
+  opacity:.16;
   mix-blend-mode:overlay;
   pointer-events:none;
-  animation:noiseMove .22s steps(2) infinite;
+  animation:noiseMove .18s steps(2) infinite;
 }
 @keyframes noiseMove{
   0%{ transform:translate(0,0); }
-  25%{ transform:translate(-30px,18px); }
-  50%{ transform:translate(-8px,-22px); }
-  75%{ transform:translate(18px,8px); }
+  25%{ transform:translate(-40px,25px); }
+  50%{ transform:translate(-10px,-30px); }
+  75%{ transform:translate(30px,10px); }
   100%{ transform:translate(0,0); }
 }
 
-/* arrow UNDER film, left corner */
-.arrow-under{
-  width:100%;
-  margin: 10px 0 0;
-  display:flex;
-  justify-content:flex-start;
+/* arrow bottom-left inside film frame */
+.arrow-slot{
+  position:absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index:50;
+  pointer-events:none;
 }
 .film-arrow{
+  pointer-events:auto;
   width:52px;
   height:52px;
   border-radius:999px;
@@ -311,16 +274,7 @@ main{
 .film-arrow:active{ transform:scale(.98); }
 .film-arrow svg{ width:18px; height:18px; }
 
-/* footer attached under film border */
-footer{
-  width: var(--frameW);
-  text-align:center;
-  margin: 12px auto 18px;
-  font-size:12.5px;
-  opacity:.5;
-}
-
-/* ===== LIGHTBOX (never crop) ===== */
+/* lightbox */
 .lightbox{
   position:fixed;
   inset:0;
@@ -335,28 +289,22 @@ footer{
 
 .lb-card{
   width:100%;
-  max-width: min(94vw, 1400px);
-  max-height: 94vh;
+  max-width: min(92vw, 1400px);
+  max-height: 92vh;
   display:flex;
   flex-direction:column;
+  justify-content:center;
   gap:12px;
 }
 
-/* print in lightbox: image itself controls height, contain always */
+/* image area */
 .lightbox .print{
   width:100%;
-  height:auto;
-  aspect-ratio: auto;
-  max-height: 80vh;
-}
-.lightbox .print img{
-  width:100%;
-  height:auto;
-  max-height: 80vh;
-  object-fit:contain;
+  max-height: 76vh;        /* leaves room for details */
+  padding: var(--pad);
 }
 
-/* details row */
+/* details row under image: meta | close | actions */
 .lb-details{
   display:grid;
   grid-template-columns: 1fr auto 1fr;
@@ -364,6 +312,7 @@ footer{
   gap:14px;
   color:#EFE7DC;
 }
+
 .lb-meta{
   display:flex;
   align-items:baseline;
@@ -380,6 +329,7 @@ footer{
   justify-content:flex-end;
 }
 
+/* close button */
 .lb-close{
   width:40px;
   height:40px;
@@ -397,45 +347,68 @@ footer{
 .lb-close:hover{ background:rgba(0,0,0,.45); transform:scale(1.04); }
 .lb-close:active{ transform:scale(.98); }
 
-/* buttons readable on dark bg */
-.btn{
+/* buttons on dark bg */
+#lbInquire.inquire-btn, #lbCollect.collect-btn{
+  border-color:#EFE7DC;
+  color:#EFE7DC;
+}
+#lbInquire.inquire-btn:hover, #lbCollect.collect-btn:hover{
+  background:#EFE7DC;
+  color:#000;
+}
+
+/* base buttons */
+.inquire-btn,.collect-btn{
   padding:8px 14px;
   font-size:13px;
-  border:1px solid #EFE7DC;
+  border:1px solid #000;
   background:transparent;
-  color:#EFE7DC;
+  color:#000;
   text-decoration:none;
   border-radius:4px;
 }
-.btn:hover{ background:#EFE7DC; color:#000; }
 
-/* mobile portrait */
-@media (max-width:520px){
+/* footer */
+footer{
+  text-align:center;
+  padding: 18px 20px 22px;
+  font-size:12.5px;
+  opacity:.5;
+}
+
+/* mobile */
+@media (max-width: 520px){
   :root{
-    --frameW: 92vw;
-    --frameH: 72vh;
-    --sideShift: 10%;
-    --sideRot: 62deg;
-    --gap: clamp(-8px, -0.8vw, -2px);
+    --slideW: 88vw;
+    --gap: 8px;
+    --maxFilmH: 72vh;
+  }
+  .film-frame{
+    width: 92vw;
+    height: 72vh;
+    padding: 10px;
   }
   .lb-details{
     grid-template-columns: 1fr auto;
     grid-template-areas:
       "meta close"
       "actions actions";
+    align-items:center;
   }
   .lb-meta{ grid-area: meta; }
   .lb-close{ grid-area: close; justify-self:end; }
   .lb-actions{ grid-area: actions; justify-content:flex-start; }
 }
 
-/* mobile landscape (rotated phone) */
+/* landscape phones */
 @media (orientation: landscape) and (max-height: 520px){
-  :root{
-    --frameH: 66vh;
-    --sideShift: 9%;
-    --sideRot: 60deg;
-  }
+  :root{ --maxFilmH: 66vh; }
+  .film-frame{ height: 66vh; }
+}
+
+/* short screens */
+@media (max-height: 650px){
+  :root{ --maxFilmH: 68vh; }
 }
 
 /* reduced motion */
@@ -467,54 +440,51 @@ footer{
 </header>
 
 <main>
-  <section class="film-viewport" aria-label="Featured works">
-    <div class="film-frame" id="filmFrame">
-      <div class="film-group">
+  <section class="film-main" aria-label="Featured works">
+    <div class="film-viewport" id="filmViewport">
+      <div class="film-frame" id="filmFrame">
+
         <div class="film-track" id="filmTrack">
           <div class="slide is-prev" id="slideL" tabindex="0" aria-label="Open left work">
             <div class="print">
-              <img id="imgL" alt="" decoding="async" fetchpriority="low">
+              <img id="imgL" alt="">
               <div class="noise"></div>
-              <div class="label" id="labL">Untitled</div>
             </div>
           </div>
 
           <div class="slide is-current" id="slideC" tabindex="0" aria-label="Open center work">
             <div class="print">
-              <img id="imgC" alt="" decoding="async" fetchpriority="high">
+              <img id="imgC" alt="">
               <div class="noise"></div>
-              <div class="label" id="labC">Untitled</div>
             </div>
           </div>
 
           <div class="slide is-next" id="slideR" tabindex="0" aria-label="Open right work">
             <div class="print">
-              <img id="imgR" alt="" decoding="async" fetchpriority="low">
+              <img id="imgR" alt="">
               <div class="noise"></div>
-              <div class="label" id="labR">Untitled</div>
             </div>
           </div>
         </div>
+
+        <div class="arrow-slot">
+          <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 6l6 6-6 6"/>
+            </svg>
+          </button>
+        </div>
+
       </div>
     </div>
-
-    <div class="arrow-under">
-      <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 6l6 6-6 6"/>
-        </svg>
-      </button>
-    </div>
   </section>
-
-  <footer>© 2026 Nelle Kristoff — All rights reserved</footer>
 </main>
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <div class="lb-card" id="lbCard">
     <div class="print">
-      <img id="lightboxImg" alt="" decoding="async" />
+      <img id="lightboxImg" alt="" />
       <div class="noise"></div>
     </div>
 
@@ -527,12 +497,14 @@ footer{
       <button class="lb-close" id="lbClose" aria-label="Close">✕</button>
 
       <div class="lb-actions">
-        <a href="#" class="btn" id="lbInquire">Inquire</a>
-        <a href="#" target="_blank" rel="noopener" class="btn" id="lbCollect">Collect</a>
+        <a href="#" class="inquire-btn" id="lbInquire">Inquire</a>
+        <a href="#" target="_blank" rel="noopener" class="collect-btn" id="lbCollect">Collect</a>
       </div>
     </div>
   </div>
 </div>
+
+<footer>© 2026 Nelle Kristoff — All rights reserved</footer>
 
 <script>
 window.addEventListener("load", () => document.documentElement.classList.add("ready"));
@@ -563,6 +535,9 @@ const works = [
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 
+// preload (optional)
+works.forEach(w => { const i = new Image(); i.src = w.src; });
+
 function wrap(i){
   const n = works.length;
   return ((i % n) + n) % n;
@@ -571,17 +546,14 @@ function wrap(i){
 /* persistent slides */
 let centerIndex = 0;
 let animating = false;
-
-let idxL=0, idxC=0, idxR=0;
-
-const slideL = document.getElementById('slideL');
-const slideC = document.getElementById('slideC');
-const slideR = document.getElementById('slideR');
+let leftIndexNow = 0;
+let centerIndexNow = 0;
+let rightIndexNow = 0;
 
 let slides = [
-  { el: slideL, img: document.getElementById('imgL'), lab: document.getElementById('labL') },
-  { el: slideC, img: document.getElementById('imgC'), lab: document.getElementById('labC') },
-  { el: slideR, img: document.getElementById('imgR'), lab: document.getElementById('labR') },
+  { el: document.getElementById('slideL'), img: document.getElementById('imgL') }, // LEFT
+  { el: document.getElementById('slideC'), img: document.getElementById('imgC') }, // CENTER
+  { el: document.getElementById('slideR'), img: document.getElementById('imgR') }, // RIGHT
 ];
 
 function applyClasses(){
@@ -591,18 +563,24 @@ function applyClasses(){
 }
 
 function setImages(){
-  idxL = wrap(centerIndex - 1);
-  idxC = centerIndex;
-  idxR = wrap(centerIndex + 1);
+  const leftIndex  = wrap(centerIndex - 1);
+  const rightIndex = wrap(centerIndex + 1);
 
-  const L = works[idxL], C = works[idxC], R = works[idxR];
+  leftIndexNow = leftIndex;
+  centerIndexNow = centerIndex;
+  rightIndexNow = rightIndex;
 
-  slides[0].img.src = L.src; slides[0].img.alt = L.title; slides[0].lab.textContent = L.title;
-  slides[1].img.src = C.src; slides[1].img.alt = C.title; slides[1].lab.textContent = C.title;
-  slides[2].img.src = R.src; slides[2].img.alt = R.title; slides[2].lab.textContent = R.title;
+  slides[0].img.src = works[leftIndex].src;
+  slides[0].img.alt = works[leftIndex].title;
+
+  slides[1].img.src = works[centerIndex].src;
+  slides[1].img.alt = works[centerIndex].title;
+
+  slides[2].img.src = works[rightIndex].src;
+  slides[2].img.alt = works[rightIndex].title;
 }
 
-/* Lightbox */
+/* Lightbox open by index (adds meta + buttons) */
 function openLightboxByIndex(i){
   const w = works[i];
   document.getElementById('lightboxImg').src = w.src;
@@ -626,31 +604,31 @@ const lightbox = document.getElementById('lightbox');
 const lbCard = document.getElementById('lbCard');
 const lbClose = document.getElementById('lbClose');
 
-lightbox.addEventListener('click', closeLightbox);
-lbCard.addEventListener('click', (e) => e.stopPropagation());
-lbClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', closeLightbox);          // dark background closes
+lbCard.addEventListener('click', (e) => e.stopPropagation()); // clicking image/card does NOT close
+lbClose.addEventListener('click', closeLightbox);           // X closes
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeLightbox();
 });
 
-/* Click-to-open for ALL slides (no matter depth) */
+/* Click-to-open for ALL slides */
 function bindSlideClicks(){
-  slides[0].el.onclick = () => openLightboxByIndex(idxL);
-  slides[1].el.onclick = () => openLightboxByIndex(idxC);
-  slides[2].el.onclick = () => openLightboxByIndex(idxR);
+  slides[0].el.onclick = () => openLightboxByIndex(leftIndexNow);
+  slides[1].el.onclick = () => openLightboxByIndex(centerIndexNow);
+  slides[2].el.onclick = () => openLightboxByIndex(rightIndexNow);
 
-  slides[0].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(idxL); };
-  slides[1].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(idxC); };
-  slides[2].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(idxR); };
+  slides[0].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(leftIndexNow); };
+  slides[1].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(centerIndexNow); };
+  slides[2].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(rightIndexNow); };
 }
 
-/* Leporelo advance: LEFT -> CENTER, CENTER -> RIGHT, RIGHT -> LEFT */
+/* FEATHER carousel advance (right arrow) */
 function advance(){
   if (animating) return;
   animating = true;
 
-  // animate role changes
+  // LEFT->CENTER, CENTER->RIGHT, RIGHT->LEFT
   slides[0].el.className = 'slide is-current';
   slides[1].el.className = 'slide is-next';
   slides[2].el.className = 'slide is-prev';
@@ -659,7 +637,6 @@ function advance(){
     if (e.propertyName !== 'transform') return;
     slides[0].el.removeEventListener('transitionend', done);
 
-    // rotate references
     slides = [ slides[2], slides[0], slides[1] ];
     centerIndex = wrap(centerIndex + 1);
 
@@ -673,20 +650,20 @@ function advance(){
   slides[0].el.addEventListener('transitionend', done);
 }
 
-/* Arrow click */
+/* arrow click */
 document.getElementById('arrowRight').addEventListener('click', (e) => {
   e.preventDefault();
   advance();
 });
 
-/* Hold to glide */
+/* hold to glide */
 let holdTimer = null;
 (function bindHold(){
   const btn = document.getElementById('arrowRight');
   const start = (e) => {
     e.preventDefault();
     advance();
-    holdTimer = setInterval(advance, 820);
+    holdTimer = setInterval(advance, 750);
   };
   const end = () => { clearInterval(holdTimer); holdTimer = null; };
   btn.addEventListener('pointerdown', start);
@@ -695,38 +672,14 @@ let holdTimer = null;
   btn.addEventListener('pointerleave', end);
 })();
 
-/* Keyboard */
+/* keyboard */
 window.addEventListener('keydown', (e) => {
-  if (document.getElementById('lightbox').classList.contains('open')) return;
+  const lbOpen = document.getElementById('lightbox').classList.contains('open');
+  if (lbOpen) return;
   if (e.key === 'ArrowRight') advance();
 });
 
-/* ===== Fit-to-frame: compute slide width so 3 slides NEVER crop ===== */
-const filmFrame = document.getElementById('filmFrame');
-
-function setSlideWidthToFit(){
-  const styles = getComputedStyle(filmFrame);
-  const pad = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
-  const innerW = filmFrame.clientWidth - pad;
-  const innerH = filmFrame.clientHeight - (parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom));
-
-  // max slide width by height (A3 ratio)
-  const maxWByH = innerH * (420/297);
-
-  // width budget: allow center + two sides with overlap (leporelo compresses visually)
-  const maxWByW = innerW * 0.72; // keeps center fully visible on all sizes
-
-  const w = Math.max(200, Math.min(maxWByH, maxWByW, 620));
-
-  document.documentElement.style.setProperty('--slideW', w + 'px');
-}
-
-const ro = new ResizeObserver(() => setSlideWidthToFit());
-ro.observe(filmFrame);
-window.addEventListener('orientationchange', () => setSlideWidthToFit());
-
-/* Init */
-setSlideWidthToFit();
+/* init */
 applyClasses();
 setImages();
 bindSlideClicks();
