@@ -270,6 +270,53 @@ main{
 .film-arrow:active{ transform:scale(.98); }
 .film-arrow svg{ width:18px; height:18px; }
 
+/* Two info blocks under the film area */
+.info-row{
+  width:100%;
+  display:grid;
+  grid-template-columns: var(--sideW, var(--slideW)) var(--centerW, var(--slideW));
+  gap: var(--gap);
+  justify-content:center;
+  align-items:start;
+  margin: 14px auto 0;
+  padding-bottom: 10px;
+}
+
+.info{
+  width:100%;
+  max-width: 92vw;
+}
+
+.info-top{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  justify-content:flex-start;
+  white-space:nowrap;
+}
+
+.info-left{ opacity:.85; }      /* slightly quieter than center */
+.info-center{ opacity:1; }
+
+.info .actions{
+  margin-top:8px;
+  display:flex;
+  gap:8px;
+  justify-content:flex-start;
+  flex-wrap:wrap;
+}
+
+/* Mobile: stack (center info first) */
+@media (max-width:520px){
+  .info-row{
+    grid-template-columns: 1fr;
+    gap: 12px;
+    width: min(92vw, 520px);
+  }
+  .info-left{ order:2; }
+  .info-center{ order:1; }
+}
+
 /* details under middle */
 .details{
   width: var(--slideW);
@@ -368,10 +415,8 @@ footer{
   :root{
     /* Center must always fit on screen */
     --centerW: 88vw;
-
-    /* Side slides become smaller so center stays fully visible */
+   /* Side slides become smaller so center stays fully visible */
     --sideW: 46vw;
-
     --gap: 10px;
     --pad: 10px;
     --maxFilmH: 72vh;
@@ -427,22 +472,34 @@ footer{
   </button>
 </div>
 
-    <div class="details">
-      <div class="details-row">
-        <div class="meta">
-  <div class="meta-top">
-    <p class="title" id="workTitle">Untitled 1</p>
-    <p class="status" id="workStatus">Unveiling soon</p>
+<div class="info-row">
+
+  <!-- LEFT image info -->
+  <div class="info info-left">
+    <div class="info-top">
+      <p class="title" id="leftTitle">Untitled 3</p>
+      <p class="status" id="leftStatus">Unveiling soon</p>
+    </div>
+    <div class="actions">
+      <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
+      <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="leftCollectBtn">Collect</a>
+    </div>
   </div>
-  <div class="meta-sub" id="workSub">Limited drop soon</div>
+
+  <!-- CENTER image info -->
+  <div class="info info-center">
+    <div class="info-top">
+      <p class="title" id="workTitle">Untitled 1</p>
+      <p class="status" id="workStatus">Unveiling soon</p>
+    </div>
+    <div class="actions">
+      <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
+      <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
+    </div>
+  </div>
+
 </div>
 
-        <div class="actions">
-          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
-        </div>
-      </div>
-    </div>
   </section>
 </main>
 
@@ -494,10 +551,19 @@ function wrap(i){
 }
 
 function updateDetails(){
-  const w = works[currentIndex];
-  document.getElementById('workTitle').textContent = w.title;
-  document.getElementById('workStatus').textContent = w.status;
-  document.getElementById('collectBtn').href = w.collect;
+  const prev = wrap(currentIndex - 1);
+
+  // CENTER
+  const c = works[currentIndex];
+  document.getElementById('workTitle').textContent = c.title;
+  document.getElementById('workStatus').textContent = c.status;
+  document.getElementById('collectBtn').href = c.collect;
+
+  // LEFT (prev)
+  const l = works[prev];
+  document.getElementById('leftTitle').textContent = l.title;
+  document.getElementById('leftStatus').textContent = l.status;
+  document.getElementById('leftCollectBtn').href = l.collect;
 }
 
 function renderSlides(){
