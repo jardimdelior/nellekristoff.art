@@ -13,34 +13,36 @@
   --card:#FFFFFF;
   --shadow:0 14px 50px rgba(0,0,0,.32);
   --inset:inset 0 0 28px rgba(0,0,0,.14);
+  --radius:2px;
 
-  /* A3 landscape ratio – never distort */
+  /* A3 landscape ratio - never deform */
   --a3w: 420;
   --a3h: 297;
   --a3ratio: calc(var(--a3w) / var(--a3h));
 
-  /* Film area: wide + responsive */
-  --frameW: min(98vw, 1500px);
-  --frameH: clamp(320px, 64vh, 640px);
-  --framePad: clamp(10px, 2vw, 18px);
+  /* film sizing */
+  --frameW: min(96vw, 1200px);
+  --frameH: 70vh;
+  --framePad: clamp(10px, 2.2vw, 18px);
 
-  /* Slide width is set by JS so 3 always fit (no cropping) */
-  --slideW: 420px;
+  /* slide sizing (JS will set --slideW dynamically) */
+  --slideW: 520px;
 
-  /* White margin inside each print */
+  /* paper margin inside print */
   --pad: clamp(10px, 1.6vw, 16px);
 
-  /* Leporelo depth */
-  --persp: 1400px;
+  /* leporelo */
+  --persp: 1300px;
+  --sideRot: 64deg;
+  --sideZ: -110px;
   --centerZ: 190px;
-  --sideZ: -130px;
-  --rot: 68deg;
+  --sideShift: 12%;
 
-  /* Distance between slides (small, so edges feel connected) */
-  --gap: clamp(2px, 0.6vw, 10px);
+  /* “connected margins” (negative = overlap slightly) */
+  --gap: clamp(-10px, -0.6vw, -2px);
 }
 
-/* Base */
+/* base */
 html, body{ height:100%; }
 body{
   margin:0;
@@ -51,10 +53,10 @@ body{
   opacity:0;
 }
 html.ready body{ animation:fadein 2.2s ease-in-out forwards; }
-@keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 body.noscroll{ overflow:hidden; }
+@keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
-/* Header */
+/* header */
 header{
   text-align:center;
   padding: 18px 16px 8px;
@@ -81,7 +83,7 @@ h1{
   letter-spacing:.3px;
 }
 
-/* Burger */
+/* burger */
 .menu-btn{
   width:44px;
   height:44px;
@@ -93,6 +95,7 @@ h1{
   flex-direction:column;
   justify-content:center;
   gap:6px;
+  z-index:9999;
 }
 .menu-btn span{
   display:block;
@@ -103,7 +106,7 @@ h1{
   opacity:1;
 }
 
-/* Menu bar */
+/* menu bar */
 .menu{
   width:min(740px, 92vw);
   margin:14px auto 0;
@@ -128,7 +131,6 @@ h1{
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
-/* Main layout */
 main{
   width:100%;
   display:flex;
@@ -136,32 +138,29 @@ main{
   align-items:center;
 }
 
-/* ===== Film block (frame + arrow + footer directly under) ===== */
-.film-block{
-  width:var(--frameW);
+/* ===== FILM AREA ===== */
+.film-viewport{
+  width: var(--frameW);
   display:flex;
   flex-direction:column;
-  align-items:stretch;
-  gap:10px;
+  align-items:center;
 }
 
-/* Film frame */
 .film-frame{
   width:100%;
-  height:var(--frameH);
+  height: var(--frameH);
   border:1px solid rgba(47,42,38,.16);
   border-radius:18px;
   background:rgba(255,255,255,.18);
   box-shadow:0 10px 30px rgba(0,0,0,.08);
-  overflow:hidden;                 /* group never spills out */
-  padding:var(--framePad);
+  overflow:hidden;                 /* nothing may spill out */
   position:relative;
+  padding: var(--framePad);
 
-  /* Leporelo depth lives here */
-  perspective:var(--persp);
+  /* leporelo depth */
+  perspective: var(--persp);
 }
 
-/* Group that centers the three slides */
 .film-group{
   width:100%;
   height:100%;
@@ -170,19 +169,18 @@ main{
   overflow:hidden;
 }
 
-/* Track */
 .film-track{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:var(--gap);
+  gap: var(--gap);                 /* “connected margins” */
   transform-style:preserve-3d;
 }
 
-/* Slide */
+/* slides */
 .slide{
-  width:var(--slideW);
-  aspect-ratio: var(--a3ratio);
+  flex: 0 0 auto;
+  width: var(--slideW);
   display:grid;
   place-items:center;
   transform-style:preserve-3d;
@@ -194,39 +192,50 @@ main{
   cursor:pointer;
 }
 
-/* IMPORTANT: fold from edge (leporelo) */
-.slide.is-prev{ transform-origin: 100% 50%; }
-.slide.is-next{ transform-origin: 0% 50%; }
-.slide.is-current{ transform-origin: 50% 50%; }
+/* ensure clickable in 3D */
+.slide, .print, .print img{ pointer-events:auto; }
 
-/* Stacking order */
-.slide.is-current{ z-index:3; }
+/* z order for leporelo reading */
 .slide.is-prev{ z-index:2; }
+.slide.is-current{ z-index:3; }
 .slide.is-next{ z-index:1; }
 
-/* Leporelo poses */
+/* center/front */
 .slide.is-current{
-  transform: translateZ(var(--centerZ)) rotateY(0deg) scale(1.00);
+  transform: translateZ(var(--centerZ)) scale(1.02);
   opacity:1;
   filter:none;
 }
+
+/* left bent */
 .slide.is-prev{
-  transform: translateZ(var(--sideZ)) rotateY(var(--rot)) scale(.94);
+  transform:
+    translateX(calc(-1 * var(--sideShift)))
+    translateZ(var(--sideZ))
+    rotateY(var(--sideRot))
+    scale(.92);
   opacity:1;
   filter:none;
 }
+
+/* right bent */
 .slide.is-next{
-  transform: translateZ(var(--sideZ)) rotateY(calc(-1 * var(--rot))) scale(.94);
-  opacity:.72;
+  transform:
+    translateX(var(--sideShift))
+    translateZ(var(--sideZ))
+    rotateY(calc(-1 * var(--sideRot)))
+    scale(.92);
+  opacity:.75;
   filter:saturate(.92) contrast(.98);
 }
 
-/* Print area keeps A3 & never crops */
+/* Print area keeps A3 and never crops */
 .print{
   width:100%;
-  height:100%;
+  aspect-ratio: calc(var(--a3w) / var(--a3h));
   background:var(--card);
   padding:var(--pad);
+  border-radius:var(--radius);
   box-shadow:var(--inset), var(--shadow);
   overflow:hidden;
   position:relative;
@@ -238,14 +247,14 @@ main{
   height:100%;
   object-fit:contain;
   display:block;
-  decoding:async;
+  decoding: async;
 }
 
-/* Label under each image (attached to that panel) */
+/* title attached under each image (inside the white margin zone) */
 .label{
   position:absolute;
-  left:12px;
-  bottom:10px;
+  left: 12px;
+  bottom: 10px;
   font-size:13px;
   letter-spacing:.2px;
   opacity:.65;
@@ -253,11 +262,11 @@ main{
   border:1px solid rgba(47,42,38,.12);
   padding:6px 10px;
   border-radius:999px;
-  backdrop-filter:blur(6px);
+  backdrop-filter: blur(6px);
   pointer-events:none;
 }
 
-/* Noise */
+/* noise (lighter CPU) */
 .noise{
   position:absolute;
   inset:0;
@@ -277,8 +286,10 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* Arrow: under frame, left */
+/* arrow UNDER film, left corner */
 .arrow-under{
+  width:100%;
+  margin: 10px 0 0;
   display:flex;
   justify-content:flex-start;
 }
@@ -300,15 +311,16 @@ main{
 .film-arrow:active{ transform:scale(.98); }
 .film-arrow svg{ width:18px; height:18px; }
 
-/* Footer glued to film block */
-.film-footer{
+/* footer attached under film border */
+footer{
+  width: var(--frameW);
   text-align:center;
+  margin: 12px auto 18px;
   font-size:12.5px;
   opacity:.5;
-  padding: 6px 0 0; /* tight to frame */
 }
 
-/* Lightbox (simple, never crops) */
+/* ===== LIGHTBOX (never crop) ===== */
 .lightbox{
   position:fixed;
   inset:0;
@@ -316,36 +328,117 @@ main{
   display:none;
   align-items:center;
   justify-content:center;
-  padding: clamp(14px, 3vw, 34px);
   z-index:2147483647;
+  padding: clamp(14px, 3vw, 34px);
 }
 .lightbox.open{ display:flex; }
+
 .lb-card{
   width:100%;
-  max-width:min(94vw, 1400px);
-  max-height:94vh;
+  max-width: min(94vw, 1400px);
+  max-height: 94vh;
   display:flex;
   flex-direction:column;
   gap:12px;
 }
+
+/* print in lightbox: image itself controls height, contain always */
 .lightbox .print{
   width:100%;
   height:auto;
-  max-height:80vh;
+  aspect-ratio: auto;
+  max-height: 80vh;
 }
 .lightbox .print img{
   width:100%;
   height:auto;
-  max-height:80vh;
+  max-height: 80vh;
   object-fit:contain;
 }
 
-/* Mobile landscape tuning */
-@media (orientation: landscape) and (max-height: 520px){
-  :root{ --frameH: clamp(240px, 62vh, 520px); }
+/* details row */
+.lb-details{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items:center;
+  gap:14px;
+  color:#EFE7DC;
+}
+.lb-meta{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  white-space:nowrap;
+}
+.lb-title{ margin:0; font-size:14px; letter-spacing:.2px; opacity:.95; }
+.lb-status{ margin:0; font-size:13px; opacity:.7; }
+
+.lb-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
 }
 
-/* Reduced motion */
+.lb-close{
+  width:40px;
+  height:40px;
+  border-radius:999px;
+  border:1px solid rgba(239,231,220,.55);
+  background:rgba(0,0,0,.25);
+  color:#EFE7DC;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  font-size:18px;
+  line-height:1;
+  transition:transform .15s ease, background .15s ease;
+}
+.lb-close:hover{ background:rgba(0,0,0,.45); transform:scale(1.04); }
+.lb-close:active{ transform:scale(.98); }
+
+/* buttons readable on dark bg */
+.btn{
+  padding:8px 14px;
+  font-size:13px;
+  border:1px solid #EFE7DC;
+  background:transparent;
+  color:#EFE7DC;
+  text-decoration:none;
+  border-radius:4px;
+}
+.btn:hover{ background:#EFE7DC; color:#000; }
+
+/* mobile portrait */
+@media (max-width:520px){
+  :root{
+    --frameW: 92vw;
+    --frameH: 72vh;
+    --sideShift: 10%;
+    --sideRot: 62deg;
+    --gap: clamp(-8px, -0.8vw, -2px);
+  }
+  .lb-details{
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "meta close"
+      "actions actions";
+  }
+  .lb-meta{ grid-area: meta; }
+  .lb-close{ grid-area: close; justify-self:end; }
+  .lb-actions{ grid-area: actions; justify-content:flex-start; }
+}
+
+/* mobile landscape (rotated phone) */
+@media (orientation: landscape) and (max-height: 520px){
+  :root{
+    --frameH: 66vh;
+    --sideShift: 9%;
+    --sideRot: 60deg;
+  }
+}
+
+/* reduced motion */
 @media (prefers-reduced-motion: reduce){
   html.ready body{ animation:none !important; }
   body{ opacity:1 !important; }
@@ -363,6 +456,7 @@ main{
       <span></span><span></span><span></span>
     </button>
   </div>
+
   <div class="subtitle">Selected Works</div>
 
   <nav class="menu" id="menu" aria-label="Site menu">
@@ -373,29 +467,29 @@ main{
 </header>
 
 <main>
-  <section class="film-block" aria-label="Featured works">
+  <section class="film-viewport" aria-label="Featured works">
     <div class="film-frame" id="filmFrame">
       <div class="film-group">
         <div class="film-track" id="filmTrack">
-          <div class="slide is-prev" id="slideL" tabindex="0">
+          <div class="slide is-prev" id="slideL" tabindex="0" aria-label="Open left work">
             <div class="print">
-              <img id="imgL" alt="" decoding="async">
+              <img id="imgL" alt="" decoding="async" fetchpriority="low">
               <div class="noise"></div>
               <div class="label" id="labL">Untitled</div>
             </div>
           </div>
 
-          <div class="slide is-current" id="slideC" tabindex="0">
+          <div class="slide is-current" id="slideC" tabindex="0" aria-label="Open center work">
             <div class="print">
-              <img id="imgC" alt="" decoding="async">
+              <img id="imgC" alt="" decoding="async" fetchpriority="high">
               <div class="noise"></div>
               <div class="label" id="labC">Untitled</div>
             </div>
           </div>
 
-          <div class="slide is-next" id="slideR" tabindex="0">
+          <div class="slide is-next" id="slideR" tabindex="0" aria-label="Open right work">
             <div class="print">
-              <img id="imgR" alt="" decoding="async">
+              <img id="imgR" alt="" decoding="async" fetchpriority="low">
               <div class="noise"></div>
               <div class="label" id="labR">Untitled</div>
             </div>
@@ -411,17 +505,31 @@ main{
         </svg>
       </button>
     </div>
-
-    <div class="film-footer">© 2026 Nelle Kristoff — All rights reserved</div>
   </section>
+
+  <footer>© 2026 Nelle Kristoff — All rights reserved</footer>
 </main>
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <div class="lb-card" id="lbCard">
     <div class="print">
-      <img id="lightboxImg" alt="" decoding="async">
+      <img id="lightboxImg" alt="" decoding="async" />
       <div class="noise"></div>
+    </div>
+
+    <div class="lb-details">
+      <div class="lb-meta">
+        <p class="lb-title" id="lbTitle">Untitled</p>
+        <p class="lb-status" id="lbStatus">Unveiling soon</p>
+      </div>
+
+      <button class="lb-close" id="lbClose" aria-label="Close">✕</button>
+
+      <div class="lb-actions">
+        <a href="#" class="btn" id="lbInquire">Inquire</a>
+        <a href="#" target="_blank" rel="noopener" class="btn" id="lbCollect">Collect</a>
+      </div>
     </div>
   </div>
 </div>
@@ -450,9 +558,9 @@ function contact(e){
 
 /* Works */
 const works = [
-  { src:"images/Untitled1.png", title:"Untitled 1" },
-  { src:"images/Untitled2.png", title:"Untitled 2" },
-  { src:"images/Untitled3.png", title:"Untitled 3" },
+  { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 
 function wrap(i){
@@ -460,18 +568,20 @@ function wrap(i){
   return ((i % n) + n) % n;
 }
 
-/* Slides (persistent) */
+/* persistent slides */
 let centerIndex = 0;
 let animating = false;
 
 let idxL=0, idxC=0, idxR=0;
 
-const filmFrame = document.getElementById('filmFrame');
+const slideL = document.getElementById('slideL');
+const slideC = document.getElementById('slideC');
+const slideR = document.getElementById('slideR');
 
 let slides = [
-  { el: document.getElementById('slideL'), img: document.getElementById('imgL'), lab: document.getElementById('labL') },
-  { el: document.getElementById('slideC'), img: document.getElementById('imgC'), lab: document.getElementById('labC') },
-  { el: document.getElementById('slideR'), img: document.getElementById('imgR'), lab: document.getElementById('labR') },
+  { el: slideL, img: document.getElementById('imgL'), lab: document.getElementById('labL') },
+  { el: slideC, img: document.getElementById('imgC'), lab: document.getElementById('labC') },
+  { el: slideR, img: document.getElementById('imgR'), lab: document.getElementById('labR') },
 ];
 
 function applyClasses(){
@@ -493,8 +603,16 @@ function setImages(){
 }
 
 /* Lightbox */
-function openLightbox(src){
-  document.getElementById('lightboxImg').src = src;
+function openLightboxByIndex(i){
+  const w = works[i];
+  document.getElementById('lightboxImg').src = w.src;
+  document.getElementById('lbTitle').textContent = w.title;
+  document.getElementById('lbStatus').textContent = w.status;
+  document.getElementById('lbCollect').href = w.collect;
+
+  const subject = encodeURIComponent(`Inquiry: ${w.title}`);
+  document.getElementById('lbInquire').href = `mailto:nellekristoff@gmail.com?subject=${subject}`;
+
   document.getElementById('lightbox').classList.add('open');
   document.body.classList.add('noscroll');
 }
@@ -502,42 +620,37 @@ function closeLightbox(){
   document.getElementById('lightbox').classList.remove('open');
   document.body.classList.remove('noscroll');
 }
-document.getElementById('lightbox').addEventListener('click', closeLightbox);
-document.getElementById('lbCard').addEventListener('click', (e) => e.stopPropagation());
 
-/* All three always clickable */
+/* Lightbox click behavior */
+const lightbox = document.getElementById('lightbox');
+const lbCard = document.getElementById('lbCard');
+const lbClose = document.getElementById('lbClose');
+
+lightbox.addEventListener('click', closeLightbox);
+lbCard.addEventListener('click', (e) => e.stopPropagation());
+lbClose.addEventListener('click', closeLightbox);
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+/* Click-to-open for ALL slides (no matter depth) */
 function bindSlideClicks(){
-  slides[0].el.onclick = () => openLightbox(slides[0].img.src);
-  slides[1].el.onclick = () => openLightbox(slides[1].img.src);
-  slides[2].el.onclick = () => openLightbox(slides[2].img.src);
+  slides[0].el.onclick = () => openLightboxByIndex(idxL);
+  slides[1].el.onclick = () => openLightboxByIndex(idxC);
+  slides[2].el.onclick = () => openLightboxByIndex(idxR);
+
+  slides[0].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(idxL); };
+  slides[1].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(idxC); };
+  slides[2].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(idxR); };
 }
 
-/* Fit: compute slide width so 3 always fit inside the frame (no cropping) */
-function fitSlides(){
-  const cs = getComputedStyle(filmFrame);
-  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-  const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-  const innerW = filmFrame.clientWidth - padX;
-  const innerH = filmFrame.clientHeight - padY;
-
-  // A3 width allowed by height:
-  const maxWByH = innerH * (420/297);
-
-  // Width budget: 3 slides + 2 gaps (no “third slide drifting away”)
-  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 0;
-  const maxWByW = (innerW - 2*gap) / 3;
-
-  // Choose the smaller, clamp for sanity
-  const w = Math.max(180, Math.min(maxWByH, maxWByW, 620));
-
-  document.documentElement.style.setProperty('--slideW', w + 'px');
-}
-
-/* Leporelo advance: left->center, center->right, right->left */
+/* Leporelo advance: LEFT -> CENTER, CENTER -> RIGHT, RIGHT -> LEFT */
 function advance(){
   if (animating) return;
   animating = true;
 
+  // animate role changes
   slides[0].el.className = 'slide is-current';
   slides[1].el.className = 'slide is-next';
   slides[2].el.className = 'slide is-prev';
@@ -546,6 +659,7 @@ function advance(){
     if (e.propertyName !== 'transform') return;
     slides[0].el.removeEventListener('transitionend', done);
 
+    // rotate references
     slides = [ slides[2], slides[0], slides[1] ];
     centerIndex = wrap(centerIndex + 1);
 
@@ -559,6 +673,7 @@ function advance(){
   slides[0].el.addEventListener('transitionend', done);
 }
 
+/* Arrow click */
 document.getElementById('arrowRight').addEventListener('click', (e) => {
   e.preventDefault();
   advance();
@@ -580,13 +695,38 @@ let holdTimer = null;
   btn.addEventListener('pointerleave', end);
 })();
 
-/* Resize / rotate */
-const ro = new ResizeObserver(() => fitSlides());
+/* Keyboard */
+window.addEventListener('keydown', (e) => {
+  if (document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'ArrowRight') advance();
+});
+
+/* ===== Fit-to-frame: compute slide width so 3 slides NEVER crop ===== */
+const filmFrame = document.getElementById('filmFrame');
+
+function setSlideWidthToFit(){
+  const styles = getComputedStyle(filmFrame);
+  const pad = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
+  const innerW = filmFrame.clientWidth - pad;
+  const innerH = filmFrame.clientHeight - (parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom));
+
+  // max slide width by height (A3 ratio)
+  const maxWByH = innerH * (420/297);
+
+  // width budget: allow center + two sides with overlap (leporelo compresses visually)
+  const maxWByW = innerW * 0.72; // keeps center fully visible on all sizes
+
+  const w = Math.max(200, Math.min(maxWByH, maxWByW, 620));
+
+  document.documentElement.style.setProperty('--slideW', w + 'px');
+}
+
+const ro = new ResizeObserver(() => setSlideWidthToFit());
 ro.observe(filmFrame);
-window.addEventListener('orientationchange', () => setTimeout(fitSlides, 60));
+window.addEventListener('orientationchange', () => setSlideWidthToFit());
 
 /* Init */
-fitSlides();
+setSlideWidthToFit();
 applyClasses();
 setImages();
 bindSlideClicks();
