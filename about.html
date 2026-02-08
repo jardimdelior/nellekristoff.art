@@ -1,33 +1,22 @@
+<!-- about.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Nelle Kristoff — Art Portfolio</title>
+<title>About — Nelle Kristoff</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-store" />
 
 <style>
 :root{
   --bg:#EFE7DC;
   --ink:#2F2A26;
   --card:#FFFFFF;
-  --shadow:0 14px 50px rgba(0,0,0,.32);
-  --inset:inset 0 0 28px rgba(0,0,0,.14);
-  --radius:2px;
-
-  /* A3 landscape ratio */
-  --a3: 420 / 297;
-
-  /* slide sizing */
-  --slideW: clamp(210px, 78vw, 620px);
-  --gap: 14px;
-  --pad: 14px;
-
-  /* film area */
-  --maxFilmH: 78vh;
+  --shadow:0 14px 50px rgba(0,0,0,.18);
+  --radius:14px;
 }
 
-/* base */
-html, body{ height:100%; }
+html,body{height:100%;}
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
@@ -37,13 +26,12 @@ body{
   opacity:0;
 }
 html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
-body.noscroll{ overflow:hidden; }
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
-/* header */
+/* header (same feel as index) */
 header{
   text-align:center;
-  padding: 18px 16px 8px;
+  padding:18px 16px 8px;
 }
 .title-row{
   display:flex;
@@ -79,18 +67,16 @@ h1{
   flex-direction:column;
   justify-content:center;
   gap:6px;
-  z-index:9999;
 }
 .menu-btn span{
   display:block;
   width:100%;
   height:2px;
-  background:#2F2A26;
+  background:var(--ink);
   border-radius:2px;
-  opacity:1;
 }
 
-/* menu bar */
+/* menu */
 .menu{
   width:min(740px, 92vw);
   margin:14px auto 0;
@@ -115,223 +101,91 @@ h1{
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
-/* main */
+/* page */
 main{
-  width:100%;
+  width:min(860px, 92vw);
+  margin: 18px auto 34px;
+}
+.card{
+  background:rgba(255,255,255,.70);
+  border:1px solid rgba(47,42,38,.14);
+  border-radius:var(--radius);
+  box-shadow:0 14px 40px rgba(0,0,0,.08);
+  backdrop-filter: blur(10px);
+  padding: clamp(16px, 3vw, 26px);
+}
+.card h2{
+  margin:0 0 10px;
+  font-weight:500;
+  letter-spacing:.4px;
+  font-size:18px;
+  text-transform:uppercase;
+}
+.card p{
+  margin:10px 0 0;
+  opacity:.9;
+  font-size:14.5px;
+}
+
+/* links */
+.links{
+  margin-top:16px;
+  display:grid;
+  gap:10px;
+}
+.link{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid rgba(47,42,38,.16);
+  background:rgba(239,231,220,.55);
+  text-decoration:none;
+  color:var(--ink);
+  transition:transform .15s ease, background .15s ease;
+}
+.link:hover{
+  background:rgba(239,231,220,.78);
+  transform: translateY(-1px);
+}
+.link .left{
   display:flex;
   flex-direction:column;
-  align-items:center;
-  gap:12px;
-  padding-bottom: 12px;
+  gap:2px;
 }
-
-/* film */
-.film-main{
-  width:min(96vw, 1400px);
-  margin:0 auto;
-  position:relative;
-}
-
-.film-viewport{
-  width:100%;
-  height: var(--maxFilmH);
-  overflow:hidden;
-  display:grid;
-  place-items:center;
-  position:relative;
-  touch-action:manipulation;
-  perspective:1200px;
-  padding: 10px 0;
-}
-
-.film-track{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  gap:var(--gap);
-  transform-style:preserve-3d;
-}
-
-/* slide + transitions */
-.slide{
-  width: var(--slideW);
-  aspect-ratio: var(--a3);
-  max-height: calc(var(--maxFilmH) - 20px);
-  display:grid;
-  place-items:center;
-  transform-style:preserve-3d;
-  will-change: transform, opacity, filter;
-  transition:
-    transform 650ms cubic-bezier(.18,.9,.2,1),
-    opacity   650ms cubic-bezier(.18,.9,.2,1),
-    filter    650ms cubic-bezier(.18,.9,.2,1);
-}
-
-/* CENTER (flat/front) */
-.slide.is-current{
-  transform: translateZ(140px) scale(1.03);
-  opacity:1;
-  filter:none;
-  cursor:pointer;
-}
-
-/* LEFT (clear, clickable) */
-.slide.is-prev{
-  transform: translateX(-22%) translateZ(-40px) rotateY(62deg) scale(.92);
-  opacity:1;
-  filter:none;
-  cursor:pointer;
-}
-
-/* RIGHT (softer) */
-.slide.is-next{
-  transform: translateX(22%) translateZ(-60px) rotateY(-62deg) scale(.92);
-  opacity:.62;
-  filter:saturate(.9) contrast(.96);
-}
-
-/* print */
-.print{
-  width:100%;
-  height:100%;
-  background:var(--card);
-  padding:var(--pad);
-  border-radius:var(--radius);
-  box-shadow:var(--inset), var(--shadow);
-  overflow:hidden;
-  position:relative;
-  display:grid;
-  place-items:center;
-}
-.print img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-}
-
-/* noise inside print */
-.noise{
-  position:absolute;
-  inset:0;
-  background-image:url("images/noise.png");
-  background-repeat:repeat;
-  background-size:520px 520px;
-  opacity:.16;
-  mix-blend-mode:overlay;
-  pointer-events:none;
-  animation:noiseMove .18s steps(2) infinite;
-}
-@keyframes noiseMove{
-  0%{ transform:translate(0,0); }
-  25%{ transform:translate(-40px,25px); }
-  50%{ transform:translate(-10px,-30px); }
-  75%{ transform:translate(30px,10px); }
-  100%{ transform:translate(0,0); }
-}
-
-/* arrow bottom-left */
-.arrow-slot{
-  position:absolute;
-  left: 12px;
-  bottom: 12px;
-  z-index:50;
-  pointer-events:none;
-}
-.film-arrow{
-  pointer-events:auto;
-  width:52px;
-  height:52px;
-  border-radius:999px;
-  border:1px solid rgba(47,42,38,.28);
-  background:rgba(239,231,220,.78);
-  backdrop-filter:blur(6px);
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  box-shadow:0 10px 24px rgba(0,0,0,.14);
-  transition:transform .2s ease, background .2s ease;
-  opacity:.96;
-}
-.film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.04); }
-.film-arrow:active{ transform:scale(.98); }
-.film-arrow svg{ width:18px; height:18px; }
-
-/* Two info blocks under the film area */
-.info-row{
-  width:100%;
-  display:grid;
-  grid-template-columns: var(--slideW) var(--slideW);
-  gap: var(--gap);
-  justify-content:center;
-  align-items:start;
-  margin: 14px auto 0;
-  padding-bottom: 10px;
-}
-.info{ width:100%; max-width: 92vw; }
-.info-top{
-  display:flex;
-  align-items:baseline;
-  gap:10px;
-  white-space:nowrap;
-}
-.info-left{ opacity:.85; }
-.info-center{ opacity:1; }
-.info .actions{
-  margin-top:8px;
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-.title{
+.link .name{
   font-size:14px;
   letter-spacing:.2px;
-  opacity:.88;
-  margin:0;
+  opacity:.92;
 }
-.status{
-  font-size:13px;
-  opacity:.65;
-  margin:0;
+.link .note{
+  font-size:12.5px;
+  opacity:.62;
 }
-.inquire-btn,.collect-btn{
-  padding:8px 14px;
+.link .arrow{
+  font-size:16px;
+  opacity:.55;
+}
+
+.actions{
+  margin-top:14px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.btn{
+  padding:9px 14px;
   font-size:13px;
   border:1px solid #000;
   background:transparent;
   color:#000;
   text-decoration:none;
   border-radius:4px;
+  display:inline-block;
 }
-.inquire-btn:hover,.collect-btn:hover{ background:#000; color:#fff; }
-
-/* lightbox */
-.lightbox{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.92);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  cursor:zoom-out;
-  z-index:2147483647;
-}
-.lightbox.open{ display:flex; }
-.lightbox .print{
-  width:auto;
-  height:auto;
-  max-width:min(92vw, 1400px);
-  max-height:92vh;
-  padding:var(--pad);
-  cursor:auto;
-}
-.lightbox .print img{
-  max-width:min(92vw, 1400px);
-  max-height:92vh;
-  width:auto;
-  height:auto;
-}
+.btn:hover{ background:#000; color:#fff; }
 
 footer{
   text-align:center;
@@ -340,33 +194,10 @@ footer{
   opacity:.5;
 }
 
-/* mobile */
-@media (max-width: 520px){
-  :root{
-    --slideW: 88vw;     /* center stays fully visible */
-    --gap: 10px;
-    --pad: 10px;
-    --maxFilmH: 72vh;
-  }
-  .info-row{
-    grid-template-columns: 1fr;
-    width: min(92vw, 520px);
-  }
-  .info-left{ order:2; }
-  .info-center{ order:1; }
-}
-
-/* short screens */
-@media (max-height: 650px){
-  :root{ --maxFilmH: 68vh; }
-}
-
 /* reduced motion */
 @media (prefers-reduced-motion: reduce){
   html.ready body{ animation:none !important; }
   body{ opacity:1 !important; }
-  .slide{ transition:none !important; }
-  .noise{ animation:none !important; }
 }
 </style>
 </head>
@@ -380,86 +211,83 @@ footer{
     </button>
   </div>
 
-  <div class="subtitle">Selected Works</div>
+  <div class="subtitle">About</div>
 
   <nav class="menu" id="menu" aria-label="Site menu">
-    <a href="about.html">About</a>
+    <a href="index.html">Home</a>
+    <a href="about.html" aria-current="page">About</a>
     <a href="#" onclick="contact(event)">Contact</a>
     <a href="posts.html">Posts</a>
   </nav>
 </header>
 
 <main>
-  <section class="film-main" aria-label="Featured works">
-    <div class="film-viewport" id="filmViewport">
+  <section class="card">
+    <h2>Bio</h2>
+    <p>
+      I’m
+    </p>
+    <p>
+      For collaborations, licensing, commissions, or questions about a specific artwork, use the contact button below.
+    </p>
 
-      <!-- 3 persistent slides (no innerHTML rebuild per click) -->
-      <div class="film-track" id="filmTrack">
-        <div class="slide is-prev" id="slideL" tabindex="0" aria-label="Open left work">
-          <div class="print">
-            <img id="imgL" alt="">
-            <div class="noise"></div>
-          </div>
-        </div>
-
-        <div class="slide is-current" id="slideC" tabindex="0" aria-label="Open center work">
-          <div class="print">
-            <img id="imgC" alt="">
-            <div class="noise"></div>
-          </div>
-        </div>
-
-        <div class="slide is-next" id="slideR" aria-hidden="true">
-          <div class="print">
-            <img id="imgR" alt="">
-            <div class="noise"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="arrow-slot">
-        <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 6l6 6-6 6"/>
-          </svg>
-        </button>
-      </div>
+    <div class="actions">
+      <a class="btn" href="#" onclick="contact(event)">Email</a>
+      <a class="btn" href="index.html">View works</a>
     </div>
 
-    <!-- IMPORTANT: info-row is UNDER the film-viewport (not inside it) -->
-    <div class="info-row">
-      <div class="info info-left">
-        <div class="info-top">
-          <p class="title" id="leftTitle">Untitled</p>
-          <p class="status" id="leftStatus">Unveiling soon</p>
-        </div>
-        <div class="actions">
-          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="leftCollectBtn">Collect</a>
-        </div>
-      </div>
+    <div class="links" aria-label="External links">
+      <!-- Replace the # with your exact profile URLs -->
+      <a class="link" href="#" target="_blank" rel="noopener">
+        <span class="left">
+          <span class="name">Instagram</span>
+          <span class="note">Latest works & process</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
 
-      <div class="info info-center">
-        <div class="info-top">
-          <p class="title" id="workTitle">Untitled</p>
-          <p class="status" id="workStatus">Unveiling soon</p>
-        </div>
-        <div class="actions">
-          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
-        </div>
-      </div>
+      <a class="link" href="#" target="_blank" rel="noopener">
+        <span class="left">
+          <span class="name">Adobe (Portfolio)</span>
+          <span class="note">Selected projects</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
+
+      <a class="link" href="#" target="_blank" rel="noopener">
+        <span class="left">
+          <span class="name">Pond5</span>
+          <span class="note">Stock photo & video</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
+
+      <a class="link" href="https://collect.nellekristoff.art" target="_blank" rel="noopener">
+        <span class="left">
+          <span class="name">Gumroad / Collect</span>
+          <span class="note">Buy downloadable works</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
+
+      <a class="link" href="#" target="_blank" rel="noopener">
+        <span class="left">
+          <span class="name">99designs</span>
+          <span class="note">Design</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
+
+      <a class="link" href="#" target="_blank" rel="noopener">
+        <span class="left">
+          <span class="name">Behance</span>
+          <span class="note">Portfolio & collections</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
     </div>
-
   </section>
 </main>
-
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <div class="print" onclick="event.stopPropagation()">
-    <img id="lightboxImg" alt="" />
-    <div class="noise"></div>
-  </div>
-</div>
 
 <footer>© 2026 Nelle Kristoff — All rights reserved</footer>
 
@@ -484,161 +312,6 @@ function contact(e){
   if (e) e.preventDefault();
   window.location.href = "mailto:nellekristoff@gmail.com";
 }
-
-/* Works */
-const works = [
-  { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-];
-
-// preload (optional)
-works.forEach(w => { const i = new Image(); i.src = w.src; });
-
-function wrap(i){
-  const n = works.length;
-  return ((i % n) + n) % n;
-}
-
-/* persistent slides */
-let centerIndex = 0;
-let animating = false;
-
-let slides = [
-  { el: document.getElementById('slideL'), img: document.getElementById('imgL') }, // LEFT
-  { el: document.getElementById('slideC'), img: document.getElementById('imgC') }, // CENTER
-  { el: document.getElementById('slideR'), img: document.getElementById('imgR') }, // RIGHT
-];
-
-function applyClasses(){
-  slides[0].el.className = 'slide is-prev';
-  slides[1].el.className = 'slide is-current';
-  slides[2].el.className = 'slide is-next';
-}
-
-function setImages(){
-  const leftIndex  = wrap(centerIndex - 1);
-  const rightIndex = wrap(centerIndex + 1);
-
-  slides[0].img.src = works[leftIndex].src;
-  slides[0].img.alt = works[leftIndex].title;
-
-  slides[1].img.src = works[centerIndex].src;
-  slides[1].img.alt = works[centerIndex].title;
-
-  slides[2].img.src = works[rightIndex].src;
-  slides[2].img.alt = works[rightIndex].title;
-
-  // update info blocks
-  const c = works[centerIndex];
-  document.getElementById('workTitle').textContent = c.title;
-  document.getElementById('workStatus').textContent = c.status;
-  document.getElementById('collectBtn').href = c.collect;
-
-  const l = works[leftIndex];
-  document.getElementById('leftTitle').textContent = l.title;
-  document.getElementById('leftStatus').textContent = l.status;
-  document.getElementById('leftCollectBtn').href = l.collect;
-}
-
-/* Lightbox */
-function openLightbox(src){
-  document.getElementById('lightboxImg').src = src;
-  document.getElementById('lightbox').classList.add('open');
-  document.body.classList.add('noscroll');
-}
-function closeLightbox(){
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.classList.remove('noscroll');
-}
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeLightbox();
-});
-
-/* Click-to-open for LEFT and CENTER (always current visuals) */
-function bindSlideClicks(){
-  // remove then re-add is not needed because nodes persist; use current slides array
-  slides[1].el.onclick = () => openLightbox(slides[1].img.src);
-  slides[0].el.onclick = () => openLightbox(slides[0].img.src);
-
-  slides[1].el.onkeydown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(slides[1].img.src);
-  };
-  slides[0].el.onkeydown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(slides[0].img.src);
-  };
-}
-
-/* FEATHER carousel advance (right arrow) */
-function advance(){
-  if (animating) return;
-  animating = true;
-
-  // Start the motion: LEFT->CENTER, CENTER->RIGHT, RIGHT->LEFT
-  slides[0].el.className = 'slide is-current';
-  slides[1].el.className = 'slide is-next';
-  slides[2].el.className = 'slide is-prev';
-
-  // Wait for the transform transition on the incoming center (slides[0])
-  const done = (e) => {
-    if (e.propertyName !== 'transform') return;
-    slides[0].el.removeEventListener('transitionend', done);
-
-    // Rotate slides array to match new visual roles:
-    // new LEFT = old RIGHT, new CENTER = old LEFT, new RIGHT = old CENTER
-    slides = [ slides[2], slides[0], slides[1] ];
-
-    // Advance the logical center work
-    centerIndex = wrap(centerIndex + 1);
-
-    // Update images for the new set (no DOM rebuild)
-    setImages();
-    applyClasses();
-    bindSlideClicks();
-
-    animating = false;
-  };
-
-  slides[0].el.addEventListener('transitionend', done);
-}
-
-/* arrow click */
-document.getElementById('arrowRight').addEventListener('click', (e) => {
-  e.preventDefault();
-  advance();
-});
-
-/* hold to glide */
-let holdTimer = null;
-function bindHold(id){
-  const btn = document.getElementById(id);
-  const start = (e) => {
-    e.preventDefault();
-    advance();
-    holdTimer = setInterval(advance, 750); // slower feels more “feather”
-  };
-  const end = () => {
-    clearInterval(holdTimer);
-    holdTimer = null;
-  };
-  btn.addEventListener('pointerdown', start);
-  btn.addEventListener('pointerup', end);
-  btn.addEventListener('pointercancel', end);
-  btn.addEventListener('pointerleave', end);
-}
-bindHold('arrowRight');
-
-/* keyboard */
-window.addEventListener('keydown', (e) => {
-  const lbOpen = document.getElementById('lightbox').classList.contains('open');
-  if (lbOpen) return;
-  if (e.key === 'ArrowRight') advance();
-});
-
-/* init */
-applyClasses();
-setImages();
-bindSlideClicks();
 </script>
 </body>
 </html>
