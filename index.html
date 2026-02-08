@@ -13,24 +13,38 @@
   --card:#FFFFFF;
   --shadow:0 14px 50px rgba(0,0,0,.32);
   --inset:inset 0 0 28px rgba(0,0,0,.14);
-  --radius:2px;
 
-  /* A3 landscape ratio */
-  --a3: 420 / 297;
+  /* A3 landscape ratio – never distort */
+  --a3w: 420;
+  --a3h: 297;
+  --a3ratio: calc(var(--a3w) / var(--a3h));
 
-  /* these will be tuned by JS so 3 always fit */
-  --slideW: 420px;
-  --gap: clamp(6px, 1.2vw, 14px);
-  --pad: clamp(10px, 1.6vw, 14px);
-
-  /* FILM frame */
-  --frameW: min(96vw, 1400px);
-  --frameH: clamp(320px, 62vh, 720px);
+  /* Film area: wide + responsive */
+  --frameW: min(98vw, 1500px);
+  --frameH: clamp(320px, 64vh, 640px);
   --framePad: clamp(10px, 2vw, 18px);
+
+  /* Slide width is set by JS so 3 always fit (no cropping) */
+  --slideW: 420px;
+
+  /* White margin inside each print */
+  --pad: clamp(10px, 1.6vw, 16px);
+
+  /* Leporelo depth */
+  --persp: 1400px;
+  --centerZ: 220px;   /* a touch more depth for the flat page */
+  --sideZ: -160px;
+  --rot: 70deg;
+
+  /* Distance between slides (set to 0 so pages “connect”) */
+  --gap: 0px;
+
+  /* Small overlap to visually “hinge” the folds */
+  --hinge: 18px;
 }
 
-/* base */
-html, body { height:100%; }
+/* Base */
+html, body{ height:100%; }
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
@@ -39,22 +53,22 @@ body{
   line-height:1.6;
   opacity:0;
 }
-html.ready body{ animation:fadein 1.6s ease-in-out forwards; }
-body.noscroll{ overflow:hidden; }
+html.ready body{ animation:fadein 2.2s ease-in-out forwards; }
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
+body.noscroll{ overflow:hidden; }
 
-/* header */
+/* Header */
 header{
   text-align:center;
   padding: 18px 16px 8px;
 }
 .title-row{
-  display:inline-flex;
+  display:flex;
   align-items:center;
   justify-content:center;
-  gap: 14px;
+  gap:14px;
   position:relative;
-  z-index:10;
+  z-index:9999;
 }
 h1{
   font-weight:500;
@@ -70,28 +84,29 @@ h1{
   letter-spacing:.3px;
 }
 
-/* hamburger */
+/* Burger */
 .menu-btn{
-  width:40px;
-  height:40px;
+  width:44px;
+  height:44px;
   border:0;
   background:transparent;
   cursor:pointer;
-  padding:8px;
+  padding:10px;
   display:inline-flex;
   flex-direction:column;
   justify-content:center;
+  gap:6px;
 }
 .menu-btn span{
   display:block;
+  width:100%;
   height:2px;
-  background:var(--ink);
-  margin:4px 0;
+  background:#2F2A26;
   border-radius:2px;
-  opacity:.9;
+  opacity:1;
 }
 
-/* menu */
+/* Menu bar */
 .menu{
   width:min(740px, 92vw);
   margin:14px auto 0;
@@ -116,101 +131,123 @@ h1{
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
-/* page */
+/* Main layout */
 main{
-  width: 100%;
+  width:100%;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:12px;
-  padding-bottom: 10px;
 }
 
-/* ===== FILM BLOCK (frame + arrow + details + footer glued under) ===== */
+/* ===== Film block (frame + arrow + footer directly under) ===== */
 .film-block{
-  width: var(--frameW);
+  width:var(--frameW);
   display:flex;
   flex-direction:column;
   align-items:stretch;
   gap:10px;
-  margin: 0 auto;
 }
 
-/* FILM BORDER/FRAME */
+/* Film frame */
 .film-frame{
-  width: 100%;
-  height: var(--frameH);
+  width:100%;
+  height:var(--frameH);
   border:1px solid rgba(47,42,38,.16);
   border-radius:18px;
   background:rgba(255,255,255,.18);
   box-shadow:0 10px 30px rgba(0,0,0,.08);
-  overflow:hidden;              /* never spill */
-  padding: var(--framePad);
+  overflow:hidden;                 /* group never spills out */
+  padding:var(--framePad);
+  position:relative;
+
+  /* Leporelo depth lives here */
+  perspective:var(--persp);
 }
 
-/* film viewport lives inside frame */
-.film-viewport{
+/* Group that centers the three slides */
+.film-group{
   width:100%;
   height:100%;
-  overflow:hidden;
   display:grid;
   place-items:center;
-  position:relative;
-  touch-action:manipulation;
-  perspective:1200px;           /* KEEP: perspective works */
+  overflow:hidden;
 }
 
-/* track */
+/* Track */
 .film-track{
   display:flex;
   align-items:center;
   justify-content:center;
-  width:100%;
   gap:var(--gap);
-  transform:translateX(0);
-  will-change:transform;
   transform-style:preserve-3d;
 }
 
-/* slide (KEEP: perspective transforms) */
+/* Slide */
 .slide{
-  width: var(--slideW);
-  aspect-ratio: var(--a3);
-  position:relative;
+  width:var(--slideW);
+  aspect-ratio: var(--a3ratio);
   display:grid;
   place-items:center;
   transform-style:preserve-3d;
+  will-change: transform, opacity, filter;
   transition:
-    transform .55s cubic-bezier(.2,.9,.2,1),
-    opacity   .55s cubic-bezier(.2,.9,.2,1),
-    filter    .55s cubic-bezier(.2,.9,.2,1);
-  perspective:1200px;
-  cursor:pointer; /* all clickable */
+    transform 650ms cubic-bezier(.18,.9,.2,1),
+    opacity   650ms cubic-bezier(.18,.9,.2,1),
+    filter    650ms cubic-bezier(.18,.9,.2,1);
+  cursor:pointer;
 }
 
-.slide.is-current{
-  transform:translateZ(130px) scale(1.02);
+/* ===== LEPORELO / ACCORDION BEHAVIOR (only change you asked for) =====
+   We keep your existing class names, but interpret them like this:
+   - .is-prev   = LEFT page (flat, fully visible, A3, “front”)
+   - .is-current= MIDDLE page (folds away to the right, hinged on its left edge)
+   - .is-next   = RIGHT page (folds further away, hinged on its left edge)
+*/
+
+/* Hinge rules */
+.slide.is-prev{  transform-origin: 50% 50%; }  /* flat page */
+.slide.is-current{ transform-origin: 0% 50%; } /* hinge on LEFT edge */
+.slide.is-next{    transform-origin: 0% 50%; } /* hinge on LEFT edge */
+
+/* Stacking order */
+.slide.is-prev{ z-index:3; }
+.slide.is-current{ z-index:2; }
+.slide.is-next{ z-index:1; }
+
+/* Leporelo poses */
+.slide.is-prev{
+  /* LEFT page: flat, fully visible */
+  transform: translateZ(var(--centerZ)) rotateY(0deg) scale(1.00);
   opacity:1;
   filter:none;
 }
-.slide.is-prev{
-  transform: translateX(-3%) translateZ(-40px) rotateY(60deg) scale(.92);
-  opacity: 1;
-  filter:none;
+.slide.is-current{
+  /* MIDDLE page: bends away, but “connected” by a slight overlap */
+  transform:
+    translateX(calc(-1 * var(--hinge)))
+    translateZ(var(--sideZ))
+    rotateY(calc(-1 * var(--rot)))
+    scale(.98);
+  opacity:.92;
+  filter:saturate(.97) contrast(.99);
 }
 .slide.is-next{
-  transform: translateX(3%) translateZ(-40px) rotateY(-60deg) scale(.92);
-  opacity:.62;
-  filter:saturate(.9) contrast(.96);
+  /* RIGHT page: bends even more away (second fold) */
+  transform:
+    translateX(calc(-2 * var(--hinge)))
+    translateZ(calc(var(--sideZ) - 80px))
+    rotateY(calc(-1.25 * var(--rot)))
+    scale(.96);
+  opacity:.72;
+  filter:saturate(.92) contrast(.98);
 }
 
-/* print */
+/* Print area keeps A3 & never crops */
 .print{
   width:100%;
   height:100%;
   background:var(--card);
   padding:var(--pad);
-  border-radius:var(--radius);
   box-shadow:var(--inset), var(--shadow);
   overflow:hidden;
   position:relative;
@@ -225,7 +262,7 @@ main{
   decoding:async;
 }
 
-/* title label attached to each image (inside the white margin area) */
+/* Label under each image (attached to that panel) */
 .label{
   position:absolute;
   left:12px;
@@ -241,27 +278,31 @@ main{
   pointer-events:none;
 }
 
-/* noise inside print */
+/* Noise */
 .noise{
   position:absolute;
   inset:0;
   background-image:url("images/noise.png");
   background-repeat:repeat;
   background-size:520px 520px;
-  opacity:.16;
+  opacity:.13;
   mix-blend-mode:overlay;
   pointer-events:none;
-  animation:noiseMove .18s steps(2) infinite;
+  animation:noiseMove .22s steps(2) infinite;
 }
 @keyframes noiseMove{
   0%{ transform:translate(0,0); }
-  25%{ transform:translate(-40px,25px); }
-  50%{ transform:translate(-10px,-30px); }
-  75%{ transform:translate(30px,10px); }
+  25%{ transform:translate(-30px,18px); }
+  50%{ transform:translate(-8px,-22px); }
+  75%{ transform:translate(18px,8px); }
   100%{ transform:translate(0,0); }
 }
 
-/* arrow between left + middle (same as your good code) */
+/* Arrow: under frame, left */
+.arrow-under{
+  display:flex;
+  justify-content:flex-start;
+}
 .film-arrow{
   width:52px;
   height:52px;
@@ -275,66 +316,20 @@ main{
   box-shadow:0 10px 24px rgba(0,0,0,.14);
   transition:transform .2s ease, background .2s ease;
   opacity:.96;
-  position:absolute;
-  left: calc(50% - (var(--slideW) / 2) - (var(--gap) / 2));
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index:50;
 }
-.film-arrow:hover{ background:rgba(239,231,220,.92); transform:translate(-50%,-50%) scale(1.03); }
-.film-arrow:active{ transform:translate(-50%,-50%) scale(.98); }
+.film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.04); }
+.film-arrow:active{ transform:scale(.98); }
 .film-arrow svg{ width:18px; height:18px; }
 
-/* details under film (center work only, like your good code) */
-.details{
-  width: min(var(--slideW), 92vw);
-  margin: 0 auto;
-  padding-top: 4px;
-  display:flex;
-  justify-content:center;
+/* Footer glued to film block */
+.film-footer{
+  text-align:center;
+  font-size:12.5px;
+  opacity:.5;
+  padding: 6px 0 0; /* tight to frame */
 }
-.details-row{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: 10px;
-  flex-wrap:wrap;
-}
-.meta{
-  display:flex;
-  align-items:baseline;
-  gap:8px;
-  white-space:nowrap;
-}
-.title{
-  font-size:14px;
-  letter-spacing:.2px;
-  opacity:.88;
-  margin:0;
-}
-.status{
-  font-size:13px;
-  opacity:.65;
-  margin:0;
-}
-.actions{
-  display:flex;
-  gap:8px;
-  white-space:nowrap;
-}
-.inquire-btn,.collect-btn{
-  padding:8px 14px;
-  font-size:13px;
-  border:1px solid #000;
-  background:transparent;
-  color:#000;
-  text-decoration:none;
-  border-radius:4px;
-}
-.inquire-btn:hover,.collect-btn:hover{ background:#000; color:#fff; }
 
-/* lightbox: NEVER crop */
+/* Lightbox (simple, never crops) */
 .lightbox{
   position:fixed;
   inset:0;
@@ -342,47 +337,36 @@ main{
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:2147483647;
   padding: clamp(14px, 3vw, 34px);
+  z-index:2147483647;
 }
 .lightbox.open{ display:flex; }
+.lb-card{
+  width:100%;
+  max-width:min(94vw, 1400px);
+  max-height:94vh;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
 .lightbox .print{
-  width: min(94vw, 1400px);
-  height: auto;
-  max-height: 90vh;
-  padding: var(--pad);
+  width:100%;
+  height:auto;
+  max-height:80vh;
 }
 .lightbox .print img{
   width:100%;
   height:auto;
-  max-height: 88vh;
+  max-height:80vh;
   object-fit:contain;
 }
 
-/* footer GLUED under film frame */
-.site-footer{
-  text-align:center;
-  font-size:12.5px;
-  opacity:.5;
-  padding: 4px 0 0;
+/* Mobile landscape tuning */
+@media (orientation: landscape) and (max-height: 520px){
+  :root{ --frameH: clamp(240px, 62vh, 520px); }
 }
 
-/* MOBILE: keep 3 inside frame */
-@media (max-width:520px){
-  :root{
-    --frameW: 94vw;
-    --frameH: 72vh;
-    --gap: 10px;
-    --pad: 12px;
-  }
-}
-
-/* short screens / landscape phones */
-@media (orientation: landscape) and (max-height:520px){
-  :root{ --frameH: 66vh; }
-}
-
-/* reduced motion */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce){
   html.ready body{ animation:none !important; }
   body{ opacity:1 !important; }
@@ -400,7 +384,6 @@ main{
       <span></span><span></span><span></span>
     </button>
   </div>
-
   <div class="subtitle">Selected Works</div>
 
   <nav class="menu" id="menu" aria-label="Site menu">
@@ -413,38 +396,54 @@ main{
 <main>
   <section class="film-block" aria-label="Featured works">
     <div class="film-frame" id="filmFrame">
-      <div class="film-viewport" id="filmViewport">
-        <div class="film-track" id="filmTrack"></div>
+      <div class="film-group">
+        <div class="film-track" id="filmTrack">
+          <div class="slide is-prev" id="slideL" tabindex="0">
+            <div class="print">
+              <img id="imgL" alt="" decoding="async">
+              <div class="noise"></div>
+              <div class="label" id="labL">Untitled</div>
+            </div>
+          </div>
 
-        <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 6l6 6-6 6"/>
-          </svg>
-        </button>
+          <div class="slide is-current" id="slideC" tabindex="0">
+            <div class="print">
+              <img id="imgC" alt="" decoding="async">
+              <div class="noise"></div>
+              <div class="label" id="labC">Untitled</div>
+            </div>
+          </div>
+
+          <div class="slide is-next" id="slideR" tabindex="0">
+            <div class="print">
+              <img id="imgR" alt="" decoding="async">
+              <div class="noise"></div>
+              <div class="label" id="labR">Untitled</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="details">
-      <div class="details-row">
-        <div class="meta">
-          <p class="title" id="workTitle">Untitled 1</p>
-          <p class="status" id="workStatus">Unveiling soon</p>
-        </div>
-        <div class="actions">
-          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
-        </div>
-      </div>
+    <div class="arrow-under">
+      <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 6l6 6-6 6"/>
+        </svg>
+      </button>
     </div>
 
-    <div class="site-footer">© 2026 Nelle Kristoff — All rights reserved</div>
+    <div class="film-footer">© 2026 Nelle Kristoff — All rights reserved</div>
   </section>
 </main>
 
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <div class="print" onclick="event.stopPropagation()">
-    <img id="lightboxImg" alt="" />
-    <div class="noise"></div>
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lb-card" id="lbCard">
+    <div class="print">
+      <img id="lightboxImg" alt="" decoding="async">
+      <div class="noise"></div>
+    </div>
   </div>
 </div>
 
@@ -472,96 +471,49 @@ function contact(e){
 
 /* Works */
 const works = [
-  { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled1.png", title:"Untitled 1" },
+  { src:"images/Untitled2.png", title:"Untitled 2" },
+  { src:"images/Untitled3.png", title:"Untitled 3" },
 ];
-
-let currentIndex = 0;
-const track = document.getElementById('filmTrack');
-const filmFrame = document.getElementById('filmFrame');
 
 function wrap(i){
   const n = works.length;
   return ((i % n) + n) % n;
 }
 
-/* FIT: compute --slideW so 3 slides ALWAYS fit inside the film frame */
-function fitSlides(){
-  const cs = getComputedStyle(filmFrame);
-  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-  const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+/* Slides (persistent) */
+let centerIndex = 0;
+let animating = false;
 
-  const innerW = filmFrame.clientWidth - padX;
-  const innerH = filmFrame.clientHeight - padY;
+let idxL=0, idxC=0, idxR=0;
 
-  // A3 width allowed by height
-  const maxWByH = innerH * (420/297);
+const filmFrame = document.getElementById('filmFrame');
 
-  // width budget: 3 slides + 2 gaps
-  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 0;
-  const maxWByW = (innerW - 2*gap) / 3;
+let slides = [
+  { el: document.getElementById('slideL'), img: document.getElementById('imgL'), lab: document.getElementById('labL') },
+  { el: document.getElementById('slideC'), img: document.getElementById('imgC'), lab: document.getElementById('labC') },
+  { el: document.getElementById('slideR'), img: document.getElementById('imgR'), lab: document.getElementById('labR') },
+];
 
-  const w = Math.max(180, Math.min(maxWByH, maxWByW, 620));
-  document.documentElement.style.setProperty('--slideW', w + 'px');
+function applyClasses(){
+  slides[0].el.className = 'slide is-prev';
+  slides[1].el.className = 'slide is-current';
+  slides[2].el.className = 'slide is-next';
 }
 
-function updateDetails(){
-  const w = works[currentIndex];
-  document.getElementById('workTitle').textContent = w.title;
-  document.getElementById('workStatus').textContent = w.status;
-  document.getElementById('collectBtn').href = w.collect;
+function setImages(){
+  idxL = wrap(centerIndex - 1);
+  idxC = centerIndex;
+  idxR = wrap(centerIndex + 1);
+
+  const L = works[idxL], C = works[idxC], R = works[idxR];
+
+  slides[0].img.src = L.src; slides[0].img.alt = L.title; slides[0].lab.textContent = L.title;
+  slides[1].img.src = C.src; slides[1].img.alt = C.title; slides[1].lab.textContent = C.title;
+  slides[2].img.src = R.src; slides[2].img.alt = R.title; slides[2].lab.textContent = R.title;
 }
 
-function renderSlides(){
-  const prev = wrap(currentIndex - 1);
-  const next = wrap(currentIndex + 1);
-
-  track.innerHTML = `
-    <div class="slide is-prev" id="leftSlide" tabindex="0" aria-label="Open ${works[prev].title}">
-      <div class="print">
-        <img src="${works[prev].src}" alt="${works[prev].title}" decoding="async">
-        <div class="noise"></div>
-        <div class="label">${works[prev].title}</div>
-      </div>
-    </div>
-
-    <div class="slide is-current" id="centerSlide" tabindex="0" aria-label="Open ${works[currentIndex].title}">
-      <div class="print">
-        <img src="${works[currentIndex].src}" alt="${works[currentIndex].title}" decoding="async">
-        <div class="noise"></div>
-        <div class="label">${works[currentIndex].title}</div>
-      </div>
-    </div>
-
-    <div class="slide is-next" id="rightSlide" tabindex="0" aria-label="Open ${works[next].title}">
-      <div class="print">
-        <img src="${works[next].src}" alt="${works[next].title}" decoding="async">
-        <div class="noise"></div>
-        <div class="label">${works[next].title}</div>
-      </div>
-    </div>
-  `;
-
-  // All three clickable
-  const left = document.getElementById('leftSlide');
-  const center = document.getElementById('centerSlide');
-  const right = document.getElementById('rightSlide');
-
-  left.addEventListener('click', () => openLightbox(works[prev].src));
-  center.addEventListener('click', () => openLightbox(works[currentIndex].src));
-  right.addEventListener('click', () => openLightbox(works[next].src));
-
-  [left, center, right].forEach((el) => {
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') el.click();
-    });
-  });
-
-  updateDetails();
-}
-
-/* Lightbox (no crop) */
+/* Lightbox */
 function openLightbox(src){
   document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('open');
@@ -571,47 +523,66 @@ function closeLightbox(){
   document.getElementById('lightbox').classList.remove('open');
   document.body.classList.remove('noscroll');
 }
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeLightbox();
-});
+document.getElementById('lightbox').addEventListener('click', closeLightbox);
+document.getElementById('lbCard').addEventListener('click', (e) => e.stopPropagation());
 
-/* Slide movement */
-let animating = false;
-
-function stepPx(){
-  const slide = track.querySelector('.slide');
-  if(!slide) return 0;
-  const gap = parseFloat(getComputedStyle(track).gap || "0");
-  return slide.getBoundingClientRect().width + gap;
+/* All three always clickable */
+function bindSlideClicks(){
+  slides[0].el.onclick = () => openLightbox(slides[0].img.src);
+  slides[1].el.onclick = () => openLightbox(slides[1].img.src);
+  slides[2].el.onclick = () => openLightbox(slides[2].img.src);
 }
 
-function move(dir){
+/* Fit: compute slide width so 3 always fit inside the frame (no cropping) */
+function fitSlides(){
+  const cs = getComputedStyle(filmFrame);
+  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  const innerW = filmFrame.clientWidth - padX;
+  const innerH = filmFrame.clientHeight - padY;
+
+  // A3 width allowed by height:
+  const maxWByH = innerH * (420/297);
+
+  // Width budget: 3 slides + 2 gaps (no “third slide drifting away”)
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 0;
+  const maxWByW = (innerW - 2*gap) / 3;
+
+  // Choose the smaller, clamp for sanity
+  const w = Math.max(180, Math.min(maxWByH, maxWByW, 620));
+
+  document.documentElement.style.setProperty('--slideW', w + 'px');
+}
+
+/* Leporelo advance: left->center, center->right, right->left */
+function advance(){
   if (animating) return;
   animating = true;
 
-  const step = stepPx();
-  if (!step){ animating = false; return; }
+  slides[0].el.className = 'slide is-current';
+  slides[1].el.className = 'slide is-next';
+  slides[2].el.className = 'slide is-prev';
 
-  track.style.transition = 'transform 420ms cubic-bezier(.2,.9,.2,1)';
-  track.style.transform = `translateX(${-dir * step}px)`;
+  const done = (e) => {
+    if (e.propertyName !== 'transform') return;
+    slides[0].el.removeEventListener('transitionend', done);
 
-  const onEnd = () => {
-    track.removeEventListener('transitionend', onEnd);
-    currentIndex = wrap(currentIndex + dir);
+    slides = [ slides[2], slides[0], slides[1] ];
+    centerIndex = wrap(centerIndex + 1);
 
-    track.style.transition = 'none';
-    track.style.transform = 'translateX(0)';
-    renderSlides();
+    setImages();
+    applyClasses();
+    bindSlideClicks();
 
-    requestAnimationFrame(() => { animating = false; });
+    animating = false;
   };
-  track.addEventListener('transitionend', onEnd);
+
+  slides[0].el.addEventListener('transitionend', done);
 }
 
-/* Right arrow */
 document.getElementById('arrowRight').addEventListener('click', (e) => {
   e.preventDefault();
-  move(+1);
+  advance();
 });
 
 /* Hold to glide */
@@ -620,43 +591,26 @@ let holdTimer = null;
   const btn = document.getElementById('arrowRight');
   const start = (e) => {
     e.preventDefault();
-    move(+1);
-    holdTimer = setInterval(() => move(+1), 520);
+    advance();
+    holdTimer = setInterval(advance, 820);
   };
-  const end = () => {
-    clearInterval(holdTimer);
-    holdTimer = null;
-  };
+  const end = () => { clearInterval(holdTimer); holdTimer = null; };
   btn.addEventListener('pointerdown', start);
   btn.addEventListener('pointerup', end);
   btn.addEventListener('pointercancel', end);
   btn.addEventListener('pointerleave', end);
 })();
 
-/* Keyboard */
-window.addEventListener('keydown', (e) => {
-  const lbOpen = document.getElementById('lightbox').classList.contains('open');
-  if (lbOpen) return;
-  if (e.key === 'ArrowRight') move(+1);
-});
-
-/* Resize/orientation stability */
-const ro = new ResizeObserver(() => {
-  fitSlides();
-  renderSlides();
-});
+/* Resize / rotate */
+const ro = new ResizeObserver(() => fitSlides());
 ro.observe(filmFrame);
-
-window.addEventListener('orientationchange', () => {
-  setTimeout(() => { fitSlides(); renderSlides(); }, 80);
-});
+window.addEventListener('orientationchange', () => setTimeout(fitSlides, 60));
 
 /* Init */
-window.addEventListener('load', () => {
-  fitSlides();
-  renderSlides();
-});
+fitSlides();
+applyClasses();
+setImages();
+bindSlideClicks();
 </script>
-
 </body>
 </html>
