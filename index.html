@@ -600,25 +600,27 @@ function renderSlides(){
 
   // Step 2: next frame → apply classes so CSS transitions animate
   requestAnimationFrame(() => {
-    const left = document.getElementById('leftSlide');
-    const center = document.getElementById('centerSlide');
-    const right = document.getElementById('rightSlide');
+  const left = document.getElementById('leftSlide');
+  const center = document.getElementById('centerSlide');
+  const right = document.getElementById('rightSlide');
 
-    left.classList.add('is-prev');
-    center.classList.add('is-current');
-    right.classList.add('is-next');
+  left.classList.add('is-prev');
+  center.classList.add('is-current');
+  right.classList.add('is-next');
 
-    // click opens correct images
-    center.addEventListener('click', () => openLightbox(works[currentIndex].src));
-    center.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') openLightbox(works[currentIndex].src);
-    });
+  const centerIndex = currentIndex;
+  const leftIndex = prev;
 
-    left.addEventListener('click', () => openLightbox(works[prev].src));
-    left.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') openLightbox(works[prev].src);
-    });
+  center.addEventListener('click', () => openLightbox(works[centerIndex].src));
+  center.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[centerIndex].src);
   });
+
+  left.addEventListener('click', () => openLightbox(works[leftIndex].src));
+  left.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[leftIndex].src);
+  });
+});
 
   updateDetails();
 }
