@@ -30,16 +30,18 @@ html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
 
 /* header (same feel as index) */
 header{
-  text-align:center;
-  padding:18px 16px 8px;
+  position:fixed;
+  top:18px;
+  left:18px;
+  padding:0;
+  text-align:left;
+  z-index:9999;
 }
 .title-row{
   display:flex;
   align-items:center;
-  justify-content:center;
-  gap:14px;
-  position:relative;
-  z-index:9999;
+  justify-content:flex-start;
+  gap:12px;
 }
 h1{
   font-weight:500;
@@ -49,12 +51,8 @@ h1{
   text-transform:uppercase;
 }
 .subtitle{
-  margin:6px 0 0;
-  opacity:.55;
-  font-size:14px;
-  letter-spacing:.3px;
+  display:none;
 }
-
 /* burger */
 .menu-btn{
   width:44px;
@@ -104,7 +102,7 @@ h1{
 /* page */
 main{
   width:min(860px, 92vw);
-  margin: 18px auto 34px;
+  margin: 110px auto 34px;
 }
 .card{
   background:rgba(255,255,255,.70);
@@ -248,7 +246,7 @@ footer{
 
       <a class="link" href="#" target="_blank" rel="noopener">
         <span class="left">
-          <span class="name">Adobe (Portfolio)</span>
+          <span class="name">Adobe</span>
           <span class="note">Selected projects</span>
         </span>
         <span class="arrow">↗</span>
@@ -266,6 +264,22 @@ footer{
         <span class="left">
           <span class="name">Gumroad / Collect</span>
           <span class="note">Buy downloadable works</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
+
+      <a class="link" href="#" target="_blank" rel="noopener">
+        <span class="left">
+          <span class="name">Fiverr</span>
+          <span class="note">Design</span>
+        </span>
+        <span class="arrow">↗</span>
+      </a>
+      
+      <a class="link" href="#" target="_blank" rel="noopener">
+        <span class="left">
+          <span class="name">Upwork</span>
+          <span class="note">Projects</span>
         </span>
         <span class="arrow">↗</span>
       </a>
