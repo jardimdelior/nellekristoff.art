@@ -13,18 +13,17 @@
   --shadow:0 14px 50px rgba(0,0,0,.32);
   --inset:inset 0 0 28px rgba(0,0,0,.14);
   --radius:2px;
-  --centerW: var(--slideW);
-  --sideW:   var(--slideW);
 
   /* A3 landscape ratio */
   --a3: 420 / 297;
 
-  /* fit 3 slides inside view */
+  /* slide sizing */
   --slideW: clamp(210px, 78vw, 620px);
   --gap: 14px;
   --pad: 14px;
 
-  --maxFilmH: 99vh;
+  /* film area */
+  --maxFilmH: 78vh;
 }
 
 /* base */
@@ -39,16 +38,13 @@ body{
 }
 html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
 body.noscroll{ overflow:hidden; }
-
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
-/* header - centered */
+/* header */
 header{
   text-align:center;
   padding: 18px 16px 8px;
 }
-
-/* Center title+burger as one unit */
 .title-row{
   display:flex;
   align-items:center;
@@ -57,8 +53,6 @@ header{
   position:relative;
   z-index:9999;
 }
-
-/* Title */
 h1{
   font-weight:500;
   letter-spacing:3px;
@@ -73,7 +67,7 @@ h1{
   letter-spacing:.3px;
 }
 
-/* Burger - always visible */
+/* burger */
 .menu-btn{
   width:44px;
   height:44px;
@@ -84,20 +78,19 @@ h1{
   display:inline-flex;
   flex-direction:column;
   justify-content:center;
-  gap:6px;                 /* consistent spacing */
+  gap:6px;
   z-index:9999;
 }
-
 .menu-btn span{
   display:block;
-  width:100%;              /* IMPORTANT */
+  width:100%;
   height:2px;
-  background:#2F2A26;      /* hard-coded so it can’t become transparent */
+  background:#2F2A26;
   border-radius:2px;
-  opacity:1;               /* IMPORTANT */
+  opacity:1;
 }
 
-/* Menu bar under title */
+/* menu bar */
 .menu{
   width:min(740px, 92vw);
   margin:14px auto 0;
@@ -141,14 +134,14 @@ main{
 
 .film-viewport{
   width:100%;
-  height: var(--maxFilmH);     /* IMPORTANT: fixed film area height */
-  overflow:hidden;            /* clips anything outside */
+  height: var(--maxFilmH);
+  overflow:hidden;
   display:grid;
   place-items:center;
   position:relative;
   touch-action:manipulation;
   perspective:1200px;
-  padding: 10px 0;            /* breathing room inside */
+  padding: 10px 0;
 }
 
 .film-track{
@@ -157,44 +150,43 @@ main{
   justify-content:center;
   width:100%;
   gap:var(--gap);
-  transform:translateX(0);
-  will-change:transform;
   transform-style:preserve-3d;
 }
 
-.slide{ 
-  transform: translateZ(0); 
-  opacity:1;
+/* slide + transitions */
+.slide{
   width: var(--slideW);
   aspect-ratio: var(--a3);
   max-height: calc(var(--maxFilmH) - 20px);
-  position:relative;
   display:grid;
   place-items:center;
   transform-style:preserve-3d;
-  transition:transform .55s cubic-bezier(.2,.9,.2,1), opacity .55s cubic-bezier(.2,.9,.2,1), filter .55s cubic-bezier(.2,.9,.2,1);
-  perspective:1200px;
+  will-change: transform, opacity, filter;
+  transition:
+    transform 650ms cubic-bezier(.18,.9,.2,1),
+    opacity   650ms cubic-bezier(.18,.9,.2,1),
+    filter    650ms cubic-bezier(.18,.9,.2,1);
 }
 
+/* CENTER (flat/front) */
 .slide.is-current{
-  transform:translateZ(120px) scale(1.02);
+  transform: translateZ(140px) scale(1.03);
   opacity:1;
   filter:none;
   cursor:pointer;
-  width: var(--centerW);              /* IMPORTANT */
 }
 
-/* LEFT: clear + clickable */
+/* LEFT (clear, clickable) */
 .slide.is-prev{
-  transform: translateX(-3%) translateZ(-40px) rotateY(60deg) scale(.92);
+  transform: translateX(-22%) translateZ(-40px) rotateY(62deg) scale(.92);
   opacity:1;
   filter:none;
   cursor:pointer;
 }
 
-/* RIGHT: softer */
+/* RIGHT (softer) */
 .slide.is-next{
-  transform: translateX(3%) translateZ(-40px) rotateY(-60deg) scale(.92);
+  transform: translateX(22%) translateZ(-60px) rotateY(-62deg) scale(.92);
   opacity:.62;
   filter:saturate(.9) contrast(.96);
 }
@@ -239,19 +231,14 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* ONE arrow: left edge of middle image (vertically centered) */
-/* container that always stays centered vertically */
+/* arrow bottom-left */
 .arrow-slot{
   position:absolute;
-  left: 12px;        /* left corner */
-  bottom: 12px;      /* under film area content */
-  top: auto;
-  transform: none;
+  left: 12px;
+  bottom: 12px;
   z-index:50;
-  pointer-events:none;  /* so only button is clickable */
+  pointer-events:none;
 }
-
-/* the button itself */
 .film-arrow{
   pointer-events:auto;
   width:52px;
@@ -267,7 +254,6 @@ main{
   transition:transform .2s ease, background .2s ease;
   opacity:.96;
 }
-
 .film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.04); }
 .film-arrow:active{ transform:scale(.98); }
 .film-arrow svg{ width:18px; height:18px; }
@@ -276,85 +262,27 @@ main{
 .info-row{
   width:100%;
   display:grid;
-  grid-template-columns: var(--sideW, var(--slideW)) var(--centerW, var(--slideW));
+  grid-template-columns: var(--slideW) var(--slideW);
   gap: var(--gap);
   justify-content:center;
   align-items:start;
   margin: 14px auto 0;
   padding-bottom: 10px;
 }
-
-.info{
-  width:100%;
-  max-width: 92vw;
-}
-
+.info{ width:100%; max-width: 92vw; }
 .info-top{
   display:flex;
   align-items:baseline;
   gap:10px;
-  justify-content:flex-start;
   white-space:nowrap;
 }
-
-.info-left{ opacity:.85; }      /* slightly quieter than center */
+.info-left{ opacity:.85; }
 .info-center{ opacity:1; }
-
 .info .actions{
   margin-top:8px;
   display:flex;
   gap:8px;
-  justify-content:flex-start;
   flex-wrap:wrap;
-}
-
-/* Mobile: stack (center info first) */
-@media (max-width:520px){
-  .info-row{
-    grid-template-columns: 1fr;
-    gap: 12px;
-    width: min(92vw, 520px);
-  }
-  .info-left{ order:2; }
-  .info-center{ order:1; }
-}
-
-/* details under middle */
-.details{
-  width: var(--slideW);
-  max-width: 92vw;
-  margin: 10px auto 0;
-  padding: 6px 0 0;
-}
-.details-row{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;   /* LEFT text vs RIGHT buttons */
-  gap: 14px;
-}
-.meta{
-  display:flex;
-  flex-direction:column;           /* allows extra line under left */
-  align-items:flex-start;
-  min-width: 0;
-}
-.meta-top{
-  display:flex;
-  align-items:baseline;
-  gap:10px;
-  white-space:nowrap;
-}
-.meta-sub{
-  margin-top:6px;
-  font-size:12.5px;
-  opacity:.6;
-  letter-spacing:.2px;
-}
-.actions{
-  display:flex;
-  gap:10px;
-  white-space:nowrap;
-  justify-content:flex-end;
 }
 .title{
   font-size:14px;
@@ -412,23 +340,23 @@ footer{
   opacity:.5;
 }
 
-/* mobile tuning */
+/* mobile */
 @media (max-width: 520px){
   :root{
-    /* Center must always fit on screen */
-    --centerW: 88vw;
-   /* Side slides become smaller so center stays fully visible */
-    --sideW: 46vw;
+    --slideW: 88vw;     /* center stays fully visible */
     --gap: 10px;
     --pad: 10px;
     --maxFilmH: 72vh;
   }
-
-  .details{ width: var(--centerW); }  /* details match center width */
-  .details-row{ flex-wrap:wrap; }
+  .info-row{
+    grid-template-columns: 1fr;
+    width: min(92vw, 520px);
+  }
+  .info-left{ order:2; }
+  .info-center{ order:1; }
 }
 
-/* short screens / landscape phones */
+/* short screens */
 @media (max-height: 650px){
   :root{ --maxFilmH: 68vh; }
 }
@@ -464,43 +392,64 @@ footer{
 <main>
   <section class="film-main" aria-label="Featured works">
     <div class="film-viewport" id="filmViewport">
-      <div class="film-track" id="filmTrack"></div>
+
+      <!-- 3 persistent slides (no innerHTML rebuild per click) -->
+      <div class="film-track" id="filmTrack">
+        <div class="slide is-prev" id="slideL" tabindex="0" aria-label="Open left work">
+          <div class="print">
+            <img id="imgL" alt="">
+            <div class="noise"></div>
+          </div>
+        </div>
+
+        <div class="slide is-current" id="slideC" tabindex="0" aria-label="Open center work">
+          <div class="print">
+            <img id="imgC" alt="">
+            <div class="noise"></div>
+          </div>
+        </div>
+
+        <div class="slide is-next" id="slideR" aria-hidden="true">
+          <div class="print">
+            <img id="imgR" alt="">
+            <div class="noise"></div>
+          </div>
+        </div>
+      </div>
 
       <div class="arrow-slot">
-  <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M9 6l6 6-6 6"/>
-    </svg>
-  </button>
-</div>
-
-<div class="info-row">
-
-  <!-- LEFT image info -->
-  <div class="info info-left">
-    <div class="info-top">
-      <p class="title" id="leftTitle">Untitled 3</p>
-      <p class="status" id="leftStatus">Unveiling soon</p>
+        <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </div>
     </div>
-    <div class="actions">
-      <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-      <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="leftCollectBtn">Collect</a>
-    </div>
-  </div>
 
-  <!-- CENTER image info -->
-  <div class="info info-center">
-    <div class="info-top">
-      <p class="title" id="workTitle">Untitled 1</p>
-      <p class="status" id="workStatus">Unveiling soon</p>
-    </div>
-    <div class="actions">
-      <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-      <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
-    </div>
-  </div>
+    <!-- IMPORTANT: info-row is UNDER the film-viewport (not inside it) -->
+    <div class="info-row">
+      <div class="info info-left">
+        <div class="info-top">
+          <p class="title" id="leftTitle">Untitled</p>
+          <p class="status" id="leftStatus">Unveiling soon</p>
+        </div>
+        <div class="actions">
+          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
+          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="leftCollectBtn">Collect</a>
+        </div>
+      </div>
 
-</div>
+      <div class="info info-center">
+        <div class="info-top">
+          <p class="title" id="workTitle">Untitled</p>
+          <p class="status" id="workStatus">Unveiling soon</p>
+        </div>
+        <div class="actions">
+          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
+          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
+        </div>
+      </div>
+    </div>
 
   </section>
 </main>
@@ -520,7 +469,6 @@ window.addEventListener("load", () => document.documentElement.classList.add("re
 /* Menu */
 const menuBtn = document.getElementById('menuBtn');
 const menu = document.getElementById('menu');
-
 menuBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   const open = menu.classList.toggle('open');
@@ -543,86 +491,54 @@ const works = [
   { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
-let currentIndex = 0;
 
+// preload (optional)
 works.forEach(w => { const i = new Image(); i.src = w.src; });
-
-const track = document.getElementById('filmTrack');
 
 function wrap(i){
   const n = works.length;
   return ((i % n) + n) % n;
 }
 
-function updateDetails(){
-  const prev = wrap(currentIndex - 1);
+/* persistent slides */
+let centerIndex = 0;
+let animating = false;
 
-  // CENTER
-  const c = works[currentIndex];
+let slides = [
+  { el: document.getElementById('slideL'), img: document.getElementById('imgL') }, // LEFT
+  { el: document.getElementById('slideC'), img: document.getElementById('imgC') }, // CENTER
+  { el: document.getElementById('slideR'), img: document.getElementById('imgR') }, // RIGHT
+];
+
+function applyClasses(){
+  slides[0].el.className = 'slide is-prev';
+  slides[1].el.className = 'slide is-current';
+  slides[2].el.className = 'slide is-next';
+}
+
+function setImages(){
+  const leftIndex  = wrap(centerIndex - 1);
+  const rightIndex = wrap(centerIndex + 1);
+
+  slides[0].img.src = works[leftIndex].src;
+  slides[0].img.alt = works[leftIndex].title;
+
+  slides[1].img.src = works[centerIndex].src;
+  slides[1].img.alt = works[centerIndex].title;
+
+  slides[2].img.src = works[rightIndex].src;
+  slides[2].img.alt = works[rightIndex].title;
+
+  // update info blocks
+  const c = works[centerIndex];
   document.getElementById('workTitle').textContent = c.title;
   document.getElementById('workStatus').textContent = c.status;
   document.getElementById('collectBtn').href = c.collect;
 
-  // LEFT (prev)
-  const l = works[prev];
+  const l = works[leftIndex];
   document.getElementById('leftTitle').textContent = l.title;
   document.getElementById('leftStatus').textContent = l.status;
   document.getElementById('leftCollectBtn').href = l.collect;
-}
-
-function renderSlides(){
-  const prev = wrap(currentIndex - 1);
-  const next = wrap(currentIndex + 1);
-
-  // Step 1: inject slides with NO is-prev/is-current/is-next classes yet
-  track.innerHTML = `
-    <div class="slide" id="leftSlide" tabindex="0">
-      <div class="print">
-        <img src="${works[prev].src}" alt="${works[prev].title}">
-        <div class="noise"></div>
-      </div>
-    </div>
-
-    <div class="slide" id="centerSlide" tabindex="0">
-      <div class="print">
-        <img src="${works[currentIndex].src}" alt="${works[currentIndex].title}">
-        <div class="noise"></div>
-      </div>
-    </div>
-
-    <div class="slide" id="rightSlide" aria-hidden="true">
-      <div class="print">
-        <img src="${works[next].src}" alt="${works[next].title}">
-        <div class="noise"></div>
-      </div>
-    </div>
-  `;
-
-  // Step 2: next frame → apply classes so CSS transitions animate
-  requestAnimationFrame(() => {
-  const left = document.getElementById('leftSlide');
-  const center = document.getElementById('centerSlide');
-  const right = document.getElementById('rightSlide');
-
-  left.classList.add('is-prev');
-  center.classList.add('is-current');
-  right.classList.add('is-next');
-
-  const centerIndex = currentIndex;
-  const leftIndex = prev;
-
-  center.addEventListener('click', () => openLightbox(works[centerIndex].src));
-  center.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[centerIndex].src);
-  });
-
-  left.addEventListener('click', () => openLightbox(works[leftIndex].src));
-  left.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[leftIndex].src);
-  });
-});
-
-  updateDetails();
 }
 
 /* Lightbox */
@@ -639,56 +555,90 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeLightbox();
 });
 
-/* movement */
-function move(){
-  currentIndex = wrap(currentIndex + 1);
-  renderSlides();
+/* Click-to-open for LEFT and CENTER (always current visuals) */
+function bindSlideClicks(){
+  // remove then re-add is not needed because nodes persist; use current slides array
+  slides[1].el.onclick = () => openLightbox(slides[1].img.src);
+  slides[0].el.onclick = () => openLightbox(slides[0].img.src);
+
+  slides[1].el.onkeydown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') openLightbox(slides[1].img.src);
+  };
+  slides[0].el.onkeydown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') openLightbox(slides[0].img.src);
+  };
 }
 
-/* right arrow = next */
+/* FEATHER carousel advance (right arrow) */
+function advance(){
+  if (animating) return;
+  animating = true;
+
+  // Start the motion: LEFT->CENTER, CENTER->RIGHT, RIGHT->LEFT
+  slides[0].el.className = 'slide is-current';
+  slides[1].el.className = 'slide is-next';
+  slides[2].el.className = 'slide is-prev';
+
+  // Wait for the transform transition on the incoming center (slides[0])
+  const done = (e) => {
+    if (e.propertyName !== 'transform') return;
+    slides[0].el.removeEventListener('transitionend', done);
+
+    // Rotate slides array to match new visual roles:
+    // new LEFT = old RIGHT, new CENTER = old LEFT, new RIGHT = old CENTER
+    slides = [ slides[2], slides[0], slides[1] ];
+
+    // Advance the logical center work
+    centerIndex = wrap(centerIndex + 1);
+
+    // Update images for the new set (no DOM rebuild)
+    setImages();
+    applyClasses();
+    bindSlideClicks();
+
+    animating = false;
+  };
+
+  slides[0].el.addEventListener('transitionend', done);
+}
+
+/* arrow click */
 document.getElementById('arrowRight').addEventListener('click', (e) => {
   e.preventDefault();
-  move();
+  advance();
 });
 
 /* hold to glide */
 let holdTimer = null;
-
 function bindHold(id){
   const btn = document.getElementById(id);
-
   const start = (e) => {
     e.preventDefault();
-    move(); // one step immediately
-    holdTimer = setInterval(() => move(), 520);
+    advance();
+    holdTimer = setInterval(advance, 750); // slower feels more “feather”
   };
-
-  const end = (e) => {
-    e.preventDefault();
+  const end = () => {
     clearInterval(holdTimer);
     holdTimer = null;
   };
-
   btn.addEventListener('pointerdown', start);
   btn.addEventListener('pointerup', end);
   btn.addEventListener('pointercancel', end);
   btn.addEventListener('pointerleave', end);
 }
-
 bindHold('arrowRight');
 
 /* keyboard */
 window.addEventListener('keydown', (e) => {
   const lbOpen = document.getElementById('lightbox').classList.contains('open');
   if (lbOpen) return;
-  if (e.key === 'ArrowRight') move();
+  if (e.key === 'ArrowRight') advance();
 });
 
-/* resize stability */
-window.addEventListener('resize', () => renderSlides());
-
 /* init */
-window.addEventListener('load', () => renderSlides());
+applyClasses();
+setImages();
+bindSlideClicks();
 </script>
 </body>
 </html>
