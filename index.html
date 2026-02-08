@@ -542,6 +542,8 @@ const works = [
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 let currentIndex = 0;
+let settledLeft = false; // false = center in middle, true = center parked left
+let animating = false;
 
 const track = document.getElementById('filmTrack');
 
@@ -569,42 +571,61 @@ function updateDetails(){
 function renderSlides(){
   const prev = wrap(currentIndex - 1);
   const next = wrap(currentIndex + 1);
+  const next2 = wrap(currentIndex + 2);
+
+  // When settledLeft=false:
+  //   left = prev, center = current, right = next
+  //
+  // When settledLeft=true (after one click):
+  //   left = current, center = next, right = next2
+  //
+  // That makes the “center image” appear to move left and STAY there.
+
+  const leftIndex   = settledLeft ? currentIndex : prev;
+  const centerIndex = settledLeft ? next : currentIndex;
+  const rightIndex  = settledLeft ? next2 : next;
 
   track.innerHTML = `
-    <div class="slide is-prev" id="leftSlide" tabindex="0" aria-label="Open ${works[prev].title}">
+    <div class="slide is-prev" id="leftSlide" tabindex="0" aria-label="Open ${works[leftIndex].title}">
       <div class="print">
-        <img src="${works[prev].src}" alt="${works[prev].title}">
+        <img src="${works[leftIndex].src}" alt="${works[leftIndex].title}">
         <div class="noise"></div>
       </div>
     </div>
 
-    <div class="slide is-current" id="centerSlide" tabindex="0" aria-label="Open ${works[currentIndex].title}">
+    <div class="slide is-current" id="centerSlide" tabindex="0" aria-label="Open ${works[centerIndex].title}">
       <div class="print">
-        <img src="${works[currentIndex].src}" alt="${works[currentIndex].title}">
+        <img src="${works[centerIndex].src}" alt="${works[centerIndex].title}">
         <div class="noise"></div>
       </div>
     </div>
 
     <div class="slide is-next" aria-hidden="true">
       <div class="print">
-        <img src="${works[next].src}" alt="${works[next].title}">
+        <img src="${works[rightIndex].src}" alt="${works[rightIndex].title}">
         <div class="noise"></div>
       </div>
     </div>
   `;
 
-  // open center
-  document.getElementById('centerSlide').addEventListener('click', () => openLightbox(works[currentIndex].src));
+  // Click opens correct images
+  document.getElementById('centerSlide').addEventListener('click', () => openLightbox(works[centerIndex].src));
   document.getElementById('centerSlide').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[currentIndex].src);
+    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[centerIndex].src);
   });
 
-  // open left (prev)
   const left = document.getElementById('leftSlide');
-  left.addEventListener('click', () => openLightbox(works[prev].src));
+  left.addEventListener('click', () => openLightbox(works[leftIndex].src));
   left.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[prev].src);
+    if (e.key === 'Enter' || e.key === ' ') openLightbox(works[leftIndex].src);
   });
+
+  // The “currentIndex” should only advance when we settle into left (first click)
+  // so that your whole gallery progresses.
+  if (settledLeft){
+    currentIndex = wrap(currentIndex + 1);
+    settledLeft = false; // IMPORTANT: next click returns the new center back to middle
+  }
 
   updateDetails();
 }
@@ -624,71 +645,53 @@ window.addEventListener('keydown', (e) => {
 });
 
 /* movement */
-let animating = false;
-
-function stepPx(){
-  const slide = track.querySelector('.slide');
-  if(!slide) return 0;
-  const gap = parseFloat(getComputedStyle(track).gap || "0");
-  return slide.getBoundingClientRect().width + gap;
-}
-
-function move(dir){
+function move(){
   if (animating) return;
   animating = true;
 
-  const step = stepPx();
-  if (!step){ animating = false; return; }
+  settledLeft = true;
+  renderSlides();
 
-  track.style.transition = 'transform 420ms cubic-bezier(.2,.9,.2,1)';
-  track.style.transform = `translateX(${-dir * step}px)`;
-
-  const onEnd = () => {
-    track.removeEventListener('transitionend', onEnd);
-    currentIndex = wrap(currentIndex + dir);
-
-    track.style.transition = 'none';
-    track.style.transform = 'translateX(0)';
-    renderSlides();
-
-    requestAnimationFrame(() => { animating = false; });
-  };
-
-  track.addEventListener('transitionend', onEnd);
+  setTimeout(() => { animating = false; }, 220);
 }
 
 /* right arrow = next */
 document.getElementById('arrowRight').addEventListener('click', (e) => {
   e.preventDefault();
-  move(+1);
+  move();
 });
 
 /* hold to glide */
 let holdTimer = null;
-function bindHold(id, dir){
+
+function bindHold(id){
   const btn = document.getElementById(id);
+
   const start = (e) => {
     e.preventDefault();
-    move(dir);
-    holdTimer = setInterval(() => move(dir), 520);
+    move(); // one step immediately
+    holdTimer = setInterval(() => move(), 520);
   };
+
   const end = (e) => {
     e.preventDefault();
     clearInterval(holdTimer);
     holdTimer = null;
   };
+
   btn.addEventListener('pointerdown', start);
   btn.addEventListener('pointerup', end);
   btn.addEventListener('pointercancel', end);
   btn.addEventListener('pointerleave', end);
 }
-bindHold('arrowRight', +1);
+
+bindHold('arrowRight');
 
 /* keyboard */
 window.addEventListener('keydown', (e) => {
   const lbOpen = document.getElementById('lightbox').classList.contains('open');
   if (lbOpen) return;
-  if (e.key === 'ArrowRight') move(+1);
+  if (e.key === 'ArrowRight') move();
 });
 
 /* resize stability */
