@@ -16,6 +16,8 @@
 
   /* A3 landscape ratio */
   --a3: 420 / 297;
+  --a3ratio: calc(420 / 297);
+
 
   /* slide sizing */
   --slideW: clamp(210px, 78vw, 620px);
@@ -316,21 +318,31 @@ main{
   justify-content:center;
   cursor:zoom-out;
   z-index:2147483647;
+  padding: clamp(14px, 3vw, 34px); /* widescreen margins */
+  box-sizing: border-box;
 }
+
 .lightbox.open{ display:flex; }
+
+/* A3 landscape frame that scales to viewport */
 .lightbox .print{
-  width:auto;
-  height:auto;
-  max-width:min(92vw, 1400px);
-  max-height:92vh;
-  padding:var(--pad);
   cursor:auto;
+  width: min(96vw, calc(92vh * var(--a3ratio)));
+  aspect-ratio: var(--a3);
+  padding: var(--pad);
+  border-radius: var(--radius);
+  box-shadow: var(--inset), var(--shadow);
+  background: var(--card);
+  overflow:hidden;
+  display:grid;
+  place-items:center;
 }
+
 .lightbox .print img{
-  max-width:min(92vw, 1400px);
-  max-height:92vh;
-  width:auto;
-  height:auto;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
 }
 
 footer{
@@ -347,6 +359,9 @@ footer{
     --gap: 10px;
     --pad: 10px;
     --maxFilmH: 72vh;
+    /* A3 landscape ratio */
+    --a3: 420 / 297;
+    --a3ratio: calc(420 / 297);
   }
   .info-row{
     grid-template-columns: 1fr;
@@ -358,7 +373,12 @@ footer{
 
 /* short screens */
 @media (max-height: 650px){
-  :root{ --maxFilmH: 68vh; }
+  :root{ 
+    --maxFilmH: 68vh;
+    /* A3 landscape ratio */
+    --a3: 420 / 297;
+    --a3ratio: calc(420 / 297);
+  }
 }
 
 /* reduced motion */
