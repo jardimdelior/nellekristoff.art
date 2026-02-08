@@ -345,6 +345,15 @@ main{
   display:block;
 }
 
+/* Optional film-only mode (we'll use later) */
+.film-main{ position:relative; } /* already true in your file, but keep safe */
+
+.lightbox.in-film{
+  position:absolute;
+  inset:0;
+  padding: clamp(10px, 2vw, 18px);
+}
+
 footer{
   text-align:center;
   padding: 18px 20px 22px;
@@ -471,15 +480,16 @@ footer{
       </div>
     </div>
 
+    <!-- LIGHTBOX LAYER (now inside film-main, can later be set to "in-film") -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+      <div class="print" onclick="event.stopPropagation()">
+        <img id="lightboxImg" alt="" />
+        <div class="noise"></div>
+      </div>
+    </div>
+
   </section>
 </main>
-
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <div class="print" onclick="event.stopPropagation()">
-    <img id="lightboxImg" alt="" />
-    <div class="noise"></div>
-  </div>
-</div>
 
 <footer>© 2026 Nelle Kristoff — All rights reserved</footer>
 
@@ -563,12 +573,19 @@ function setImages(){
 
 /* Lightbox */
 function openLightbox(src){
+  const lightbox = document.getElementById('lightbox');
   document.getElementById('lightboxImg').src = src;
-  document.getElementById('lightbox').classList.add('open');
+
+  /* make it film-only (inside film-main) */
+  lightbox.classList.add('in-film');
+
+  lightbox.classList.add('open');
   document.body.classList.add('noscroll');
 }
 function closeLightbox(){
-  document.getElementById('lightbox').classList.remove('open');
+  const lightbox = document.getElementById('lightbox');
+  lightbox.classList.remove('open');
+  lightbox.classList.remove('in-film'); /* reset mode */
   document.body.classList.remove('noscroll');
 }
 window.addEventListener('keydown', (e) => {
