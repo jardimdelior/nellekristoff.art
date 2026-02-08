@@ -10,6 +10,21 @@
   h1{ margin:0 0 10px; letter-spacing:2px; text-transform:uppercase; font-weight:500; }
   .card{ margin-top:18px; padding:18px; background:rgba(255,255,255,.55); border:1px solid rgba(47,42,38,.14); border-radius:14px; }
   a{ color:inherit; opacity:.8; }
+  /* HINGE / SEAM between leporelo pages */
+.slide .print::after{
+  content:"";
+  position:absolute;
+  top:0; bottom:0;
+  right:0;
+  width:2px;                  /* seam thickness */
+  background:rgba(47,42,38,.18);
+  opacity:.65;
+  pointer-events:none;
+}
+
+/* Only show seams where a next page exists */
+.slide.is-next .print::after{ opacity:0; }   /* last page: no seam */
+
 </style>
 </head>
 <body>
