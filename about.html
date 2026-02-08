@@ -2,39 +2,594 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>About — Nelle Kristoff</title>
+<title>Nelle Kristoff — Art Portfolio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-store" />
+
 <style>
-  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif; background:#EFE7DC; color:#2F2A26; line-height:1.7; }
-  .wrap{ max-width:820px; margin:0 auto; padding:44px 20px 70px; }
-  h1{ margin:0 0 10px; letter-spacing:2px; text-transform:uppercase; font-weight:500; }
-  .card{ margin-top:18px; padding:18px; background:rgba(255,255,255,.55); border:1px solid rgba(47,42,38,.14); border-radius:14px; }
-  a{ color:inherit; opacity:.8; }
-  /* HINGE / SEAM between leporelo pages */
-.slide .print::after{
-  content:"";
+:root{
+  --bg:#EFE7DC;
+  --ink:#2F2A26;
+  --card:#FFFFFF;
+  --shadow:0 14px 50px rgba(0,0,0,.32);
+  --inset:inset 0 0 28px rgba(0,0,0,.14);
+
+  /* A3 landscape ratio – never distort */
+  --a3w: 420;
+  --a3h: 297;
+  --a3ratio: calc(var(--a3w) / var(--a3h));
+
+  /* Film area: wide + responsive */
+  --frameW: min(98vw, 1500px);
+  --frameH: clamp(320px, 64vh, 640px);
+  --framePad: clamp(10px, 2vw, 18px);
+
+  /* Slide width is set by JS so 3 always fit (no cropping) */
+  --slideW: 420px;
+
+  /* White margin inside each print */
+  --pad: clamp(10px, 1.6vw, 16px);
+
+  /* Leporelo depth */
+  --persp: 1400px;
+  --centerZ: 190px;
+  --sideZ: -130px;
+  --rot: 68deg;
+
+  /* Distance between slides (small, so edges feel connected) */
+  --gap: clamp(2px, 0.6vw, 10px);
+}
+
+/* Base */
+html, body{ height:100%; }
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  opacity:0;
+}
+html.ready body{ animation:fadein 2.2s ease-in-out forwards; }
+@keyframes fadein{ from{opacity:0;} to{opacity:1;} }
+body.noscroll{ overflow:hidden; }
+
+/* Header */
+header{
+  text-align:center;
+  padding: 18px 16px 8px;
+}
+.title-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  position:relative;
+  z-index:9999;
+}
+h1{
+  font-weight:500;
+  letter-spacing:3px;
+  margin:0;
+  font-size:29px;
+  text-transform:uppercase;
+}
+.subtitle{
+  margin:6px 0 0;
+  opacity:.55;
+  font-size:14px;
+  letter-spacing:.3px;
+}
+
+/* Burger */
+.menu-btn{
+  width:44px;
+  height:44px;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  padding:10px;
+  display:inline-flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:6px;
+}
+.menu-btn span{
+  display:block;
+  width:100%;
+  height:2px;
+  background:#2F2A26;
+  border-radius:2px;
+  opacity:1;
+}
+
+/* Menu bar */
+.menu{
+  width:min(740px, 92vw);
+  margin:14px auto 0;
+  border-radius:14px;
+  border:1px solid rgba(47,42,38,.16);
+  background:rgba(239,231,220,.92);
+  box-shadow:0 14px 40px rgba(0,0,0,.10);
+  backdrop-filter:blur(8px);
+  display:none;
+  padding:8px;
+}
+.menu.open{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+.menu a{
+  display:inline-block;
+  padding:10px 14px;
+  text-decoration:none;
+  color:var(--ink);
+  font-size:13px;
+  letter-spacing:.2px;
+  opacity:.9;
+  border-radius:12px;
+}
+.menu a:hover{ background:rgba(47,42,38,.08); }
+
+/* Main layout */
+main{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* ===== Film block (frame + arrow + footer directly under) ===== */
+.film-block{
+  width:var(--frameW);
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:10px;
+}
+
+/* Film frame */
+.film-frame{
+  width:100%;
+  height:var(--frameH);
+  border:1px solid rgba(47,42,38,.16);
+  border-radius:18px;
+  background:rgba(255,255,255,.18);
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  overflow:hidden;                 /* group never spills out */
+  padding:var(--framePad);
+  position:relative;
+
+  /* Leporelo depth lives here */
+  perspective:var(--persp);
+}
+
+/* Group that centers the three slides */
+.film-group{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+}
+
+/* Track */
+.film-track{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:var(--gap);
+  transform-style:preserve-3d;
+}
+
+/* Slide */
+.slide{
+  width:var(--slideW);
+  aspect-ratio: var(--a3ratio);
+  display:grid;
+  place-items:center;
+  transform-style:preserve-3d;
+  will-change: transform, opacity, filter;
+  transition:
+    transform 650ms cubic-bezier(.18,.9,.2,1),
+    opacity   650ms cubic-bezier(.18,.9,.2,1),
+    filter    650ms cubic-bezier(.18,.9,.2,1);
+  cursor:pointer;
+}
+
+/* IMPORTANT: fold from edge (leporelo) */
+.slide.is-prev{ transform-origin: 100% 50%; }
+.slide.is-next{ transform-origin: 0% 50%; }
+.slide.is-current{ transform-origin: 50% 50%; }
+
+/* Stacking order */
+.slide.is-current{ z-index:3; }
+.slide.is-prev{ z-index:2; }
+.slide.is-next{ z-index:1; }
+
+/* Leporelo poses */
+.slide.is-current{
+  transform: translateZ(var(--centerZ)) rotateY(0deg) scale(1.00);
+  opacity:1;
+  filter:none;
+}
+.slide.is-prev{
+  transform: translateZ(var(--sideZ)) rotateY(var(--rot)) scale(.94);
+  opacity:1;
+  filter:none;
+}
+.slide.is-next{
+  transform: translateZ(var(--sideZ)) rotateY(calc(-1 * var(--rot))) scale(.94);
+  opacity:.72;
+  filter:saturate(.92) contrast(.98);
+}
+
+/* Print area keeps A3 & never crops */
+.print{
+  width:100%;
+  height:100%;
+  background:var(--card);
+  padding:var(--pad);
+  box-shadow:var(--inset), var(--shadow);
+  overflow:hidden;
+  position:relative;
+  display:grid;
+  place-items:center;
+}
+.print img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  decoding:async;
+}
+
+/* Label under each image (attached to that panel) */
+.label{
   position:absolute;
-  top:0; bottom:0;
-  right:0;
-  width:2px;                  /* seam thickness */
-  background:rgba(47,42,38,.18);
+  left:12px;
+  bottom:10px;
+  font-size:13px;
+  letter-spacing:.2px;
   opacity:.65;
+  background:rgba(255,255,255,.65);
+  border:1px solid rgba(47,42,38,.12);
+  padding:6px 10px;
+  border-radius:999px;
+  backdrop-filter:blur(6px);
   pointer-events:none;
 }
 
-/* Only show seams where a next page exists */
-.slide.is-next .print::after{ opacity:0; }   /* last page: no seam */
+/* Noise */
+.noise{
+  position:absolute;
+  inset:0;
+  background-image:url("images/noise.png");
+  background-repeat:repeat;
+  background-size:520px 520px;
+  opacity:.13;
+  mix-blend-mode:overlay;
+  pointer-events:none;
+  animation:noiseMove .22s steps(2) infinite;
+}
+@keyframes noiseMove{
+  0%{ transform:translate(0,0); }
+  25%{ transform:translate(-30px,18px); }
+  50%{ transform:translate(-8px,-22px); }
+  75%{ transform:translate(18px,8px); }
+  100%{ transform:translate(0,0); }
+}
 
+/* Arrow: under frame, left */
+.arrow-under{
+  display:flex;
+  justify-content:flex-start;
+}
+.film-arrow{
+  width:52px;
+  height:52px;
+  border-radius:999px;
+  border:1px solid rgba(47,42,38,.28);
+  background:rgba(239,231,220,.78);
+  backdrop-filter:blur(6px);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.14);
+  transition:transform .2s ease, background .2s ease;
+  opacity:.96;
+}
+.film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.04); }
+.film-arrow:active{ transform:scale(.98); }
+.film-arrow svg{ width:18px; height:18px; }
+
+/* Footer glued to film block */
+.film-footer{
+  text-align:center;
+  font-size:12.5px;
+  opacity:.5;
+  padding: 6px 0 0; /* tight to frame */
+}
+
+/* Lightbox (simple, never crops) */
+.lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.92);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding: clamp(14px, 3vw, 34px);
+  z-index:2147483647;
+}
+.lightbox.open{ display:flex; }
+.lb-card{
+  width:100%;
+  max-width:min(94vw, 1400px);
+  max-height:94vh;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.lightbox .print{
+  width:100%;
+  height:auto;
+  max-height:80vh;
+}
+.lightbox .print img{
+  width:100%;
+  height:auto;
+  max-height:80vh;
+  object-fit:contain;
+}
+
+/* Mobile landscape tuning */
+@media (orientation: landscape) and (max-height: 520px){
+  :root{ --frameH: clamp(240px, 62vh, 520px); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  html.ready body{ animation:none !important; }
+  body{ opacity:1 !important; }
+  .slide{ transition:none !important; }
+  .noise{ animation:none !important; }
+}
 </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <h1>About</h1>
-    <div class="card">
-      <p><strong>Bio</strong></p>
-      <p>(Write your bio here.)</p>
-    </div>
-    <p style="margin-top:18px;"><a href="index.html">← Back to works</a></p>
+<header>
+  <div class="title-row">
+    <h1>Nelle Kristoff</h1>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
+  <div class="subtitle">Selected Works</div>
+
+  <nav class="menu" id="menu" aria-label="Site menu">
+    <a href="about.html">About</a>
+    <a href="#" onclick="contact(event)">Contact</a>
+    <a href="posts.html">Posts</a>
+  </nav>
+</header>
+
+<main>
+  <section class="film-block" aria-label="Featured works">
+    <div class="film-frame" id="filmFrame">
+      <div class="film-group">
+        <div class="film-track" id="filmTrack">
+          <div class="slide is-prev" id="slideL" tabindex="0">
+            <div class="print">
+              <img id="imgL" alt="" decoding="async">
+              <div class="noise"></div>
+              <div class="label" id="labL">Untitled</div>
+            </div>
+          </div>
+
+          <div class="slide is-current" id="slideC" tabindex="0">
+            <div class="print">
+              <img id="imgC" alt="" decoding="async">
+              <div class="noise"></div>
+              <div class="label" id="labC">Untitled</div>
+            </div>
+          </div>
+
+          <div class="slide is-next" id="slideR" tabindex="0">
+            <div class="print">
+              <img id="imgR" alt="" decoding="async">
+              <div class="noise"></div>
+              <div class="label" id="labR">Untitled</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow-under">
+      <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="film-footer">© 2026 Nelle Kristoff — All rights reserved</div>
+  </section>
+</main>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lb-card" id="lbCard">
+    <div class="print">
+      <img id="lightboxImg" alt="" decoding="async">
+      <div class="noise"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener("load", () => document.documentElement.classList.add("ready"));
+
+/* Menu */
+const menuBtn = document.getElementById('menuBtn');
+const menu = document.getElementById('menu');
+menuBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const open = menu.classList.toggle('open');
+  menuBtn.setAttribute('aria-expanded', String(open));
+});
+document.addEventListener('click', () => {
+  menu.classList.remove('open');
+  menuBtn.setAttribute('aria-expanded', 'false');
+});
+
+/* Contact */
+function contact(e){
+  if (e) e.preventDefault();
+  window.location.href = "mailto:nellekristoff@gmail.com";
+}
+
+/* Works */
+const works = [
+  { src:"images/Untitled1.png", title:"Untitled 1" },
+  { src:"images/Untitled2.png", title:"Untitled 2" },
+  { src:"images/Untitled3.png", title:"Untitled 3" },
+];
+
+function wrap(i){
+  const n = works.length;
+  return ((i % n) + n) % n;
+}
+
+/* Slides (persistent) */
+let centerIndex = 0;
+let animating = false;
+
+let idxL=0, idxC=0, idxR=0;
+
+const filmFrame = document.getElementById('filmFrame');
+
+let slides = [
+  { el: document.getElementById('slideL'), img: document.getElementById('imgL'), lab: document.getElementById('labL') },
+  { el: document.getElementById('slideC'), img: document.getElementById('imgC'), lab: document.getElementById('labC') },
+  { el: document.getElementById('slideR'), img: document.getElementById('imgR'), lab: document.getElementById('labR') },
+];
+
+function applyClasses(){
+  slides[0].el.className = 'slide is-prev';
+  slides[1].el.className = 'slide is-current';
+  slides[2].el.className = 'slide is-next';
+}
+
+function setImages(){
+  idxL = wrap(centerIndex - 1);
+  idxC = centerIndex;
+  idxR = wrap(centerIndex + 1);
+
+  const L = works[idxL], C = works[idxC], R = works[idxR];
+
+  slides[0].img.src = L.src; slides[0].img.alt = L.title; slides[0].lab.textContent = L.title;
+  slides[1].img.src = C.src; slides[1].img.alt = C.title; slides[1].lab.textContent = C.title;
+  slides[2].img.src = R.src; slides[2].img.alt = R.title; slides[2].lab.textContent = R.title;
+}
+
+/* Lightbox */
+function openLightbox(src){
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.classList.add('noscroll');
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.classList.remove('noscroll');
+}
+document.getElementById('lightbox').addEventListener('click', closeLightbox);
+document.getElementById('lbCard').addEventListener('click', (e) => e.stopPropagation());
+
+/* All three always clickable */
+function bindSlideClicks(){
+  slides[0].el.onclick = () => openLightbox(slides[0].img.src);
+  slides[1].el.onclick = () => openLightbox(slides[1].img.src);
+  slides[2].el.onclick = () => openLightbox(slides[2].img.src);
+}
+
+/* Fit: compute slide width so 3 always fit inside the frame (no cropping) */
+function fitSlides(){
+  const cs = getComputedStyle(filmFrame);
+  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  const innerW = filmFrame.clientWidth - padX;
+  const innerH = filmFrame.clientHeight - padY;
+
+  // A3 width allowed by height:
+  const maxWByH = innerH * (420/297);
+
+  // Width budget: 3 slides + 2 gaps (no “third slide drifting away”)
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 0;
+  const maxWByW = (innerW - 2*gap) / 3;
+
+  // Choose the smaller, clamp for sanity
+  const w = Math.max(180, Math.min(maxWByH, maxWByW, 620));
+
+  document.documentElement.style.setProperty('--slideW', w + 'px');
+}
+
+/* Leporelo advance: left->center, center->right, right->left */
+function advance(){
+  if (animating) return;
+  animating = true;
+
+  slides[0].el.className = 'slide is-current';
+  slides[1].el.className = 'slide is-next';
+  slides[2].el.className = 'slide is-prev';
+
+  const done = (e) => {
+    if (e.propertyName !== 'transform') return;
+    slides[0].el.removeEventListener('transitionend', done);
+
+    slides = [ slides[2], slides[0], slides[1] ];
+    centerIndex = wrap(centerIndex + 1);
+
+    setImages();
+    applyClasses();
+    bindSlideClicks();
+
+    animating = false;
+  };
+
+  slides[0].el.addEventListener('transitionend', done);
+}
+
+document.getElementById('arrowRight').addEventListener('click', (e) => {
+  e.preventDefault();
+  advance();
+});
+
+/* Hold to glide */
+let holdTimer = null;
+(function bindHold(){
+  const btn = document.getElementById('arrowRight');
+  const start = (e) => {
+    e.preventDefault();
+    advance();
+    holdTimer = setInterval(advance, 820);
+  };
+  const end = () => { clearInterval(holdTimer); holdTimer = null; };
+  btn.addEventListener('pointerdown', start);
+  btn.addEventListener('pointerup', end);
+  btn.addEventListener('pointercancel', end);
+  btn.addEventListener('pointerleave', end);
+})();
+
+/* Resize / rotate */
+const ro = new ResizeObserver(() => fitSlides());
+ro.observe(filmFrame);
+window.addEventListener('orientationchange', () => setTimeout(fitSlides, 60));
+
+/* Init */
+fitSlides();
+applyClasses();
+setImages();
+bindSlideClicks();
+</script>
 </body>
 </html>
