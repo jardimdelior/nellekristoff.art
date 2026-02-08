@@ -18,9 +18,9 @@
   --a3: 420 / 297;
 
   /* slide sizing */
-  --slideW: clamp(210px, 52vw, 620px);
-  --gap: clamp(4px, 1vw, 12px);
-  --pad: clamp(10px, 1.6vw, 16px);
+  --slideW: clamp(210px, 78vw, 620px);
+  --gap: 14px;
+  --pad: 14px;
 
   /* film area */
   --maxFilmH: 78vh;
@@ -135,6 +135,7 @@ main{
 .film-viewport{
   width:100%;
   height: var(--maxFilmH);
+  overflow:hidden;
   display:grid;
   place-items:center;
   position:relative;
@@ -143,36 +144,20 @@ main{
   padding: 10px 0;
 }
 
-/* FILM FRAME (bordered container) */
-.film-frame{
-  width:min(96vw, 1200px);
-  height:min(var(--maxFilmH), 78vh);
-  border:1px solid rgba(47,42,38,.16);
-  border-radius:18px;
-  background:rgba(255,255,255,.18);
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
-  overflow:hidden;                 /* keeps everything inside */
-  display:grid;
-  place-items:center;
-  position:relative;
-  padding: clamp(10px, 2.2vw, 18px);
-}
-
 .film-track{
   display:flex;
   align-items:center;
   justify-content:center;
   width:100%;
-  gap: var(--gap);
+  gap:var(--gap);
   transform-style:preserve-3d;
 }
 
 /* slide + transitions */
 .slide{
-  flex: 0 0 auto;                  /* prevents flex from shrinking */
   width: var(--slideW);
   aspect-ratio: var(--a3);
-  max-height: calc(min(var(--maxFilmH), 78vh) - 40px);
+  max-height: calc(var(--maxFilmH) - 20px);
   display:grid;
   place-items:center;
   transform-style:preserve-3d;
@@ -193,7 +178,7 @@ main{
 
 /* LEFT (clear, clickable) */
 .slide.is-prev{
-  transform: translateX(-12%) translateZ(-40px) rotateY(62deg) scale(.92);
+  transform: translateX(-22%) translateZ(-40px) rotateY(62deg) scale(.92);
   opacity:1;
   filter:none;
   cursor:pointer;
@@ -201,10 +186,9 @@ main{
 
 /* RIGHT (softer) */
 .slide.is-next{
-  transform: translateX(12%) translateZ(-60px) rotateY(-62deg) scale(.92);
+  transform: translateX(22%) translateZ(-60px) rotateY(-62deg) scale(.92);
   opacity:.62;
   filter:saturate(.9) contrast(.96);
-  cursor:pointer;
 }
 
 /* print */
@@ -223,7 +207,7 @@ main{
 .print img{
   width:100%;
   height:100%;
-  object-fit:contain;              /* no distortion */
+  object-fit:contain;
   display:block;
 }
 
@@ -247,7 +231,7 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* arrow bottom-left inside film frame */
+/* arrow bottom-left */
 .arrow-slot{
   position:absolute;
   left: 12px;
@@ -274,90 +258,43 @@ main{
 .film-arrow:active{ transform:scale(.98); }
 .film-arrow svg{ width:18px; height:18px; }
 
-/* lightbox */
-.lightbox{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.92);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:2147483647;
-  padding: clamp(14px, 3vw, 34px);
-}
-.lightbox.open{ display:flex; }
-
-.lb-card{
+/* Two info blocks under the film area */
+.info-row{
   width:100%;
-  max-width: min(92vw, 1400px);
-  max-height: 92vh;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:12px;
-}
-
-/* image area */
-.lightbox .print{
-  width:100%;
-  max-height: 76vh;        /* leaves room for details */
-  padding: var(--pad);
-}
-
-/* details row under image: meta | close | actions */
-.lb-details{
   display:grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items:center;
-  gap:14px;
-  color:#EFE7DC;
+  grid-template-columns: var(--slideW) var(--slideW);
+  gap: var(--gap);
+  justify-content:center;
+  align-items:start;
+  margin: 14px auto 0;
+  padding-bottom: 10px;
 }
-
-.lb-meta{
+.info{ width:100%; max-width: 92vw; }
+.info-top{
   display:flex;
   align-items:baseline;
   gap:10px;
   white-space:nowrap;
 }
-.lb-title{ margin:0; font-size:14px; letter-spacing:.2px; opacity:.95; }
-.lb-status{ margin:0; font-size:13px; opacity:.7; }
-
-.lb-actions{
+.info-left{ opacity:.85; }
+.info-center{ opacity:1; }
+.info .actions{
+  margin-top:8px;
   display:flex;
-  gap:10px;
+  gap:8px;
   flex-wrap:wrap;
-  justify-content:flex-end;
 }
-
-/* close button */
-.lb-close{
-  width:40px;
-  height:40px;
-  border-radius:999px;
-  border:1px solid rgba(239,231,220,.55);
-  background:rgba(0,0,0,.25);
-  color:#EFE7DC;
-  cursor:pointer;
-  display:grid;
-  place-items:center;
-  font-size:18px;
-  line-height:1;
-  transition:transform .15s ease, background .15s ease;
+.title{
+  font-size:14px;
+  letter-spacing:.2px;
+  opacity:.88;
+  margin:0;
 }
-.lb-close:hover{ background:rgba(0,0,0,.45); transform:scale(1.04); }
-.lb-close:active{ transform:scale(.98); }
-
-/* buttons on dark bg */
-#lbInquire.inquire-btn, #lbCollect.collect-btn{
-  border-color:#EFE7DC;
-  color:#EFE7DC;
+.status{
+  font-size:13px;
+  opacity:.65;
+  margin:0;
 }
-#lbInquire.inquire-btn:hover, #lbCollect.collect-btn:hover{
-  background:#EFE7DC;
-  color:#000;
-}
-
-/* base buttons */
 .inquire-btn,.collect-btn{
   padding:8px 14px;
   font-size:13px;
@@ -367,8 +304,35 @@ main{
   text-decoration:none;
   border-radius:4px;
 }
+.inquire-btn:hover,.collect-btn:hover{ background:#000; color:#fff; }
 
-/* footer */
+/* lightbox */
+.lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.92);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  cursor:zoom-out;
+  z-index:2147483647;
+}
+.lightbox.open{ display:flex; }
+.lightbox .print{
+  width:auto;
+  height:auto;
+  max-width:min(92vw, 1400px);
+  max-height:92vh;
+  padding:var(--pad);
+  cursor:auto;
+}
+.lightbox .print img{
+  max-width:min(92vw, 1400px);
+  max-height:92vh;
+  width:auto;
+  height:auto;
+}
+
 footer{
   text-align:center;
   padding: 18px 20px 22px;
@@ -379,31 +343,17 @@ footer{
 /* mobile */
 @media (max-width: 520px){
   :root{
-    --slideW: 88vw;
-    --gap: 8px;
+    --slideW: 88vw;     /* center stays fully visible */
+    --gap: 10px;
+    --pad: 10px;
     --maxFilmH: 72vh;
   }
-  .film-frame{
-    width: 92vw;
-    height: 72vh;
-    padding: 10px;
+  .info-row{
+    grid-template-columns: 1fr;
+    width: min(92vw, 520px);
   }
-  .lb-details{
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "meta close"
-      "actions actions";
-    align-items:center;
-  }
-  .lb-meta{ grid-area: meta; }
-  .lb-close{ grid-area: close; justify-self:end; }
-  .lb-actions{ grid-area: actions; justify-content:flex-start; }
-}
-
-/* landscape phones */
-@media (orientation: landscape) and (max-height: 520px){
-  :root{ --maxFilmH: 66vh; }
-  .film-frame{ height: 66vh; }
+  .info-left{ order:2; }
+  .info-center{ order:1; }
 }
 
 /* short screens */
@@ -442,65 +392,72 @@ footer{
 <main>
   <section class="film-main" aria-label="Featured works">
     <div class="film-viewport" id="filmViewport">
-      <div class="film-frame" id="filmFrame">
 
-        <div class="film-track" id="filmTrack">
-          <div class="slide is-prev" id="slideL" tabindex="0" aria-label="Open left work">
-            <div class="print">
-              <img id="imgL" alt="">
-              <div class="noise"></div>
-            </div>
-          </div>
-
-          <div class="slide is-current" id="slideC" tabindex="0" aria-label="Open center work">
-            <div class="print">
-              <img id="imgC" alt="">
-              <div class="noise"></div>
-            </div>
-          </div>
-
-          <div class="slide is-next" id="slideR" tabindex="0" aria-label="Open right work">
-            <div class="print">
-              <img id="imgR" alt="">
-              <div class="noise"></div>
-            </div>
+      <!-- 3 persistent slides (no innerHTML rebuild per click) -->
+      <div class="film-track" id="filmTrack">
+        <div class="slide is-prev" id="slideL" tabindex="0" aria-label="Open left work">
+          <div class="print">
+            <img id="imgL" alt="">
+            <div class="noise"></div>
           </div>
         </div>
 
-        <div class="arrow-slot">
-          <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 6l6 6-6 6"/>
-            </svg>
-          </button>
+        <div class="slide is-current" id="slideC" tabindex="0" aria-label="Open center work">
+          <div class="print">
+            <img id="imgC" alt="">
+            <div class="noise"></div>
+          </div>
         </div>
 
+        <div class="slide is-next" id="slideR" aria-hidden="true">
+          <div class="print">
+            <img id="imgR" alt="">
+            <div class="noise"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow-slot">
+        <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </button>
       </div>
     </div>
+
+    <!-- IMPORTANT: info-row is UNDER the film-viewport (not inside it) -->
+    <div class="info-row">
+      <div class="info info-left">
+        <div class="info-top">
+          <p class="title" id="leftTitle">Untitled</p>
+          <p class="status" id="leftStatus">Unveiling soon</p>
+        </div>
+        <div class="actions">
+          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
+          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="leftCollectBtn">Collect</a>
+        </div>
+      </div>
+
+      <div class="info info-center">
+        <div class="info-top">
+          <p class="title" id="workTitle">Untitled</p>
+          <p class="status" id="workStatus">Unveiling soon</p>
+        </div>
+        <div class="actions">
+          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
+          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
+        </div>
+      </div>
+    </div>
+
   </section>
 </main>
 
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox">
-  <div class="lb-card" id="lbCard">
-    <div class="print">
-      <img id="lightboxImg" alt="" />
-      <div class="noise"></div>
-    </div>
-
-    <div class="lb-details">
-      <div class="lb-meta">
-        <p class="lb-title" id="lbTitle">Untitled</p>
-        <p class="lb-status" id="lbStatus">Unveiling soon</p>
-      </div>
-
-      <button class="lb-close" id="lbClose" aria-label="Close">✕</button>
-
-      <div class="lb-actions">
-        <a href="#" class="inquire-btn" id="lbInquire">Inquire</a>
-        <a href="#" target="_blank" rel="noopener" class="collect-btn" id="lbCollect">Collect</a>
-      </div>
-    </div>
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="print" onclick="event.stopPropagation()">
+    <img id="lightboxImg" alt="" />
+    <div class="noise"></div>
   </div>
 </div>
 
@@ -546,9 +503,6 @@ function wrap(i){
 /* persistent slides */
 let centerIndex = 0;
 let animating = false;
-let leftIndexNow = 0;
-let centerIndexNow = 0;
-let rightIndexNow = 0;
 
 let slides = [
   { el: document.getElementById('slideL'), img: document.getElementById('imgL') }, // LEFT
@@ -566,10 +520,6 @@ function setImages(){
   const leftIndex  = wrap(centerIndex - 1);
   const rightIndex = wrap(centerIndex + 1);
 
-  leftIndexNow = leftIndex;
-  centerIndexNow = centerIndex;
-  rightIndexNow = rightIndex;
-
   slides[0].img.src = works[leftIndex].src;
   slides[0].img.alt = works[leftIndex].title;
 
@@ -578,19 +528,22 @@ function setImages(){
 
   slides[2].img.src = works[rightIndex].src;
   slides[2].img.alt = works[rightIndex].title;
+
+  // update info blocks
+  const c = works[centerIndex];
+  document.getElementById('workTitle').textContent = c.title;
+  document.getElementById('workStatus').textContent = c.status;
+  document.getElementById('collectBtn').href = c.collect;
+
+  const l = works[leftIndex];
+  document.getElementById('leftTitle').textContent = l.title;
+  document.getElementById('leftStatus').textContent = l.status;
+  document.getElementById('leftCollectBtn').href = l.collect;
 }
 
-/* Lightbox open by index (adds meta + buttons) */
-function openLightboxByIndex(i){
-  const w = works[i];
-  document.getElementById('lightboxImg').src = w.src;
-  document.getElementById('lbTitle').textContent = w.title;
-  document.getElementById('lbStatus').textContent = w.status;
-  document.getElementById('lbCollect').href = w.collect;
-
-  const subject = encodeURIComponent(`Inquiry: ${w.title}`);
-  document.getElementById('lbInquire').href = `mailto:nellekristoff@gmail.com?subject=${subject}`;
-
+/* Lightbox */
+function openLightbox(src){
+  document.getElementById('lightboxImg').src = src;
   document.getElementById('lightbox').classList.add('open');
   document.body.classList.add('noscroll');
 }
@@ -598,29 +551,22 @@ function closeLightbox(){
   document.getElementById('lightbox').classList.remove('open');
   document.body.classList.remove('noscroll');
 }
-
-/* Lightbox click behavior */
-const lightbox = document.getElementById('lightbox');
-const lbCard = document.getElementById('lbCard');
-const lbClose = document.getElementById('lbClose');
-
-lightbox.addEventListener('click', closeLightbox);          // dark background closes
-lbCard.addEventListener('click', (e) => e.stopPropagation()); // clicking image/card does NOT close
-lbClose.addEventListener('click', closeLightbox);           // X closes
-
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeLightbox();
 });
 
-/* Click-to-open for ALL slides */
+/* Click-to-open for LEFT and CENTER (always current visuals) */
 function bindSlideClicks(){
-  slides[0].el.onclick = () => openLightboxByIndex(leftIndexNow);
-  slides[1].el.onclick = () => openLightboxByIndex(centerIndexNow);
-  slides[2].el.onclick = () => openLightboxByIndex(rightIndexNow);
+  // remove then re-add is not needed because nodes persist; use current slides array
+  slides[1].el.onclick = () => openLightbox(slides[1].img.src);
+  slides[0].el.onclick = () => openLightbox(slides[0].img.src);
 
-  slides[0].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(leftIndexNow); };
-  slides[1].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(centerIndexNow); };
-  slides[2].el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') openLightboxByIndex(rightIndexNow); };
+  slides[1].el.onkeydown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') openLightbox(slides[1].img.src);
+  };
+  slides[0].el.onkeydown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') openLightbox(slides[0].img.src);
+  };
 }
 
 /* FEATHER carousel advance (right arrow) */
@@ -628,18 +574,24 @@ function advance(){
   if (animating) return;
   animating = true;
 
-  // LEFT->CENTER, CENTER->RIGHT, RIGHT->LEFT
+  // Start the motion: LEFT->CENTER, CENTER->RIGHT, RIGHT->LEFT
   slides[0].el.className = 'slide is-current';
   slides[1].el.className = 'slide is-next';
   slides[2].el.className = 'slide is-prev';
 
+  // Wait for the transform transition on the incoming center (slides[0])
   const done = (e) => {
     if (e.propertyName !== 'transform') return;
     slides[0].el.removeEventListener('transitionend', done);
 
+    // Rotate slides array to match new visual roles:
+    // new LEFT = old RIGHT, new CENTER = old LEFT, new RIGHT = old CENTER
     slides = [ slides[2], slides[0], slides[1] ];
+
+    // Advance the logical center work
     centerIndex = wrap(centerIndex + 1);
 
+    // Update images for the new set (no DOM rebuild)
     setImages();
     applyClasses();
     bindSlideClicks();
@@ -658,19 +610,23 @@ document.getElementById('arrowRight').addEventListener('click', (e) => {
 
 /* hold to glide */
 let holdTimer = null;
-(function bindHold(){
-  const btn = document.getElementById('arrowRight');
+function bindHold(id){
+  const btn = document.getElementById(id);
   const start = (e) => {
     e.preventDefault();
     advance();
-    holdTimer = setInterval(advance, 750);
+    holdTimer = setInterval(advance, 750); // slower feels more “feather”
   };
-  const end = () => { clearInterval(holdTimer); holdTimer = null; };
+  const end = () => {
+    clearInterval(holdTimer);
+    holdTimer = null;
+  };
   btn.addEventListener('pointerdown', start);
   btn.addEventListener('pointerup', end);
   btn.addEventListener('pointercancel', end);
   btn.addEventListener('pointerleave', end);
-})();
+}
+bindHold('arrowRight');
 
 /* keyboard */
 window.addEventListener('keydown', (e) => {
