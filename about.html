@@ -90,14 +90,35 @@ main{
   width:min(860px, 92vw);
   margin: 110px auto 34px;
 }
+/* redesigned unified panel — straight frame + gradient shadow */
+
 .card{
-  background:rgba(255,255,255,.70);
-  border:1px solid rgba(47,42,38,.14);
-  border-radius:var(--radius);
-  box-shadow:0 14px 40px rgba(0,0,0,.08);
-  backdrop-filter: blur(10px);
-  padding: clamp(16px, 3vw, 26px);
+  background:transparent;
+  border:1px solid rgba(47,42,38,.22);
+  border-radius:0;
+  box-shadow:none;
+  backdrop-filter:none;
+  padding: clamp(18px, 3vw, 28px);
+  position:relative;
 }
+
+/* soft gradient shadow aura around the whole block */
+.card::before{
+  content:"";
+  position:absolute;
+  inset:-16px;
+  background:linear-gradient(
+    to bottom,
+    rgba(0,0,0,.10),
+    rgba(0,0,0,.03) 45%,
+    rgba(0,0,0,0) 85%
+  );
+  filter:blur(22px);
+  opacity:.45;
+  z-index:-1;
+  pointer-events:none;
+}
+
 .card h2{
   margin:0 0 10px;
   font-weight:500;
