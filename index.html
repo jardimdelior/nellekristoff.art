@@ -13,6 +13,8 @@
   --shadow:0 14px 50px rgba(0,0,0,.32);
   --inset:inset 0 0 28px rgba(0,0,0,.14);
   --radius:2px;
+  --centerW: var(--slideW);
+  --sideW:   var(--slideW);
 
   /* A3 landscape ratio */
   --a3: 420 / 297;
@@ -177,6 +179,7 @@ main{
   opacity:1;
   filter:none;
   cursor:pointer;
+  width: var(--centerW);              /* IMPORTANT */
 }
 
 /* LEFT: clear + clickable */
@@ -360,14 +363,28 @@ footer{
 }
 
 /* mobile tuning */
-@media (max-width:520px){
+@media (max-width: 520px){
   :root{
-    --slideW: 76vw;
+    /* Center must always fit on screen */
+    --centerW: 88vw;
+
+    /* Side slides become smaller so center stays fully visible */
+    --sideW: 46vw;
+
     --gap: 10px;
-    --pad: 12px;
-    --maxFilmH: 76vh;
+    --pad: 10px;
+    --maxFilmH: 72vh;
   }
+
+  .details{ width: var(--centerW); }  /* details match center width */
   .details-row{ flex-wrap:wrap; }
+}
+
+/* short screens / landscape phones */
+@media (max-height: 650px){
+  :root{
+    --maxFilmH: 62vh;
+  }
 }
 
 /* reduced motion */
