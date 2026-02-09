@@ -42,7 +42,11 @@ body{
   opacity:0;
 }
 html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
-body.noscroll{ overflow:hidden; }
+body.noscroll{ 
+  overflow:visible;
+  padding: clamp(14px, 3vw, 34px);
+  box-sizing: border-box;
+}
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
 /* header */
@@ -140,7 +144,7 @@ main{
 .film-viewport{
   width:100%;
   height: var(--maxFilmH);
-  overflow:hidden;
+  overflow:visible;
   display:grid;
   place-items:center;
   position:relative;
@@ -154,10 +158,31 @@ main{
   display:flex;
   align-items:center;
   justify-content:center;
-  width:100%;
+  max-width:100%;
+  transform: scale(var(--filmScale));
   gap:var(--gap);
   transform-style:preserve-3d;
+  transform-origin: center;
 }
+:root{
+  --filmScale: 1;
+}
+@media (max-width: 900px){
+  :root{ --filmScale: .95; }
+}
+@media (max-width: 700px){
+  :root{ --filmScale: .9; }
+}
+@media (max-width: 520px){
+  :root{ --filmScale: .86; }
+}
+
+/* responsive scale steps */
+@media (max-width: 1100px){ :root{ --filmScale: .96; } }
+@media (max-width: 900px){  :root{ --filmScale: .92; } }
+@media (max-width: 700px){  :root{ --filmScale: .88; } }
+@media (max-width: 520px){  :root{ --filmScale: .84; } }
+@media (max-height: 650px){ :root{ --filmScale: .86; } }
 
 /* slide + transitions */
 .slide{
@@ -203,10 +228,11 @@ main{
   width:100%;
   height:100%;
   background:var(--card);
-  padding:0;
+  padding:clamp(14px, 3vw, 34px);
+  box-sizing: border-box;
   border-radius:var(--radius);
   box-shadow:var(--inset), var(--shadow);
-  overflow:hidden;
+  overflow:visible;
   position:relative;
   display:grid;
   place-items:center;
@@ -334,11 +360,12 @@ main{
   cursor:auto;
   width: min(96vw, calc(92vh * var(--a3ratio)));
   aspect-ratio: var(--a3);
-  padding: var(--pad);
+  padding: clamp(14px, 3vw, 34px);
+  box-sizing: border-box;
   border-radius: var(--radius);
   box-shadow: var(--inset), var(--shadow);
   background: var(--card);
-  overflow:hidden;
+  overflow:visible;
   display:grid;
   place-items:center;
 }
