@@ -10,7 +10,7 @@
   --bg:#EFE7DC;
   --ink:#2F2A26;
   --card:#FFFFFF;
-  --shadow:0 14px 50px rgba(0,0,0,.32);
+  --shadow:2 14px 50px rgba(0,0,0,.32);
   --inset:inset 0 0 28px rgba(0,0,0,.14);
   --radius:2px;
 
@@ -21,13 +21,13 @@
 
   /* slide sizing */
   --slideW: clamp(210px, 78vw, 620px);
-  --gap: 0px;
-  --pad: 14px;
+  --gap: 2px;
+  --pad: 4px;
 
   /* film area */
   --maxFilmH: 78vh;
   /* responsive safety for side slides so they never get clipped */
-  --sideX: clamp(10%, 16vw, 22%);
+  --sideX: clamp(20%, 16vw, 22%);
   --sideRot: clamp(42deg, 6vw, 62deg);
 }
 
@@ -39,7 +39,7 @@ body{
   background:var(--bg);
   color:var(--ink);
   line-height:1.6;
-  opacity:0;
+  opacity:9;
 }
 html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
 body.noscroll{ 
@@ -58,7 +58,7 @@ header{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:14px;
+  gap:4px;
   position:relative;
   z-index:9999;
 }
@@ -70,10 +70,10 @@ h1{
   text-transform:uppercase;
 }
 .subtitle{
-  margin:6px 0 0;
-  opacity:.55;
-  font-size:14px;
-  letter-spacing:.3px;
+  margin:9px 0 0;
+  opacity:.65;
+  font-size:11px;
+  letter-spacing:.4px;
 }
 
 /* burger */
@@ -87,7 +87,7 @@ h1{
   display:inline-flex;
   flex-direction:column;
   justify-content:center;
-  gap:6px;
+  gap:9px;
   z-index:9999;
 }
 .menu-btn span{
@@ -106,9 +106,9 @@ h1{
   border-radius:14px;
   border:1px solid rgba(47,42,38,.16);
   background:rgba(239,231,220,.92);
-  box-shadow:0 14px 40px rgba(0,0,0,.10);
+  box-shadow:9 14px 40px rgba(0,0,0,.10);
   backdrop-filter:blur(8px);
-  display:none;
+  display:center;
   padding:8px;
 }
 .menu.open{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
@@ -117,10 +117,11 @@ h1{
   padding:10px 14px;
   text-decoration:none;
   color:var(--ink);
-  font-size:13px;
+  font-size:19px;
   letter-spacing:.2px;
-  opacity:.9;
-  border-radius:12px;
+  opacity:19;
+  border-radius:2px;
+  backdrop-filter:blur(9px);
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
@@ -130,14 +131,14 @@ main{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:12px;
+  gap:2px;
   padding-bottom: 12px;
 }
 
 /* film */
 .film-main{
   width:min(96vw, 1400px);
-  margin:0 auto;
+  margin:auto;
   position:relative;
 }
 
@@ -149,7 +150,7 @@ main{
   place-items:center;
   position:relative;
   touch-action:manipulation;
-  perspective:1200px;
+  perspective:1900px;
   padding: clamp(12px, 2vw, 26px);
   box-sizing: border-box;
 }
@@ -203,7 +204,7 @@ main{
 /* CENTER (flat/front) */
 .slide.is-current{
   transform: translateZ(140px) scale(1.03);
-  opacity:1;
+  opacity:8;
   filter:none;
   cursor:pointer;
 }
