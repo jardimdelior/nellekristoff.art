@@ -4,31 +4,41 @@
 <meta charset="UTF-8" />
 <title>Nelle Kristoff — Art</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-store" />
 
 <style>
 :root{
   --bg:#EFE7DC;
   --ink:#2F2A26;
   --card:#FFFFFF;
-  --shadow:2 14px 50px rgba(0,0,0,.32);
-  --inset:inset 0 0 28px rgba(0,0,0,.14);
+
+  /* shadows (FIXED: include px) */
+  --shadow: 0 14px 50px rgba(0,0,0,.32);
+  --inset: inset 0 0 28px rgba(0,0,0,.14);
+
   --radius:2px;
 
   /* A3 landscape ratio */
   --a3: 420 / 297;
   --a3ratio: calc(420 / 297);
 
+  /* ===== 3D TRIANGLE WALL ===== */
+  /* Spacious camera (higher = more spacious, less distortion) */
+  --triPersp: 3600px;
 
-  /* slide sizing */
-  --slideW: clamp(210px, 78vw, 620px);
-  --gap: 2px;
-  --pad: 4px;
+  /* Face size (tuned so 9 columns fits nicely) */
+  --faceW: clamp(110px, 9vw, 150px);
+  --faceH: calc(var(--faceW) * (297 / 420)); /* A3-ish feel */
 
-  /* film area */
-  --maxFilmH: 78vh;
-  /* responsive safety for side slides so they never get clipped */
-  --sideX: clamp(20%, 16vw, 22%);
-  --sideRot: clamp(42deg, 6vw, 62deg);
+  /* Critical: radius that makes 3 faces touch edge-to-edge */
+  /* r = w / (2*tan(60deg)) ≈ w / 3.464 */
+  --triR: calc(var(--faceW) / 3.464);
+
+  /* Default open angle */
+  --triSpin: -18deg;
+
+  /* spacing */
+  --triGap: clamp(10px, 1.2vw, 16px);
 }
 
 /* base */
@@ -40,14 +50,14 @@ body{
   color:var(--ink);
   line-height:1.6;
   opacity:0;
-}
-html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
-body.noscroll{ 
-  overflow:visible;
   padding: clamp(14px, 3vw, 34px);
   box-sizing: border-box;
 }
+html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
+
+/* when lightbox open */
+body.noscroll{ overflow:hidden; }
 
 /* header */
 header{
@@ -94,9 +104,8 @@ h1{
   display:block;
   width:100%;
   height:2px;
-  background:#2F2A26;
+  background:var(--ink);
   border-radius:2px;
-  opacity:1;
 }
 
 /* menu bar */
@@ -106,9 +115,9 @@ h1{
   border-radius:14px;
   border:1px solid rgba(47,42,38,.16);
   background:rgba(239,231,220,.92);
-  box-shadow:9 14px 40px rgba(0,0,0,.10);
+  box-shadow: 0 14px 40px rgba(0,0,0,.10);
   backdrop-filter:blur(8px);
-  display:center;
+  display:none;
   padding:8px;
 }
 .menu.open{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
@@ -119,9 +128,8 @@ h1{
   color:var(--ink);
   font-size:19px;
   letter-spacing:.2px;
-  opacity:19;
+  opacity:1;
   border-radius:2px;
-  backdrop-filter:blur(9px);
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
@@ -131,128 +139,120 @@ main{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:2px;
   padding-bottom: 12px;
 }
 
-/* film */
+/* ===== TRIANGLE WALL AREA ===== */
 .film-main{
   width:min(96vw, 1400px);
-  margin:auto;
+  margin: 0 auto;
   position:relative;
 }
 
-.film-viewport{
+.tri-viewport{
   width:100%;
-  height: var(--maxFilmH);
-  overflow:visible;
-  display:grid;
-  place-items:center;
-  position:relative;
-  touch-action:manipulation;
-  perspective:1900px;
-  padding: clamp(12px, 2vw, 26px);
-  box-sizing: border-box;
+  padding: clamp(10px, 2vw, 26px);
+  box-sizing:border-box;
 }
 
-.film-track{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  max-width:100%;
-  transform: scale(var(--filmScale));
-  gap:var(--gap);
-  transform-style:preserve-3d;
-  transform-origin: center;
+/* EXACTLY 9 per row on desktop (responsive steps below) */
+.tri-grid{
+  display:grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: var(--triGap);
+  place-items:center;
+  perspective: var(--triPersp);
 }
-:root{
-  --filmScale: 1;
+
+/* Large laptop / small desktop */
+@media (max-width: 1400px){
+  .tri-grid{ grid-template-columns: repeat(6, 1fr); }
 }
-@media (max-width: 900px){
-  :root{ --filmScale: .95; }
+/* Tablet */
+@media (max-width: 1000px){
+  .tri-grid{ grid-template-columns: repeat(4, 1fr); }
 }
+/* Large mobile */
 @media (max-width: 700px){
-  :root{ --filmScale: .9; }
+  .tri-grid{ grid-template-columns: repeat(3, 1fr); }
 }
-@media (max-width: 520px){
-  :root{ --filmScale: .86; }
-}
-
-/* responsive scale steps */
-@media (max-width: 1100px){ :root{ --filmScale: .96; } }
-@media (max-width: 900px){  :root{ --filmScale: .92; } }
-@media (max-width: 700px){  :root{ --filmScale: .88; } }
-@media (max-width: 520px){  :root{ --filmScale: .84; } }
-@media (max-height: 650px){ :root{ --filmScale: .86; } }
-
-/* slide + transitions */
-.slide{
-  width: var(--slideW);
-  aspect-ratio: var(--a3);
-  max-height: calc(var(--maxFilmH) - 20px);
-  max-width: calc(100% - 2 * clamp(12px, 2vw, 26px));
-  display:grid;
-  place-items:center;
-  transform-style:preserve-3d;
-  will-change: transform, opacity, filter;
-  transition:
-    transform 650ms cubic-bezier(.18,.9,.2,1),
-    opacity   650ms cubic-bezier(.18,.9,.2,1),
-    filter    650ms cubic-bezier(.18,.9,.2,1);
+/* Small mobile */
+@media (max-width: 480px){
+  .tri-grid{ grid-template-columns: repeat(2, 1fr); }
 }
 
-/* CENTER (flat/front) */
-.slide.is-current{
-  transform: translateZ(140px) scale(1.03);
-  opacity:8;
-  filter:none;
-  cursor:pointer;
-}
-
-/* LEFT (clear, clickable) */
-.slide.is-prev{
-  transform: translateX(calc(-1 * var(--sideX))) translateZ(-40px) rotateY(var(--sideRot)) scale(.92);
-  opacity:1;
-  filter:none;
-  cursor:pointer;
-}
-
-/* RIGHT (softer) */
-.slide.is-next{
-  transform: translateX(var(--sideX)) translateZ(-60px) rotateY(calc(-1 * var(--sideRot))) scale(.92);
-  opacity:.62;
-  filter:saturate(.9) contrast(.96);
-}
-
-/* print */
-.print{
-  width:100%;
-  height:100%;
-  background:var(--card);
-  padding:clamp(14px, 3vw, 34px);
-  box-sizing: border-box;
-  border-radius:var(--radius);
-  box-shadow:var(--inset), var(--shadow);
-  overflow:visible;
+/* Outer holder (keeps layout size stable) */
+.tri{
+  width: var(--faceW);
+  height: var(--faceH);
   position:relative;
-  display:grid;
-  place-items:center;
 }
-.print img{
+
+/* Animated wrapper (owns the transform animation) */
+.tri-wrap{
+  width: 100%;
+  height: 100%;
+  position:relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+  animation:
+    triFloat 9.5s ease-in-out infinite,
+    triTurn  22s ease-in-out infinite;
+  animation-delay: var(--d, 0s), var(--d, 0s);
+  transform: rotateY(var(--triSpin));
+}
+
+/* Pause animation on hover (so clicking feels stable) */
+@media (hover:hover){
+  .tri-wrap:hover{ animation-play-state: paused; }
+}
+
+/* Gentle up/down + micro depth */
+@keyframes triFloat{
+  0%,100% { transform: rotateY(var(--triSpin)) translateY(0) translateZ(0); }
+  50%     { transform: rotateY(var(--triSpin)) translateY(-7px) translateZ(6px); }
+}
+
+/* Very slow breathing turn */
+@keyframes triTurn{
+  0%,100% { transform: rotateY(calc(var(--triSpin) - 6deg)); }
+  50%     { transform: rotateY(calc(var(--triSpin) + 6deg)); }
+}
+
+/* Faces share EXACT same rectangle => edges align */
+.tri-face{
+  position:absolute;
+  inset:0;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--inset), var(--shadow);
+  overflow:hidden;
+  cursor:pointer;
+  outline:none;
+}
+
+/* 3 sides (120° apart) */
+.tri-wrap .f1{ transform: rotateY(  0deg) translateZ(var(--triR)); }
+.tri-wrap .f2{ transform: rotateY(120deg) translateZ(var(--triR)); }
+.tri-wrap .f3{ transform: rotateY(240deg) translateZ(var(--triR)); }
+
+.tri-face img{
   width:100%;
   height:100%;
-  object-fit:contain;
+  object-fit:cover; /* change to contain if you want no crop */
   display:block;
 }
 
-/* noise inside print */
+/* noise overlay */
 .noise{
   position:absolute;
   inset:0;
   background-image:url("images/noise.png");
   background-repeat:repeat;
   background-size:520px 520px;
-  opacity:.16;
+  opacity:.12;
   mix-blend-mode:overlay;
   pointer-events:none;
   animation:noiseMove .18s steps(2) infinite;
@@ -265,82 +265,7 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* arrow bottom-left */
-.arrow-slot{
-  position:absolute;
-  left: 12px;
-  bottom: 12px;
-  z-index:50;
-  pointer-events:none;
-}
-.film-arrow{
-  pointer-events:auto;
-  width:52px;
-  height:52px;
-  border-radius:999px;
-  border:1px solid rgba(47,42,38,.28);
-  background:rgba(239,231,220,.78);
-  backdrop-filter:blur(6px);
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  box-shadow:0 10px 24px rgba(0,0,0,.14);
-  transition:transform .2s ease, background .2s ease;
-  opacity:.96;
-}
-.film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.04); }
-.film-arrow:active{ transform:scale(.98); }
-.film-arrow svg{ width:18px; height:18px; }
-
-/* Two info blocks under the film area */
-.info-row{
-  width:100%;
-  display:grid;
-  grid-template-columns: var(--slideW) var(--slideW);
-  gap: var(--gap);
-  justify-content:center;
-  align-items:start;
-  margin: 14px auto 0;
-  padding-bottom: 10px;
-}
-.info{ width:100%; max-width: 92vw; }
-.info-top{
-  display:flex;
-  align-items:baseline;
-  gap:10px;
-  white-space:nowrap;
-}
-.info-left{ opacity:.85; }
-.info-center{ opacity:1; }
-.info .actions{
-  margin-top:8px;
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-.title{
-  font-size:14px;
-  letter-spacing:.2px;
-  opacity:.88;
-  margin:0;
-}
-.status{
-  font-size:13px;
-  opacity:.65;
-  margin:0;
-}
-.inquire-btn,.collect-btn{
-  padding:8px 14px;
-  font-size:13px;
-  border:1px solid #000;
-  background:transparent;
-  color:#000;
-  text-decoration:none;
-  border-radius:4px;
-}
-.inquire-btn:hover,.collect-btn:hover{ background:#000; color:#fff; }
-
-/* lightbox */
+/* Lightbox */
 .lightbox{
   position:fixed;
   inset:0;
@@ -350,10 +275,9 @@ main{
   justify-content:center;
   cursor:zoom-out;
   z-index:2147483647;
-  padding: clamp(14px, 3vw, 34px); /* widescreen margins */
+  padding: clamp(14px, 3vw, 34px);
   box-sizing: border-box;
 }
-
 .lightbox.open{ display:flex; }
 
 /* A3 landscape frame that scales to viewport */
@@ -367,10 +291,10 @@ main{
   box-shadow: var(--inset), var(--shadow);
   background: var(--card);
   overflow:visible;
+  position:relative;
   display:grid;
   place-items:center;
 }
-
 .lightbox .print img{
   width:100%;
   height:100%;
@@ -378,15 +302,7 @@ main{
   display:block;
 }
 
-/* Optional film-only mode (we'll use later) */
-.film-main{ position:relative; } /* already true in your file, but keep safe */
-
-.lightbox.in-film{
-  position:absolute;
-  inset:0;
-  padding: clamp(10px, 2vw, 18px);
-}
-
+/* footer */
 footer{
   text-align:center;
   padding: 18px 20px 22px;
@@ -394,45 +310,11 @@ footer{
   opacity:.5;
 }
 
-/* mobile */
-@media (max-width: 520px){
-  :root{
-    --sideX: 10%;
-    --sideRot: 46deg;
-    --slideW: 88vw;     /* center stays fully visible */
-    --gap: 0px;
-    --pad: 10px;
-    --maxFilmH: 72vh;
-    /* A3 landscape ratio */
-    --a3: 420 / 297;
-    --a3ratio: calc(420 / 297);
-  }
-  .info-row{
-    grid-template-columns: 1fr;
-    width: min(92vw, 520px);
-  }
-  .info-left{ order:2; }
-  .info-center{ order:1; }
-}
-
-/* short screens */
-@media (max-height: 650px){
-  :root{ 
-    --sideX: 10%;
-    --sideRot: 46deg;
-    --maxFilmH: 68vh;
-    /* A3 landscape ratio */
-    --a3: 420 / 297;
-    --a3ratio: calc(420 / 297);
-    --gap: 0px;
-  }
-}
-
-/* reduced motion */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce){
   html.ready body{ animation:none !important; }
   body{ opacity:1 !important; }
-  .slide{ transition:none !important; }
+  .tri-wrap{ animation:none !important; }
   .noise{ animation:none !important; }
 }
 </style>
@@ -457,75 +339,18 @@ footer{
 </header>
 
 <main>
-  <section class="film-main" aria-label="Featured works">
-    <div class="film-viewport" id="filmViewport">
-
-      <!-- 3 persistent slides (no innerHTML rebuild per click) -->
-      <div class="film-track" id="filmTrack">
-        <div class="slide is-prev" id="slideL" tabindex="0" aria-label="Open left work">
-          <div class="print">
-            <img id="imgL" alt="">
-            <div class="noise"></div>
-          </div>
-        </div>
-
-        <div class="slide is-current" id="slideC" tabindex="0" aria-label="Open center work">
-          <div class="print">
-            <img id="imgC" alt="">
-            <div class="noise"></div>
-          </div>
-        </div>
-
-        <div class="slide is-next" id="slideR" aria-hidden="true">
-          <div class="print">
-            <img id="imgR" alt="">
-            <div class="noise"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="arrow-slot">
-        <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 6l6 6-6 6"/>
-          </svg>
-        </button>
-      </div>
+  <section class="film-main" aria-label="3D triangle wall works">
+    <div class="tri-viewport">
+      <div class="tri-grid" id="triGrid"></div>
     </div>
 
-    <!-- IMPORTANT: info-row is UNDER the film-viewport (not inside it) -->
-    <div class="info-row">
-      <div class="info info-left">
-        <div class="info-top">
-          <p class="title" id="leftTitle">Untitled</p>
-          <p class="status" id="leftStatus">Unveiling soon</p>
-        </div>
-        <div class="actions">
-          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="leftCollectBtn">Collect</a>
-        </div>
-      </div>
-
-      <div class="info info-center">
-        <div class="info-top">
-          <p class="title" id="workTitle">Untitled</p>
-          <p class="status" id="workStatus">Unveiling soon</p>
-        </div>
-        <div class="actions">
-          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- LIGHTBOX LAYER (now inside film-main, can later be set to "in-film") -->
+    <!-- LIGHTBOX -->
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
       <div class="print" onclick="event.stopPropagation()">
         <img id="lightboxImg" alt="" />
         <div class="noise"></div>
       </div>
     </div>
-
   </section>
 </main>
 
@@ -537,6 +362,7 @@ window.addEventListener("load", () => document.documentElement.classList.add("re
 /* Menu */
 const menuBtn = document.getElementById('menuBtn');
 const menu = document.getElementById('menu');
+
 menuBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   const open = menu.classList.toggle('open');
@@ -553,167 +379,111 @@ function contact(e){
   window.location.href = "mailto:nellekristoff@gmail.com";
 }
 
-/* Works */
-const works = [
-  { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-];
-
-// preload (optional)
-works.forEach(w => { const i = new Image(); i.src = w.src; });
-
-function wrap(i){
-  const n = works.length;
-  return ((i % n) + n) % n;
-}
-
-/* persistent slides */
-let centerIndex = 0;
-let animating = false;
-
-let slides = [
-  { el: document.getElementById('slideL'), img: document.getElementById('imgL') }, // LEFT
-  { el: document.getElementById('slideC'), img: document.getElementById('imgC') }, // CENTER
-  { el: document.getElementById('slideR'), img: document.getElementById('imgR') }, // RIGHT
-];
-
-function applyClasses(){
-  slides[0].el.className = 'slide is-prev';
-  slides[1].el.className = 'slide is-current';
-  slides[2].el.className = 'slide is-next';
-}
-
-function setImages(){
-  const leftIndex  = wrap(centerIndex - 1);
-  const rightIndex = wrap(centerIndex + 1);
-
-  slides[0].img.src = works[leftIndex].src;
-  slides[0].img.alt = works[leftIndex].title;
-
-  slides[1].img.src = works[centerIndex].src;
-  slides[1].img.alt = works[centerIndex].title;
-
-  slides[2].img.src = works[rightIndex].src;
-  slides[2].img.alt = works[rightIndex].title;
-
-  // update info blocks
-  const c = works[centerIndex];
-  document.getElementById('workTitle').textContent = c.title;
-  document.getElementById('workStatus').textContent = c.status;
-  document.getElementById('collectBtn').href = c.collect;
-
-  const l = works[leftIndex];
-  document.getElementById('leftTitle').textContent = l.title;
-  document.getElementById('leftStatus').textContent = l.status;
-  document.getElementById('leftCollectBtn').href = l.collect;
-}
-
 /* Lightbox */
-function openLightbox(src){
+function openLightbox(src, titleText){
   const lightbox = document.getElementById('lightbox');
-  document.getElementById('lightboxImg').src = src;
-
-  /* make it film-only (inside film-main) */
-  lightbox.classList.add('in-film');
-
+  const img = document.getElementById('lightboxImg');
+  img.src = src;
+  img.alt = titleText || "";
   lightbox.classList.add('open');
   document.body.classList.add('noscroll');
 }
 function closeLightbox(){
   const lightbox = document.getElementById('lightbox');
   lightbox.classList.remove('open');
-  lightbox.classList.remove('in-film'); /* reset mode */
   document.body.classList.remove('noscroll');
 }
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeLightbox();
 });
 
-/* Click-to-open for LEFT and CENTER (always current visuals) */
-function bindSlideClicks(){
-  // remove then re-add is not needed because nodes persist; use current slides array
-  slides[1].el.onclick = () => openLightbox(slides[1].img.src);
-  slides[0].el.onclick = () => openLightbox(slides[0].img.src);
+/* Works — add as many as you want */
+const works = [
+  { src:"images/Untitled1.png", title:"Untitled 1" },
+  { src:"images/Untitled2.png", title:"Untitled 2" },
+  { src:"images/Untitled3.png", title:"Untitled 3" },
 
-  slides[1].el.onkeydown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(slides[1].img.src);
-  };
-  slides[0].el.onkeydown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') openLightbox(slides[0].img.src);
-  };
+  /* add more for many triangles */
+  // { src:"images/Untitled4.png", title:"Untitled 4" },
+  // { src:"images/Untitled5.png", title:"Untitled 5" },
+  // { src:"images/Untitled6.png", title:"Untitled 6" },
+  // { src:"images/Untitled7.png", title:"Untitled 7" },
+  // { src:"images/Untitled8.png", title:"Untitled 8" },
+  // { src:"images/Untitled9.png", title:"Untitled 9" },
+];
+
+/* Preload */
+works.forEach(w => { const i = new Image(); i.src = w.src; });
+
+function wrap(i, n){ return ((i % n) + n) % n; }
+
+/* Build triangle objects:
+   each triangle uses 3 images: i, i+1, i+2 (wrapped).
+   triangles = ceil(works.length/3). */
+function renderTriGrid(){
+  const grid = document.getElementById('triGrid');
+  const n = works.length;
+
+  if (n === 0){
+    grid.innerHTML = "";
+    return;
+  }
+
+  const triCount = Math.ceil(n / 3);
+  grid.innerHTML = "";
+
+  for(let t = 0; t < triCount; t++){
+    const base = t * 3;
+
+    const a = works[wrap(base + 0, n)];
+    const b = works[wrap(base + 1, n)];
+    const c = works[wrap(base + 2, n)];
+
+    // stagger delay across each row of 9 (so it looks like a living wall)
+    const delay = (t % 9) * 0.18;
+
+    const tri = document.createElement('div');
+    tri.className = 'tri';
+    tri.setAttribute('aria-label', `3D triangle group ${t + 1}`);
+
+    tri.innerHTML = `
+      <div class="tri-wrap" style="--d:${delay}s">
+        <div class="tri-face f1" tabindex="0" data-src="${a.src}" data-title="${a.title}">
+          <img src="${a.src}" alt="${a.title}">
+          <div class="noise"></div>
+        </div>
+        <div class="tri-face f2" tabindex="0" data-src="${b.src}" data-title="${b.title}">
+          <img src="${b.src}" alt="${b.title}">
+          <div class="noise"></div>
+        </div>
+        <div class="tri-face f3" tabindex="0" data-src="${c.src}" data-title="${c.title}">
+          <img src="${c.src}" alt="${c.title}">
+          <div class="noise"></div>
+        </div>
+      </div>
+    `;
+
+    tri.querySelectorAll('.tri-face').forEach(face => {
+      const open = () => openLightbox(face.dataset.src, face.dataset.title);
+
+      face.addEventListener('click', (e) => {
+        e.stopPropagation();
+        open();
+      });
+
+      face.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          open();
+        }
+      });
+    });
+
+    grid.appendChild(tri);
+  }
 }
 
-/* FEATHER carousel advance (right arrow) */
-function advance(){
-  if (animating) return;
-  animating = true;
-
-  // Start the motion: LEFT->CENTER, CENTER->RIGHT, RIGHT->LEFT
-  slides[0].el.className = 'slide is-current';
-  slides[1].el.className = 'slide is-next';
-  slides[2].el.className = 'slide is-prev';
-
-  // Wait for the transform transition on the incoming center (slides[0])
-  const done = (e) => {
-    if (e.propertyName !== 'transform') return;
-    slides[0].el.removeEventListener('transitionend', done);
-
-    // Rotate slides array to match new visual roles:
-    // new LEFT = old RIGHT, new CENTER = old LEFT, new RIGHT = old CENTER
-    slides = [ slides[2], slides[0], slides[1] ];
-
-    // Advance the logical center work
-    centerIndex = wrap(centerIndex + 1);
-
-    // Update images for the new set (no DOM rebuild)
-    setImages();
-    applyClasses();
-    bindSlideClicks();
-
-    animating = false;
-  };
-
-  slides[0].el.addEventListener('transitionend', done);
-}
-
-/* arrow click */
-document.getElementById('arrowRight').addEventListener('click', (e) => {
-  e.preventDefault();
-  advance();
-});
-
-/* hold to glide */
-let holdTimer = null;
-function bindHold(id){
-  const btn = document.getElementById(id);
-  const start = (e) => {
-    e.preventDefault();
-    advance();
-    holdTimer = setInterval(advance, 750); // slower feels more “feather”
-  };
-  const end = () => {
-    clearInterval(holdTimer);
-    holdTimer = null;
-  };
-  btn.addEventListener('pointerdown', start);
-  btn.addEventListener('pointerup', end);
-  btn.addEventListener('pointercancel', end);
-  btn.addEventListener('pointerleave', end);
-}
-bindHold('arrowRight');
-
-/* keyboard */
-window.addEventListener('keydown', (e) => {
-  const lbOpen = document.getElementById('lightbox').classList.contains('open');
-  if (lbOpen) return;
-  if (e.key === 'ArrowRight') advance();
-});
-
-/* init */
-applyClasses();
-setImages();
-bindSlideClicks();
+renderTriGrid();
 </script>
 </body>
 </html>
