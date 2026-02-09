@@ -12,33 +12,33 @@
   --ink:#2F2A26;
   --card:#FFFFFF;
 
-  /* shadows (FIXED: include px) */
   --shadow: 0 14px 50px rgba(0,0,0,.32);
   --inset: inset 0 0 28px rgba(0,0,0,.14);
-
   --radius:2px;
 
   /* A3 landscape ratio */
   --a3: 420 / 297;
   --a3ratio: calc(420 / 297);
 
-  /* ===== 3D TRIANGLE WALL ===== */
-  /* Spacious camera (higher = more spacious, less distortion) */
-  --triPersp: 3600px;
+  /* ===== LEPORELLO / SPACE ===== */
+  --maxFilmH: 78vh;
 
-  /* Face size (tuned so 9 columns fits nicely) */
-  --faceW: clamp(110px, 9vw, 150px);
-  --faceH: calc(var(--faceW) * (297 / 420)); /* A3-ish feel */
+  /* panel sizing (controls how many visible) */
+  --panelW: clamp(180px, 42vw, 560px);
+  --panelH: calc(var(--panelW) * (297 / 420));
 
-  /* Critical: radius that makes 3 faces touch edge-to-edge */
-  /* r = w / (2*tan(60deg)) ≈ w / 3.464 */
-  --triR: calc(var(--faceW) / 3.464);
+  /* 3D camera: higher = more spacious */
+  --persp: 2600px;
 
-  /* Default open angle */
-  --triSpin: -18deg;
+  /* 3D shaping */
+  --angleStep: 18deg;       /* tilt per distance step */
+  --maxAngle: 72deg;        /* clamp for far panels */
+  --zStep: 70px;            /* depth falloff per distance */
+  --xStep: 78%;             /* horizontal step as % of panelW (accordion feel) */
 
-  /* spacing */
-  --triGap: clamp(10px, 1.2vw, 16px);
+  /* zoom limits */
+  --zoomMin: .65;
+  --zoomMax: 2.2;
 }
 
 /* base */
@@ -55,8 +55,6 @@ body{
 }
 html.ready body{ animation:fadein 2.9s ease-in-out forwards; }
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
-
-/* when lightbox open */
 body.noscroll{ overflow:hidden; }
 
 /* header */
@@ -139,120 +137,99 @@ main{
   display:flex;
   flex-direction:column;
   align-items:center;
+  gap:2px;
   padding-bottom: 12px;
 }
 
-/* ===== TRIANGLE WALL AREA ===== */
+/* ===== FILM / SPACE VIEWPORT ===== */
 .film-main{
   width:min(96vw, 1400px);
-  margin: 0 auto;
+  margin:auto;
   position:relative;
 }
 
-.tri-viewport{
+/* The “stage”: clips only the outside space, not your images (they stay inside by design) */
+.space-viewport{
   width:100%;
-  padding: clamp(10px, 2vw, 26px);
-  box-sizing:border-box;
-}
-
-/* EXACTLY 9 per row on desktop (responsive steps below) */
-.tri-grid{
-  display:grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: var(--triGap);
-  place-items:center;
-  perspective: var(--triPersp);
-}
-
-/* Large laptop / small desktop */
-@media (max-width: 1400px){
-  .tri-grid{ grid-template-columns: repeat(6, 1fr); }
-}
-/* Tablet */
-@media (max-width: 1000px){
-  .tri-grid{ grid-template-columns: repeat(4, 1fr); }
-}
-/* Large mobile */
-@media (max-width: 700px){
-  .tri-grid{ grid-template-columns: repeat(3, 1fr); }
-}
-/* Small mobile */
-@media (max-width: 480px){
-  .tri-grid{ grid-template-columns: repeat(2, 1fr); }
-}
-
-/* Outer holder (keeps layout size stable) */
-.tri{
-  width: var(--faceW);
-  height: var(--faceH);
+  height: var(--maxFilmH);
   position:relative;
+  border-radius: 14px;
+  border: 1px solid rgba(47,42,38,.14);
+  background: rgba(255,255,255,.18);
+  box-shadow: 0 12px 44px rgba(0,0,0,.10);
+  backdrop-filter: blur(8px);
+
+  overflow:hidden;
+  perspective: var(--persp);
+
+  /* We handle pan/zoom ourselves */
+  touch-action: none;
+  user-select: none;
 }
 
-/* Animated wrapper (owns the transform animation) */
-.tri-wrap{
-  width: 100%;
-  height: 100%;
-  position:relative;
-  transform-style: preserve-3d;
-  will-change: transform;
-  animation:
-    triFloat 9.5s ease-in-out infinite,
-    triTurn  22s ease-in-out infinite;
-  animation-delay: var(--d, 0s), var(--d, 0s);
-  transform: rotateY(var(--triSpin));
-}
-
-/* Pause animation on hover (so clicking feels stable) */
-@media (hover:hover){
-  .tri-wrap:hover{ animation-play-state: paused; }
-}
-
-/* Gentle up/down + micro depth */
-@keyframes triFloat{
-  0%,100% { transform: rotateY(var(--triSpin)) translateY(0) translateZ(0); }
-  50%     { transform: rotateY(var(--triSpin)) translateY(-7px) translateZ(6px); }
-}
-
-/* Very slow breathing turn */
-@keyframes triTurn{
-  0%,100% { transform: rotateY(calc(var(--triSpin) - 6deg)); }
-  50%     { transform: rotateY(calc(var(--triSpin) + 6deg)); }
-}
-
-/* Faces share EXACT same rectangle => edges align */
-.tri-face{
+/* The zoomable + pannable space */
+.space{
   position:absolute;
   inset:0;
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--inset), var(--shadow);
-  overflow:hidden;
-  cursor:pointer;
-  outline:none;
+  display:grid;
+  place-items:center;
+  transform-origin: 50% 50%;
+  transform: translate3d(var(--panX, 0px), var(--panY, 0px), 0) scale(var(--zoom, 1));
+  will-change: transform;
 }
 
-/* 3 sides (120° apart) */
-.tri-wrap .f1{ transform: rotateY(  0deg) translateZ(var(--triR)); }
-.tri-wrap .f2{ transform: rotateY(120deg) translateZ(var(--triR)); }
-.tri-wrap .f3{ transform: rotateY(240deg) translateZ(var(--triR)); }
+/* The leporello track (3D) */
+.leporello{
+  position:relative;
+  width: 1px;  /* we position panels absolutely in 3D */
+  height: 1px;
+  transform-style: preserve-3d;
+}
 
-.tri-face img{
+/* Panels */
+.panel{
+  position:absolute;
+  width: var(--panelW);
+  height: var(--panelH);
+  left: calc(var(--panelW) * -0.5);
+  top:  calc(var(--panelH) * -0.5);
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+  transition:
+    transform 650ms cubic-bezier(.18,.9,.2,1),
+    opacity   650ms cubic-bezier(.18,.9,.2,1),
+    filter    650ms cubic-bezier(.18,.9,.2,1);
+  cursor:pointer;
+}
+
+.print{
   width:100%;
   height:100%;
-  object-fit:cover; /* change to contain if you want no crop */
+  background:var(--card);
+  padding:clamp(12px, 2.2vw, 28px);
+  box-sizing: border-box;
+  border-radius:var(--radius);
+  box-shadow:var(--inset), var(--shadow);
+  overflow:hidden;
+  position:relative;
+  display:grid;
+  place-items:center;
+}
+.print img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
   display:block;
 }
 
-/* noise overlay */
+/* noise inside print */
 .noise{
   position:absolute;
   inset:0;
   background-image:url("images/noise.png");
   background-repeat:repeat;
   background-size:520px 520px;
-  opacity:.12;
+  opacity:.13;
   mix-blend-mode:overlay;
   pointer-events:none;
   animation:noiseMove .18s steps(2) infinite;
@@ -265,7 +242,101 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* Lightbox */
+/* Arrow bottom-right (flow button) */
+.arrow-slot{
+  position:absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index:50;
+}
+.film-arrow{
+  width:52px;
+  height:52px;
+  border-radius:999px;
+  border:1px solid rgba(47,42,38,.28);
+  background:rgba(239,231,220,.78);
+  backdrop-filter:blur(6px);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.14);
+  transition:transform .2s ease, background .2s ease;
+  opacity:.96;
+}
+.film-arrow:hover{ background:rgba(239,231,220,.92); transform:scale(1.04); }
+.film-arrow:active{ transform:scale(.98); }
+.film-arrow svg{ width:18px; height:18px; }
+
+/* Zoom hint top-left */
+.hint{
+  position:absolute;
+  left:12px;
+  top:12px;
+  z-index:40;
+  font-size:12px;
+  opacity:.7;
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid rgba(47,42,38,.16);
+  background:rgba(239,231,220,.68);
+  backdrop-filter: blur(6px);
+}
+
+/* info row under the viewport (like your original) */
+.info-row{
+  width:100%;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  justify-content:center;
+  align-items:start;
+  margin: 14px auto 0;
+  padding-bottom: 10px;
+}
+.info{
+  width:100%;
+  border-radius:14px;
+  border:1px solid rgba(47,42,38,.16);
+  background:rgba(255,255,255,.42);
+  backdrop-filter: blur(8px);
+  padding:12px 14px;
+  box-sizing:border-box;
+}
+.info-top{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  white-space:nowrap;
+}
+.title{
+  font-size:14px;
+  letter-spacing:.2px;
+  opacity:.88;
+  margin:0;
+}
+.status{
+  font-size:13px;
+  opacity:.65;
+  margin:0;
+}
+.actions{
+  margin-top:10px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.inquire-btn,.collect-btn{
+  padding:8px 14px;
+  font-size:13px;
+  border:1px solid #000;
+  background:transparent;
+  color:#000;
+  text-decoration:none;
+  border-radius:4px;
+}
+.inquire-btn:hover,.collect-btn:hover{ background:#000; color:#fff; }
+
+/* lightbox */
 .lightbox{
   position:fixed;
   inset:0;
@@ -285,13 +356,13 @@ main{
   cursor:auto;
   width: min(96vw, calc(92vh * var(--a3ratio)));
   aspect-ratio: var(--a3);
+  height: auto;
   padding: clamp(14px, 3vw, 34px);
   box-sizing: border-box;
   border-radius: var(--radius);
   box-shadow: var(--inset), var(--shadow);
   background: var(--card);
-  overflow:visible;
-  position:relative;
+  overflow:hidden;
   display:grid;
   place-items:center;
 }
@@ -302,7 +373,6 @@ main{
   display:block;
 }
 
-/* footer */
 footer{
   text-align:center;
   padding: 18px 20px 22px;
@@ -310,11 +380,29 @@ footer{
   opacity:.5;
 }
 
-/* Reduced motion */
+/* mobile */
+@media (max-width: 520px){
+  :root{
+    --panelW: 86vw;
+    --maxFilmH: 72vh;
+    --persp: 3200px; /* more spacious */
+    --angleStep: 16deg;
+    --zStep: 62px;
+    --xStep: 74%;
+  }
+  .info-row{ grid-template-columns: 1fr; }
+}
+
+/* short screens */
+@media (max-height: 650px){
+  :root{ --maxFilmH: 68vh; }
+}
+
+/* reduced motion */
 @media (prefers-reduced-motion: reduce){
   html.ready body{ animation:none !important; }
   body{ opacity:1 !important; }
-  .tri-wrap{ animation:none !important; }
+  .panel{ transition:none !important; }
   .noise{ animation:none !important; }
 }
 </style>
@@ -339,9 +427,45 @@ footer{
 </header>
 
 <main>
-  <section class="film-main" aria-label="3D triangle wall works">
-    <div class="tri-viewport">
-      <div class="tri-grid" id="triGrid"></div>
+  <section class="film-main" aria-label="Leporello space gallery">
+
+    <div class="space-viewport" id="viewport">
+      <div class="hint">Drag to pan · Pinch/scroll to zoom · → button flows one-by-one</div>
+
+      <div class="space" id="space">
+        <div class="leporello" id="leporello"></div>
+      </div>
+
+      <div class="arrow-slot">
+        <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info">
+        <div class="info-top">
+          <p class="title" id="workTitle">Untitled</p>
+          <p class="status" id="workStatus">Unveiling soon</p>
+        </div>
+        <div class="actions">
+          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
+          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
+        </div>
+      </div>
+
+      <div class="info">
+        <div class="info-top">
+          <p class="title" id="zoomReadout">Zoom 100%</p>
+          <p class="status" id="indexReadout">1 / 1</p>
+        </div>
+        <div class="actions">
+          <a href="#" class="collect-btn" id="resetView">Reset view</a>
+        </div>
+      </div>
     </div>
 
     <!-- LIGHTBOX -->
@@ -351,6 +475,7 @@ footer{
         <div class="noise"></div>
       </div>
     </div>
+
   </section>
 </main>
 
@@ -362,7 +487,6 @@ window.addEventListener("load", () => document.documentElement.classList.add("re
 /* Menu */
 const menuBtn = document.getElementById('menuBtn');
 const menu = document.getElementById('menu');
-
 menuBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   const open = menu.classList.toggle('open');
@@ -397,93 +521,277 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeLightbox();
 });
 
-/* Works — add as many as you want */
+/* Works (your list) */
 const works = [
-  { src:"images/Untitled1.png", title:"Untitled 1" },
-  { src:"images/Untitled2.png", title:"Untitled 2" },
-  { src:"images/Untitled3.png", title:"Untitled 3" },
+  { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 
-  /* add more for many triangles */
-  // { src:"images/Untitled4.png", title:"Untitled 4" },
-  // { src:"images/Untitled5.png", title:"Untitled 5" },
-  // { src:"images/Untitled6.png", title:"Untitled 6" },
-  // { src:"images/Untitled7.png", title:"Untitled 7" },
-  // { src:"images/Untitled8.png", title:"Untitled 8" },
-  // { src:"images/Untitled9.png", title:"Untitled 9" },
+  /* add many more here */
+  // { src:"images/Untitled4.png", title:"Untitled 4", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 
-/* Preload */
+/* preload */
 works.forEach(w => { const i = new Image(); i.src = w.src; });
 
-function wrap(i, n){ return ((i % n) + n) % n; }
+/* Build panels */
+const lep = document.getElementById('leporello');
+const panels = [];
+works.forEach((w, i) => {
+  const el = document.createElement('div');
+  el.className = 'panel';
+  el.tabIndex = 0;
+  el.innerHTML = `
+    <div class="print">
+      <img src="${w.src}" alt="${w.title}">
+      <div class="noise"></div>
+    </div>
+  `;
+  el.addEventListener('click', () => openLightbox(w.src, w.title));
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(w.src, w.title); }
+  });
+  lep.appendChild(el);
+  panels.push(el);
+});
 
-/* Build triangle objects:
-   each triangle uses 3 images: i, i+1, i+2 (wrapped).
-   triangles = ceil(works.length/3). */
-function renderTriGrid(){
-  const grid = document.getElementById('triGrid');
-  const n = works.length;
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-  if (n === 0){
-    grid.innerHTML = "";
-    return;
-  }
+/* Read CSS vars (we re-read on resize) */
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
+function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
+function num(v){ return parseFloat(v) || 0; }
 
-  const triCount = Math.ceil(n / 3);
-  grid.innerHTML = "";
+let active = 0;
+let animating = false;
 
-  for(let t = 0; t < triCount; t++){
-    const base = t * 3;
+/* View (pan/zoom) */
+const viewport = document.getElementById('viewport');
+const space = document.getElementById('space');
 
-    const a = works[wrap(base + 0, n)];
-    const b = works[wrap(base + 1, n)];
-    const c = works[wrap(base + 2, n)];
+let zoom = 1;
+let panX = 0;
+let panY = 0;
 
-    // stagger delay across each row of 9 (so it looks like a living wall)
-    const delay = (t % 9) * 0.18;
+/* zoom limits from CSS */
+function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
+function zoomMax(){ return num(cssVar('--zoomMax')) || 2.2; }
 
-    const tri = document.createElement('div');
-    tri.className = 'tri';
-    tri.setAttribute('aria-label', `3D triangle group ${t + 1}`);
+function applyView(){
+  space.style.setProperty('--zoom', zoom);
+  space.style.setProperty('--panX', panX + 'px');
+  space.style.setProperty('--panY', panY + 'px');
 
-    tri.innerHTML = `
-      <div class="tri-wrap" style="--d:${delay}s">
-        <div class="tri-face f1" tabindex="0" data-src="${a.src}" data-title="${a.title}">
-          <img src="${a.src}" alt="${a.title}">
-          <div class="noise"></div>
-        </div>
-        <div class="tri-face f2" tabindex="0" data-src="${b.src}" data-title="${b.title}">
-          <img src="${b.src}" alt="${b.title}">
-          <div class="noise"></div>
-        </div>
-        <div class="tri-face f3" tabindex="0" data-src="${c.src}" data-title="${c.title}">
-          <img src="${c.src}" alt="${c.title}">
-          <div class="noise"></div>
-        </div>
-      </div>
-    `;
-
-    tri.querySelectorAll('.tri-face').forEach(face => {
-      const open = () => openLightbox(face.dataset.src, face.dataset.title);
-
-      face.addEventListener('click', (e) => {
-        e.stopPropagation();
-        open();
-      });
-
-      face.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          open();
-        }
-      });
-    });
-
-    grid.appendChild(tri);
-  }
+  document.getElementById('zoomReadout').textContent = `Zoom ${Math.round(zoom*100)}%`;
 }
 
-renderTriGrid();
+function updateInfo(){
+  const w = works[active] || works[0];
+  document.getElementById('workTitle').textContent = w ? w.title : 'Untitled';
+  document.getElementById('workStatus').textContent = w ? w.status : '';
+  document.getElementById('collectBtn').href = w ? w.collect : 'https://collect.nellekristoff.art';
+  document.getElementById('indexReadout').textContent = `${active+1} / ${works.length}`;
+}
+
+/* 3D layout: leporello flow with depth + tilt */
+function layout3D(){
+  const panelW = numPx(cssVar('--panelW'));
+  const angleStep = numDeg(cssVar('--angleStep'));
+  const maxAngle  = numDeg(cssVar('--maxAngle'));
+  const zStep     = numPx(cssVar('--zStep'));
+  const xStepPct  = num(cssVar('--xStep')) / 100;  // e.g. 0.78
+  const stepX     = panelW * xStepPct;
+
+  panels.forEach((el, i) => {
+    const d = i - active;               // distance from active
+    const ad = Math.abs(d);
+
+    const rot = clamp(-d * angleStep, -maxAngle, maxAngle);
+    const x   = d * stepX;
+    const z   = -ad * zStep;
+
+    // opacity + filter falloff
+    const op  = clamp(1 - ad * 0.12, 0.25, 1);
+    const sat = clamp(1 - ad * 0.08, 0.72, 1);
+
+    el.style.transform =
+      `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
+
+    el.style.opacity = op;
+    el.style.filter = `saturate(${sat}) contrast(${clamp(1 - ad*0.02, 0.92, 1)})`;
+    el.style.pointerEvents = (op < 0.28) ? 'none' : 'auto';
+  });
+
+  updateInfo();
+}
+
+/* Flow (button -> next) */
+function next(){
+  if (animating || works.length < 2) return;
+  animating = true;
+  active = (active + 1) % works.length;
+  layout3D();
+  // allow the CSS transition to finish
+  setTimeout(() => { animating = false; }, 680);
+}
+document.getElementById('arrowRight').addEventListener('click', (e) => {
+  e.preventDefault();
+  next();
+});
+
+/* Keyboard flow */
+window.addEventListener('keydown', (e) => {
+  const lbOpen = document.getElementById('lightbox').classList.contains('open');
+  if (lbOpen) return;
+  if (e.key === 'ArrowRight') next();
+  if (e.key === 'ArrowLeft'){
+    active = (active - 1 + works.length) % works.length;
+    layout3D();
+  }
+});
+
+/* ===== Pan + Zoom (desktop wheel + touch pinch) ===== */
+let pointers = new Map();
+let lastPan = null;
+let pinchStart = null;
+
+function setPointer(e){
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+}
+function updatePointer(e){
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+}
+function getTwoPointers(){
+  const arr = Array.from(pointers.values());
+  if (arr.length < 2) return null;
+  return [arr[0], arr[1]];
+}
+function dist(a,b){
+  const dx = a.x - b.x, dy = a.y - b.y;
+  return Math.hypot(dx, dy);
+}
+function mid(a,b){
+  return { x: (a.x+b.x)/2, y:(a.y+b.y)/2 };
+}
+function zoomAt(factor, cx, cy){
+  const newZoom = clamp(zoom * factor, zoomMin(), zoomMax());
+  const k = newZoom / zoom;
+  // keep the point under the finger/mouse stable while zooming
+  panX = (panX - cx) * k + cx;
+  panY = (panY - cy) * k + cy;
+  zoom = newZoom;
+  applyView();
+}
+
+/* Pointer events */
+viewport.addEventListener('pointerdown', (e) => {
+  viewport.setPointerCapture(e.pointerId);
+  setPointer(e);
+
+  if (pointers.size === 1){
+    lastPan = { x: e.clientX, y: e.clientY };
+    pinchStart = null;
+  } else if (pointers.size === 2){
+    const [p1, p2] = getTwoPointers();
+    pinchStart = {
+      d: dist(p1,p2),
+      z: zoom,
+      m: mid(p1,p2)
+    };
+    lastPan = null;
+  }
+});
+
+viewport.addEventListener('pointermove', (e) => {
+  if (!pointers.has(e.pointerId)) return;
+  updatePointer(e);
+
+  if (pointers.size === 1 && lastPan){
+    const dx = e.clientX - lastPan.x;
+    const dy = e.clientY - lastPan.y;
+    panX += dx;
+    panY += dy;
+    lastPan = { x: e.clientX, y: e.clientY };
+    applyView();
+  }
+
+  if (pointers.size >= 2){
+    const two = getTwoPointers();
+    if (!two) return;
+    const [p1, p2] = two;
+
+    const dNow = dist(p1,p2);
+    const mNow = mid(p1,p2);
+
+    if (!pinchStart){
+      pinchStart = { d: dNow, z: zoom, m: mNow };
+      return;
+    }
+    const factor = dNow / pinchStart.d;
+
+    // Zoom around midpoint
+    zoomAt(factor, mNow.x - viewport.getBoundingClientRect().left, mNow.y - viewport.getBoundingClientRect().top);
+
+    // Also allow gentle pan with the midpoint drift
+    const mdx = mNow.x - pinchStart.m.x;
+    const mdy = mNow.y - pinchStart.m.y;
+    panX += mdx;
+    panY += mdy;
+    pinchStart.m = mNow;
+
+    applyView();
+  }
+});
+
+function endPointer(e){
+  pointers.delete(e.pointerId);
+  if (pointers.size === 0){
+    lastPan = null;
+    pinchStart = null;
+  }
+  if (pointers.size === 1){
+    // reset lastPan to remaining pointer
+    const remaining = Array.from(pointers.values())[0];
+    lastPan = remaining ? { x: remaining.x, y: remaining.y } : null;
+    pinchStart = null;
+  }
+}
+viewport.addEventListener('pointerup', endPointer);
+viewport.addEventListener('pointercancel', endPointer);
+viewport.addEventListener('pointerleave', () => { /* keep capture-based */ });
+
+/* Wheel zoom (desktop/trackpad) */
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const rect = viewport.getBoundingClientRect();
+  const cx = e.clientX - rect.left;
+  const cy = e.clientY - rect.top;
+  const delta = -e.deltaY;
+  const factor = (delta > 0) ? 1.08 : 0.92;
+  zoomAt(factor, cx, cy);
+}, { passive:false });
+
+/* Reset */
+document.getElementById('resetView').addEventListener('click', (e) => {
+  e.preventDefault();
+  zoom = 1;
+  panX = 0;
+  panY = 0;
+  applyView();
+});
+
+/* init */
+applyView();
+layout3D();
+
+/* Keep layout correct on resize */
+window.addEventListener('resize', () => {
+  layout3D();
+});
 </script>
 </body>
 </html>
