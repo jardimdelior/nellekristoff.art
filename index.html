@@ -26,6 +26,9 @@
 
   /* film area */
   --maxFilmH: 78vh;
+  /* responsive safety for side slides so they never get clipped */
+  --sideX: clamp(10%, 16vw, 22%);
+  --sideRot: clamp(42deg, 6vw, 62deg);
 }
 
 /* base */
@@ -143,7 +146,8 @@ main{
   position:relative;
   touch-action:manipulation;
   perspective:1200px;
-  padding: 10px 0;
+  padding: clamp(12px, 2vw, 26px);
+  box-sizing: border-box;
 }
 
 .film-track{
@@ -160,6 +164,7 @@ main{
   width: var(--slideW);
   aspect-ratio: var(--a3);
   max-height: calc(var(--maxFilmH) - 20px);
+  max-width: calc(100% - 2 * clamp(12px, 2vw, 26px));
   display:grid;
   place-items:center;
   transform-style:preserve-3d;
@@ -180,7 +185,7 @@ main{
 
 /* LEFT (clear, clickable) */
 .slide.is-prev{
-  transform: translateX(-12%) translateZ(-40px) rotateY(62deg) scale(.92);
+  transform: translateX(calc(-1 * var(--sideX))) translateZ(-40px) rotateY(var(--sideRot)) scale(.92);
   opacity:1;
   filter:none;
   cursor:pointer;
@@ -188,7 +193,7 @@ main{
 
 /* RIGHT (softer) */
 .slide.is-next{
-  transform: translateX(12%) translateZ(-60px) rotateY(-62deg) scale(.92);
+  transform: translateX(var(--sideX)) translateZ(-60px) rotateY(calc(-1 * var(--sideRot))) scale(.92);
   opacity:.62;
   filter:saturate(.9) contrast(.96);
 }
@@ -364,6 +369,8 @@ footer{
 /* mobile */
 @media (max-width: 520px){
   :root{
+    --sideX: 10%;
+    --sideRot: 46deg;
     --slideW: 88vw;     /* center stays fully visible */
     --gap: 0px;
     --pad: 10px;
@@ -383,6 +390,8 @@ footer{
 /* short screens */
 @media (max-height: 650px){
   :root{ 
+    --sideX: 10%;
+    --sideRot: 46deg;
     --maxFilmH: 68vh;
     /* A3 landscape ratio */
     --a3: 420 / 297;
