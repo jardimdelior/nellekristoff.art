@@ -695,7 +695,6 @@ function zoomTo(newZoom, cx, cy){
   panY = (panY - cy) * k + cy;
   zoom = newZoom;
 }
-
 function zoomAt(factor, cx, cy){
   const newZoom = clamp(zoom * factor, zoomMin(), zoomMax());
   const k = newZoom / zoom;
