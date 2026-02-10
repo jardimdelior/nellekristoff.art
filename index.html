@@ -794,8 +794,7 @@ viewport.addEventListener('wheel', (e) => {
   const cy = e.clientY - rect.top;
   const delta = -e.deltaY;
   const factor = (delta > 0) ? 1.08 : 0.92;
-  const newZoom = pinchStart.z * (dNow / pinchStart.d);
-  zoomTo(newZoom, cx, cy);
+  zoomAt(factor, cx, cy);
 }, { passive:false });
 
 /* Reset */
