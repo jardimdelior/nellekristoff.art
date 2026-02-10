@@ -683,7 +683,7 @@ function zoomTo(newZoom, cx, cy){
   panX = (panX - cx) * k + cx;
   panY = (panY - cy) * k + cy;
   zoom = newZoom;
-  applyView();
+  applyViewRaf();
 }
 
 /* Pointer events */
