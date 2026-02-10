@@ -756,15 +756,15 @@ viewport.addEventListener('pointermove', (e) => {
     const newZoom = pinchStart.z * (dNow / pinchStart.d);
     zoomTo(newZoom, cx, cy);
 
-    // Also allow gentle pan with the midpoint drift
     const mdx = mNow.x - pinchStart.m.x;
     const mdy = mNow.y - pinchStart.m.y;
-    panX += mdx;
-    panY += mdy;
+
+    panX += mdx / zoom;
+    panY += mdy / zoom;
+
     pinchStart.m = mNow;
 
     applyViewRaf();
-  }
 });
 
 function endPointer(e){
