@@ -715,7 +715,7 @@ viewport.addEventListener('pointermove', (e) => {
     panX += dx;
     panY += dy;
     lastPan = { x: e.clientX, y: e.clientY };
-    applyView();
+    applyViewRaf();
   }
 
   if (pointers.size >= 2){
