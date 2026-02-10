@@ -694,7 +694,6 @@ function zoomTo(newZoom, cx, cy){
   panX = (panX - cx) * k + cx;
   panY = (panY - cy) * k + cy;
   zoom = newZoom;
-  applyViewRaf();
 }
 
 function zoomAt(factor, cx, cy){
