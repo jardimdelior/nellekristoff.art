@@ -730,10 +730,13 @@ viewport.addEventListener('pointermove', (e) => {
       pinchStart = { d: dNow, z: zoom, m: mNow };
       return;
     }
-    const factor = dNow / pinchStart.d;
+    const rect = viewport.getBoundingClientRect();
+    const cx = mNow.x - rect.left;
+    const cy = mNow.y - rect.top;
 
-    // Zoom around midpoint
-    zoomAt(factor, mNow.x - viewport.getBoundingClientRect().left, mNow.y - viewport.getBoundingClientRect().top);
+    // absolute zoom: startZoom * (currentDistance / startDistance)
+    const newZoom = pinchStart.z * (dNow / pinchStart.d);
+    zoomTo(newZoom, cx, cy);
 
     // Also allow gentle pan with the midpoint drift
     const mdx = mNow.x - pinchStart.m.x;
