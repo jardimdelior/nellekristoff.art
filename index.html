@@ -845,6 +845,29 @@ viewport.addEventListener('pointermove', (e) => {
     applyViewRaf();
   }
 
+async function requestMotionPermission(){
+  try{
+    // iOS sometimes exposes motion via DeviceMotionEvent permission
+    if (typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function'){
+      const res = await DeviceMotionEvent.requestPermission();
+      if (res === 'granted') { startMotion(); return; }
+    }
+
+    // iOS Safari classic path
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function'){
+      const res = await DeviceOrientationEvent.requestPermission();
+      if (res === 'granted') { startMotion(); return; }
+    }
+
+    // Non-iOS: just start
+    startMotion();
+  } catch (err){
+    alert('Motion permission not available here. Open in Safari on HTTPS and enable Motion & Orientation Access in Settings.');
+  }
+}
+
 // Fallback parallax (no permission needed)
 viewport.addEventListener('pointermove', (e) => {
   if (motionEnabled) return; // if real motion is on, skip
