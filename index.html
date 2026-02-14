@@ -936,6 +936,22 @@ function setTilt(rxDeg, ryDeg){
   screenEl.style.setProperty('--tiltY', ry.toFixed(2) + 'deg');
 }
 
+const bg = document.getElementById('spaceBg');
+
+function setBgMotion(rxDeg, ryDeg, px, py){
+  if (!bg) return;
+
+  // subtle + clamped
+  const rx = Math.max(-6, Math.min(6, rxDeg));
+  const ry = Math.max(-8, Math.min(8, ryDeg));
+
+  bg.style.setProperty('--bgTiltX', rx.toFixed(2) + 'deg');
+  bg.style.setProperty('--bgTiltY', ry.toFixed(2) + 'deg');
+
+  bg.style.setProperty('--bgPanX', (px || 0).toFixed(1) + 'px');
+  bg.style.setProperty('--bgPanY', (py || 0).toFixed(1) + 'px');
+}
+
 function startMotion(){
   if (motionEnabled) return;
   motionEnabled = true;
