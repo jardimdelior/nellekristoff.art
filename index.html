@@ -492,17 +492,18 @@ footer{
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
-    <div class="space-viewport" id="viewport">
-  <div class="screen" id="screen">
-    <div class="hint">Drag to pan · Pinch/scroll to zoom · → button flows one-by-one</div>
+   <div class="space-viewport" id="viewport">
+      <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
+       <div class="screen" id="screen">
+         <div class="hint">Drag to pan · Pinch/scroll to zoom · → button flows one-by-one</div>
 
-    <div class="space" id="space">
-      <div class="leporello" id="leporello"></div>
+         <div class="space" id="space">
+       <div class="leporello" id="leporello"></div>
     </div>
 
-<button class="collect-btn" id="motionBtn" style="position:absolute;left:12px;bottom:12px;z-index:60;">
-  Enable motion
-</button>
+     <button class="collect-btn" id="motionBtn" style="position:absolute;left:12px;bottom:12px;z-index:60;">
+      Enable motion
+     </button>
 
     <div class="arrow-slot">
       <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
