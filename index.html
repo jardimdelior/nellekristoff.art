@@ -958,16 +958,19 @@ function startMotion(){
 
   // Android + many browsers: DeviceOrientationEvent works without requestPermission
   window.addEventListener('deviceorientation', (e) => {
-    // beta: front-back, gamma: left-right
-    const beta = e.beta ?? 0;   // [-180..180]
-    const gamma = e.gamma ?? 0; // [-90..90]
+  const beta  = e.beta ?? 0;   // front-back
+  const gamma = e.gamma ?? 0;  // left-right
 
-    // map to subtle degrees
-    const rx = (beta - 20) * 0.08;   // adjust offset/sensitivity to taste
-    const ry = gamma * 0.10;
+  // tilt: map to degrees
+  const rx = (beta - 20) * 0.08;
+  const ry = gamma * 0.10;
 
-    setTilt(rx, ry);
-  }, { passive: true });
+  // tiny parallax shift too (feels like depth)
+  const px = gamma * 0.35;     // px
+  const py = (beta - 20) * 0.25;
+
+  setBgMotion(rx, ry, px, py);
+}, { passive: true });
 
   if (motionBtn) motionBtn.textContent = 'Motion enabled';
   if (motionBtn) motionBtn.style.opacity = '0.75';
