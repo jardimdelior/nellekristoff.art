@@ -882,6 +882,64 @@ layout3D();
 window.addEventListener('resize', () => {
   layout3D();
 });
+
+const screenEl = document.getElementById('screen');
+const motionBtn = document.getElementById('motionBtn');
+
+let motionEnabled = false;
+
+function setTilt(rxDeg, ryDeg){
+  // clamp for subtlety
+  const rx = Math.max(-6, Math.min(6, rxDeg));
+  const ry = Math.max(-8, Math.min(8, ryDeg));
+  screenEl.style.setProperty('--tiltX', rx.toFixed(2) + 'deg');
+  screenEl.style.setProperty('--tiltY', ry.toFixed(2) + 'deg');
+}
+
+function startMotion(){
+  if (motionEnabled) return;
+  motionEnabled = true;
+
+  // Android + many browsers: DeviceOrientationEvent works without requestPermission
+  window.addEventListener('deviceorientation', (e) => {
+    // beta: front-back, gamma: left-right
+    const beta = e.beta ?? 0;   // [-180..180]
+    const gamma = e.gamma ?? 0; // [-90..90]
+
+    // map to subtle degrees
+    const rx = (beta - 20) * 0.08;   // adjust offset/sensitivity to taste
+    const ry = gamma * 0.10;
+
+    setTilt(rx, ry);
+  }, { passive: true });
+
+  if (motionBtn) motionBtn.textContent = 'Motion enabled';
+  if (motionBtn) motionBtn.style.opacity = '0.75';
+}
+
+async function requestMotionPermission(){
+  // iOS Safari requires explicit permission
+  try{
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function'){
+      const res = await DeviceOrientationEvent.requestPermission();
+      if (res === 'granted') startMotion();
+      else alert('Motion permission not granted.');
+    } else {
+      startMotion();
+    }
+  } catch (err){
+    alert('Motion not available here (needs HTTPS and permission).');
+  }
+}
+
+if (motionBtn){
+  motionBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    requestMotionPermission();
+  });
+}
+
 </script>
 </body>
 </html>
