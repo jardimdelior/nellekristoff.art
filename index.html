@@ -148,7 +148,7 @@ main{
   position:relative;
 }
 
-/* The “stage”: clips only the outside space, not your images (they stay inside by design) */
+/* The “stage”: keep it FLAT for stable interaction */
 .space-viewport{
   width:100%;
   height: var(--maxFilmH);
@@ -160,14 +160,13 @@ main{
   backdrop-filter: blur(8px);
 
   overflow:hidden;
-  transform: perspective(var(--persp)) rotateX(7deg) rotateY(-2deg);
 
   /* We handle pan/zoom ourselves */
   touch-action: none;
   user-select: none;
 }
 
-/* Background layer that “bends” like a cinema screen */
+/* Background “cinema screen” layer (moves/bends; panels stay fixed) */
 .space-bg{
   position:absolute;
   inset:-8%;
@@ -175,7 +174,6 @@ main{
   pointer-events:none;
   z-index:0;
 
-  /* the cinema look */
   background:
     radial-gradient(140% 90% at 50% 55%,
       rgba(255,255,255,.10) 0%,
@@ -192,7 +190,7 @@ main{
   transform:
     perspective(var(--persp))
     rotateX(calc(7deg + var(--bgTiltX, 0deg)))
-    rotateY(calc(0deg + var(--bgTiltY, 0deg)))
+    rotateY(calc(-2deg + var(--bgTiltY, 0deg)))
     translate3d(var(--bgPanX, 0px), var(--bgPanY, 0px), 0);
 
   transition: transform 120ms ease-out;
@@ -200,73 +198,10 @@ main{
   opacity:.95;
 }
 
-/* Make sure your content stays above the background */
-.hint, .space, .arrow-slot{
+/* Keep content above background */
+.hint, .space, .arrow-slot, #motionBtn{
   position:relative;
   z-index:2;
-}
-
-/* inner curved cinema screen */
-.screen{
-  position:absolute;
-  inset:0;
-  border-radius:14px;
-  transform-style:preserve-3d;
-
-  /* base bend + dynamic phone tilt */
-  transform:
-    perspective(var(--persp))
-    rotateX(calc(var(--baseRX, 7deg) + var(--tiltX, 0deg)))
-    rotateY(calc(var(--baseRY, 0deg) + var(--tiltY, 0deg)));
-  transition: transform 120ms ease-out;
-  will-change: transform;
-}
-
-:root{ --baseRX: 7deg; --baseRY: 0deg;
-}
-
-  /* the bend */
-  transform: perspective(var(--persp)) rotateX(7deg);
-}
-
-/* extra cinema shading: subtle vignette + edge rolloff */
-.screen::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:14px;
-  pointer-events:none;
-
-  /* soft vignette + edge depth */
-  background:
-    radial-gradient(140% 90% at 50% 55%,
-      rgba(255,255,255,.10) 0%,
-      rgba(0,0,0,.08) 58%,
-      rgba(0,0,0,.22) 100%);
-
-  /* adds that “bent glass/screen” vibe */
-  box-shadow:
-    inset 0 10px 30px rgba(255,255,255,.10),
-    inset 0 -18px 44px rgba(0,0,0,.16);
-  mix-blend-mode: multiply;
-  opacity:.75;
-}
-
-/* optional: slight highlight strip like a projection glare */
-.screen::after{
-  content:"";
-  position:absolute;
-  left:6%;
-  right:6%;
-  top:10%;
-  height:18%;
-  border-radius:999px;
-  pointer-events:none;
-  background: radial-gradient(closest-side,
-    rgba(255,255,255,.14),
-    rgba(255,255,255,0));
-  opacity:.6;
-  filter: blur(2px);
 }
 
 /* The zoomable + pannable space */
@@ -276,14 +211,17 @@ main{
   display:grid;
   place-items:center;
   transform-origin: 50% 50%;
-  transform: translate3d(var(--panX, 0px), var(--panY, 0px), 0) scale(var(--zoom, 1));
+
+  /* IMPORTANT: scale first, then translate (prevents “pan exploding” while zooming) */
+  transform: scale(var(--zoom, 1)) translate3d(var(--panX, 0px), var(--panY, 0px), 0);
+
   will-change: transform;
 }
 
 /* The leporello track (3D) */
 .leporello{
   position:relative;
-  width: 1px;  /* we position panels absolutely in 3D */
+  width: 1px;
   height: 1px;
   transform-style: preserve-3d;
 }
@@ -344,7 +282,7 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* Arrow bottom-right (flow button) */
+/* Arrow bottom-right */
 .arrow-slot{
   position:absolute;
   right: 12px;
@@ -384,7 +322,7 @@ main{
   backdrop-filter: blur(6px);
 }
 
-/* info row under the viewport (like your original) */
+/* info row under the viewport */
 .info-row{
   width:100%;
   display:grid;
@@ -487,7 +425,7 @@ footer{
   :root{
     --panelW: 86vw;
     --maxFilmH: 72vh;
-    --persp: 3200px; /* more spacious */
+    --persp: 3200px;
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
@@ -531,28 +469,28 @@ footer{
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
-   <div class="space-viewport" id="viewport">
+    <div class="space-viewport" id="viewport">
       <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
-       <div class="screen" id="screen">
-         <div class="hint">Drag to pan · Pinch/scroll to zoom · → button flows one-by-one</div>
 
-         <div class="space" id="space">
-       <div class="leporello" id="leporello"></div>
-    </div>
+      <div class="hint">Drag to pan · Pinch/scroll to zoom · → button flows one-by-one</div>
 
-     <button class="collect-btn" id="motionBtn" style="position:absolute;left:12px;bottom:12px;z-index:60;">
-      Enable motion
-     </button>
+      <div class="space" id="space">
+        <div class="leporello" id="leporello"></div>
+      </div>
 
-    <div class="arrow-slot">
-      <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 6l6 6-6 6"/>
-        </svg>
+      <button class="collect-btn" id="motionBtn"
+        style="position:absolute;left:12px;bottom:12px;z-index:60;">
+        Enable motion
       </button>
+
+      <div class="arrow-slot">
+        <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </div>
     </div>
-  </div>
-</div>
 
     <div class="info-row">
       <div class="info">
@@ -630,14 +568,11 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeLightbox();
 });
 
-/* Works (your list) */
+/* Works */
 const works = [
   { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-
-  /* add many more here */
-  // { src:"images/Untitled4.png", title:"Untitled 4", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 
 /* preload */
@@ -646,7 +581,7 @@ works.forEach(w => { const i = new Image(); i.src = w.src; });
 /* Build panels */
 const lep = document.getElementById('leporello');
 const panels = [];
-works.forEach((w, i) => {
+works.forEach((w) => {
   const el = document.createElement('div');
   el.className = 'panel';
   el.tabIndex = 0;
@@ -666,7 +601,7 @@ works.forEach((w, i) => {
 
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-/* Read CSS vars (we re-read on resize) */
+/* Read CSS vars */
 function cssVar(name){
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
@@ -685,7 +620,6 @@ let zoom = 1;
 let panX = 0;
 let panY = 0;
 
-/* zoom limits from CSS */
 function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
 function zoomMax(){ return num(cssVar('--zoomMax')) || 2.2; }
 
@@ -693,12 +627,10 @@ function applyView(){
   space.style.setProperty('--zoom', zoom);
   space.style.setProperty('--panX', panX + 'px');
   space.style.setProperty('--panY', panY + 'px');
-
   document.getElementById('zoomReadout').textContent = `Zoom ${Math.round(zoom*100)}%`;
 }
 
 let rafPending = false;
-
 function applyViewRaf(){
   if (rafPending) return;
   rafPending = true;
@@ -716,33 +648,30 @@ function updateInfo(){
   document.getElementById('indexReadout').textContent = `${active+1} / ${works.length}`;
 }
 
-/* 3D layout: leporello flow with depth + tilt */
+/* 3D layout */
 function layout3D(){
   const panelW = numPx(cssVar('--panelW'));
   const angleStep = numDeg(cssVar('--angleStep'));
   const maxAngle  = numDeg(cssVar('--maxAngle'));
   const zStep     = numPx(cssVar('--zStep'));
-  const xStepPct  = num(cssVar('--xStep')) / 100;  // e.g. 0.78
+  const xStepPct  = num(cssVar('--xStep')) / 100;
   const stepX     = panelW * xStepPct;
 
   panels.forEach((el, i) => {
-    const d = i - active;               // distance from active
+    const d = i - active;
     const ad = Math.abs(d);
 
     const rot = clamp(-d * angleStep, -maxAngle, maxAngle);
     const x   = d * stepX;
     const z   = -ad * zStep;
 
-    // opacity + filter falloff
-    const op  = clamp(1 - ad * 0.12, 0.25, 1);
-    const sat = clamp(1 - ad * 0.08, 0.72, 1);
+    /* Never disappear */
+    const op  = clamp(1 - ad * 0.05, 0.72, 1);
 
-    el.style.transform =
-      `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
-
+    el.style.transform = `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
     el.style.opacity = op;
-    el.style.filter = `saturate(${sat}) contrast(${clamp(1 - ad*0.02, 0.92, 1)})`;
-    el.style.pointerEvents = (op < 0.28) ? 'none' : 'auto';
+    el.style.filter = 'none';
+    el.style.pointerEvents = 'auto';
   });
 
   updateInfo();
@@ -754,7 +683,6 @@ function next(){
   animating = true;
   active = (active + 1) % works.length;
   layout3D();
-  // allow the CSS transition to finish
   setTimeout(() => { animating = false; }, 680);
 }
 document.getElementById('arrowRight').addEventListener('click', (e) => {
@@ -773,14 +701,12 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-/* ===== Pan + Zoom (desktop wheel + touch pinch) ===== */
+/* ===== Pan + Zoom ===== */
 let pointers = new Map();
 let lastPan = null;
 let pinchStart = null;
 
-function setPointer(e){
-  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-}
+function setPointer(e){ pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); }
 function updatePointer(e){
   if (!pointers.has(e.pointerId)) return;
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -790,13 +716,9 @@ function getTwoPointers(){
   if (arr.length < 2) return null;
   return [arr[0], arr[1]];
 }
-function dist(a,b){
-  const dx = a.x - b.x, dy = a.y - b.y;
-  return Math.hypot(dx, dy);
-}
-function mid(a,b){
-  return { x: (a.x+b.x)/2, y:(a.y+b.y)/2 };
-}
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
+
 function zoomTo(newZoom, cx, cy){
   newZoom = clamp(newZoom, zoomMin(), zoomMax());
   const k = newZoom / zoom;
@@ -823,11 +745,7 @@ viewport.addEventListener('pointerdown', (e) => {
     pinchStart = null;
   } else if (pointers.size === 2){
     const [p1, p2] = getTwoPointers();
-    pinchStart = {
-      d: dist(p1,p2),
-      z: zoom,
-      m: mid(p1,p2)
-    };
+    pinchStart = { d: dist(p1,p2), z: zoom, m: mid(p1,p2) };
     lastPan = null;
   }
 });
@@ -845,45 +763,6 @@ viewport.addEventListener('pointermove', (e) => {
     applyViewRaf();
   }
 
-async function requestMotionPermission(){
-  try{
-    // iOS sometimes exposes motion via DeviceMotionEvent permission
-    if (typeof DeviceMotionEvent !== 'undefined' &&
-        typeof DeviceMotionEvent.requestPermission === 'function'){
-      const res = await DeviceMotionEvent.requestPermission();
-      if (res === 'granted') { startMotion(); return; }
-    }
-
-    // iOS Safari classic path
-    if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function'){
-      const res = await DeviceOrientationEvent.requestPermission();
-      if (res === 'granted') { startMotion(); return; }
-    }
-
-    // Non-iOS: just start
-    startMotion();
-  } catch (err){
-    alert('Motion permission not available here. Open in Safari on HTTPS and enable Motion & Orientation Access in Settings.');
-  }
-}
-
-// Fallback parallax (no permission needed)
-viewport.addEventListener('pointermove', (e) => {
-  if (motionEnabled) return; // if real motion is on, skip
-  const rect = viewport.getBoundingClientRect();
-  const nx = (e.clientX - rect.left) / rect.width  - 0.5; // -0.5..0.5
-  const ny = (e.clientY - rect.top)  / rect.height - 0.5;
-
-  // map to subtle motion
-  const rx = ny * -6;        // degrees
-  const ry = nx *  8;        // degrees
-  const px = nx * 18;        // px
-  const py = ny * 14;        // px
-
-  setBgMotion(rx, ry, px, py);
-}, { passive:true });
-
   if (pointers.size >= 2){
     const two = getTwoPointers();
     if (!two) return;
@@ -896,19 +775,20 @@ viewport.addEventListener('pointermove', (e) => {
       pinchStart = { d: dNow, z: zoom, m: mNow };
       return;
     }
+
     const rect = viewport.getBoundingClientRect();
     const cx = mNow.x - rect.left;
     const cy = mNow.y - rect.top;
 
-    // absolute zoom: startZoom * (currentDistance / startDistance)
     const newZoom = pinchStart.z * (dNow / pinchStart.d);
     zoomTo(newZoom, cx, cy);
 
     const mdx = mNow.x - pinchStart.m.x;
     const mdy = mNow.y - pinchStart.m.y;
 
-    panX += mdx / zoom;
-    panY += mdy / zoom;
+    /* pan is in screen px (don’t divide by zoom) */
+    panX += mdx;
+    panY += mdy;
 
     pinchStart.m = mNow;
 
@@ -923,7 +803,6 @@ function endPointer(e){
     pinchStart = null;
   }
   if (pointers.size === 1){
-    // reset lastPan to remaining pointer
     const remaining = Array.from(pointers.values())[0];
     lastPan = remaining ? { x: remaining.x, y: remaining.y } : null;
     pinchStart = null;
@@ -931,16 +810,14 @@ function endPointer(e){
 }
 viewport.addEventListener('pointerup', endPointer);
 viewport.addEventListener('pointercancel', endPointer);
-viewport.addEventListener('pointerleave', () => { /* keep capture-based */ });
 
-/* Wheel zoom (desktop/trackpad) */
+/* Wheel zoom */
 viewport.addEventListener('wheel', (e) => {
   e.preventDefault();
   const rect = viewport.getBoundingClientRect();
   const cx = e.clientX - rect.left;
   const cy = e.clientY - rect.top;
-  const delta = -e.deltaY;
-  const factor = (delta > 0) ? 1.08 : 0.92;
+  const factor = (e.deltaY < 0) ? 1.08 : 0.92;
   zoomAt(factor, cx, cy);
 }, { passive:false });
 
@@ -956,37 +833,20 @@ document.getElementById('resetView').addEventListener('click', (e) => {
 /* init */
 applyView();
 layout3D();
+window.addEventListener('resize', () => layout3D());
 
-/* Keep layout correct on resize */
-window.addEventListener('resize', () => {
-  layout3D();
-});
-
-const screenEl = document.getElementById('screen');
+/* ===== Motion background (optional) ===== */
+const bg = document.getElementById('spaceBg');
 const motionBtn = document.getElementById('motionBtn');
 
 let motionEnabled = false;
 
-function setTilt(rxDeg, ryDeg){
-  // clamp for subtlety
-  const rx = Math.max(-6, Math.min(6, rxDeg));
-  const ry = Math.max(-8, Math.min(8, ryDeg));
-  screenEl.style.setProperty('--tiltX', rx.toFixed(2) + 'deg');
-  screenEl.style.setProperty('--tiltY', ry.toFixed(2) + 'deg');
-}
-
-const bg = document.getElementById('spaceBg');
-
 function setBgMotion(rxDeg, ryDeg, px, py){
   if (!bg) return;
-
-  // subtle + clamped
   const rx = Math.max(-6, Math.min(6, rxDeg));
   const ry = Math.max(-8, Math.min(8, ryDeg));
-
   bg.style.setProperty('--bgTiltX', rx.toFixed(2) + 'deg');
   bg.style.setProperty('--bgTiltY', ry.toFixed(2) + 'deg');
-
   bg.style.setProperty('--bgPanX', (px || 0).toFixed(1) + 'px');
   bg.style.setProperty('--bgPanY', (py || 0).toFixed(1) + 'px');
 }
@@ -995,39 +855,40 @@ function startMotion(){
   if (motionEnabled) return;
   motionEnabled = true;
 
-  // Android + many browsers: DeviceOrientationEvent works without requestPermission
   window.addEventListener('deviceorientation', (e) => {
-  const beta  = e.beta ?? 0;   // front-back
-  const gamma = e.gamma ?? 0;  // left-right
+    const beta  = e.beta ?? 0;
+    const gamma = e.gamma ?? 0;
 
-  // tilt: map to degrees
-  const rx = (beta - 20) * 0.08;
-  const ry = gamma * 0.10;
+    const rx = (beta - 20) * 0.08;
+    const ry = gamma * 0.10;
 
-  // tiny parallax shift too (feels like depth)
-  const px = gamma * 0.35;     // px
-  const py = (beta - 20) * 0.25;
+    const px = gamma * 0.35;
+    const py = (beta - 20) * 0.25;
 
-  setBgMotion(rx, ry, px, py);
-}, { passive: true });
+    setBgMotion(rx, ry, px, py);
+  }, { passive:true });
 
-  if (motionBtn) motionBtn.textContent = 'Motion enabled';
-  if (motionBtn) motionBtn.style.opacity = '0.75';
+  if (motionBtn){
+    motionBtn.textContent = 'Motion enabled';
+    motionBtn.style.opacity = '0.75';
+  }
 }
 
 async function requestMotionPermission(){
-  // iOS Safari requires explicit permission
   try{
+    if (typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function'){
+      const res = await DeviceMotionEvent.requestPermission();
+      if (res === 'granted') { startMotion(); return; }
+    }
     if (typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function'){
       const res = await DeviceOrientationEvent.requestPermission();
-      if (res === 'granted') startMotion();
-      else alert('Motion permission not granted.');
-    } else {
-      startMotion();
+      if (res === 'granted') { startMotion(); return; }
     }
+    startMotion();
   } catch (err){
-    alert('Motion not available here (needs HTTPS and permission).');
+    alert('Motion permission blocked. On iPhone: Settings → Safari → Motion & Orientation Access → ON, and open on HTTPS in Safari.');
   }
 }
 
@@ -1038,6 +899,14 @@ if (motionBtn){
   });
 }
 
+/* Fallback parallax (finger) */
+viewport.addEventListener('pointermove', (e) => {
+  if (motionEnabled) return;
+  const rect = viewport.getBoundingClientRect();
+  const nx = (e.clientX - rect.left) / rect.width  - 0.5;
+  const ny = (e.clientY - rect.top)  / rect.height - 0.5;
+  setBgMotion(ny * -6, nx * 8, nx * 18, ny * 14);
+}, { passive:true });
 </script>
 </body>
 </html>
