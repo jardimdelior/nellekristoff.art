@@ -971,7 +971,7 @@ viewport.addEventListener('pointermove', (e) => {
   const rect = viewport.getBoundingClientRect();
   const nx = (e.clientX - rect.left) / rect.width  - 0.5;
   const ny = (e.clientY - rect.top)  / rect.height - 0.5;
-  setBgMotion(ny * -7, nx * 10, nx * 26, ny * 20);
+  setBgTarget(ny * -7, nx * 10, nx * 26, ny * 20);
 }, { passive:true });
 </script>
 </body>
