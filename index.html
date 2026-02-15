@@ -200,6 +200,44 @@ main{
   opacity:.95;
 }
 
+.space-bg::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:14px;
+  pointer-events:none;
+
+  /* vignette that makes the bend visible */
+  background:
+    radial-gradient(140% 95% at calc(50% + (var(--bgPanX,0px) * 0.6))
+                          calc(52% + (var(--bgPanY,0px) * 0.6)),
+      rgba(255,255,255,.14) 0%,
+      rgba(0,0,0,.10) 55%,
+      rgba(0,0,0,.30) 100%);
+
+  opacity: var(--shade);
+  mix-blend-mode: multiply;
+}
+
+.space-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:14px;
+  pointer-events:none;
+
+  /* moving “projection glare” band */
+  background:
+    radial-gradient(60% 20% at calc(50% + (var(--bgPanX,0px) * 0.8))
+                         calc(18% + (var(--bgPanY,0px) * 0.5)),
+      rgba(255,255,255,.22),
+      rgba(255,255,255,0) 70%);
+
+  opacity: var(--glare);
+  mix-blend-mode: screen;
+  filter: blur(2px);
+}
+
 /* Keep content above background */
 .hint, .space, .arrow-slot, #motionBtn{
   position:relative;
