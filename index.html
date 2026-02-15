@@ -931,7 +931,7 @@ function startMotion(){
     const px = gamma * 0.35;
     const py = (beta - 20) * 0.25;
 
-    setBgMotion(rx, ry, px, py);
+    setBgTarget(rx, ry, px, py);
   }, { passive:true });
 
   if (motionBtn){
