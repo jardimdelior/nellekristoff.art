@@ -881,6 +881,32 @@ const motionBtn = document.getElementById('motionBtn');
 
 let motionEnabled = false;
 
+// ===== Inertia (cinema float) =====
+let tRx = 0, tRy = 0, tPx = 0, tPy = 0;   // targets
+let cRx = 0, cRy = 0, cPx = 0, cPy = 0;   // current
+let inertiaOn = true;
+
+// 0.08 = slow float, 0.18 = snappier
+const inertia = 0.12;
+
+function setBgTarget(rx, ry, px, py){
+  tRx = rx; tRy = ry; tPx = px; tPy = py;
+}
+
+function tickBg(){
+  if (inertiaOn){
+    cRx += (tRx - cRx) * inertia;
+    cRy += (tRy - cRy) * inertia;
+    cPx += (tPx - cPx) * inertia;
+    cPy += (tPy - cPy) * inertia;
+    setBgMotion(cRx, cRy, cPx, cPy);
+  } else {
+    setBgMotion(tRx, tRy, tPx, tPy);
+  }
+  requestAnimationFrame(tickBg);
+}
+requestAnimationFrame(tickBg);
+
 function setBgMotion(rxDeg, ryDeg, px, py){
   if (!bg) return;
   const rx = Math.max(-6, Math.min(6, rxDeg));
