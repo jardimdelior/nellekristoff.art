@@ -894,6 +894,14 @@ function setBgTarget(rx, ry, px, py){
   ensureBgAnim(); // START only when needed
 }
 
+/* Pause animation when tab not visible (energy saving) */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && bgRaf){
+    cancelAnimationFrame(bgRaf);
+    bgRaf = null;
+  }
+});
+
 flet bgRaf = null;
 
 function tickBg(){
