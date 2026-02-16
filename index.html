@@ -891,6 +891,7 @@ const inertia = 0.12;
 
 function setBgTarget(rx, ry, px, py){
   tRx = rx; tRy = ry; tPx = px; tPy = py;
+  ensureBgAnim(); // START only when needed
 }
 
 flet bgRaf = null;
