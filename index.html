@@ -885,6 +885,7 @@ let motionEnabled = false;
 let tRx = 0, tRy = 0, tPx = 0, tPy = 0;   // targets
 let cRx = 0, cRy = 0, cPx = 0, cPy = 0;   // current
 let inertiaOn = true;
+let bgRaf = null;
 
 // 0.08 = slow float, 0.18 = snappier
 const inertia = 0.12;
@@ -901,8 +902,6 @@ document.addEventListener('visibilitychange', () => {
     bgRaf = null;
   }
 });
-
-flet bgRaf = null;
 
 function tickBg(){
   // ease toward targets
