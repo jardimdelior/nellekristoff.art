@@ -893,7 +893,10 @@ function setBgTarget(rx, ry, px, py){
   tRx = rx; tRy = ry; tPx = px; tPy = py;
 }
 
+flet bgRaf = null;
+
 function tickBg(){
+  // ease toward targets
   if (inertiaOn){
     cRx += (tRx - cRx) * inertia;
     cRy += (tRy - cRy) * inertia;
@@ -903,9 +906,26 @@ function tickBg(){
   } else {
     setBgMotion(tRx, tRy, tPx, tPy);
   }
-  requestAnimationFrame(tickBg);
+
+  // stop when "close enough" AND motion is not enabled
+  const still =
+    Math.abs(tRx - cRx) < 0.01 &&
+    Math.abs(tRy - cRy) < 0.01 &&
+    Math.abs(tPx - cPx) < 0.1  &&
+    Math.abs(tPy - cPy) < 0.1;
+
+  if (!motionEnabled && still){
+    bgRaf = null;
+    return; // STOP the loop
+  }
+
+  bgRaf = requestAnimationFrame(tickBg);
 }
-requestAnimationFrame(tickBg);
+
+function ensureBgAnim(){
+  if (bgRaf) return;
+  bgRaf = requestAnimationFrame(tickBg);
+}
 
 function setBgMotion(rxDeg, ryDeg, px, py){
   if (!bg) return;
