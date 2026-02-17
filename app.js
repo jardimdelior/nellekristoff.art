@@ -1,8 +1,8 @@
-window.addEventListener("load", () => {
+document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.classList.add("ready");
 });
 
-/* Make these available for inline onclick */
+/* for inline onclick */
 window.contact = function contact(e){
   if (e) e.preventDefault();
   window.location.href = "mailto:nellekristoff@gmail.com";
@@ -19,7 +19,6 @@ function openLightbox(src, titleText){
   const lightbox = document.getElementById('lightbox');
   const img = document.getElementById('lightboxImg');
   if (!lightbox || !img) return;
-
   img.src = src;
   img.alt = titleText || "";
   lightbox.classList.add('open');
@@ -29,21 +28,19 @@ function openLightbox(src, titleText){
 /* Menu */
 const menuBtn = document.getElementById('menuBtn');
 const menu = document.getElementById('menu');
-
 if (menuBtn && menu){
   menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     const open = menu.classList.toggle('open');
     menuBtn.setAttribute('aria-expanded', String(open));
   });
-
   document.addEventListener('click', () => {
     menu.classList.remove('open');
     menuBtn.setAttribute('aria-expanded', 'false');
   });
 }
 
-/* Close lightbox on Escape */
+/* Escape closes lightbox */
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') window.closeLightbox();
 });
@@ -55,13 +52,10 @@ const works = [
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 
-/* preload */
 works.forEach(w => { const i = new Image(); i.src = w.src; });
 
-/* Build panels */
 const lep = document.getElementById('leporello');
 const panels = [];
-
 if (lep){
   works.forEach((w) => {
     const el = document.createElement('div');
@@ -75,10 +69,7 @@ if (lep){
     `;
     el.addEventListener('click', () => openLightbox(w.src, w.title));
     el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openLightbox(w.src, w.title);
-      }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(w.src, w.title); }
     });
     lep.appendChild(el);
     panels.push(el);
@@ -86,9 +77,7 @@ if (lep){
 }
 
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-function cssVar(name){
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
 function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
 function num(v){ return parseFloat(v) || 0; }
@@ -96,7 +85,6 @@ function num(v){ return parseFloat(v) || 0; }
 let active = 0;
 let animating = false;
 
-/* View (pan/zoom) */
 const viewport = document.getElementById('viewport');
 const spacePan  = document.getElementById('spacePan');
 const spaceZoom = document.getElementById('spaceZoom');
@@ -108,11 +96,12 @@ let panY = 0;
 function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
 function zoomMax(){ return num(cssVar('--zoomMax')) || 2.2; }
 
+/* tighter, correct bounds */
 function clampPan(){
   if (!viewport) return;
   const rect = viewport.getBoundingClientRect();
-  const maxX = (rect.width  * (zoom - 1)) * 0.55;
-  const maxY = (rect.height * (zoom - 1)) * 0.55;
+  const maxX = (rect.width  * (zoom - 1)) / 2;
+  const maxY = (rect.height * (zoom - 1)) / 2;
   panX = clamp(panX, -maxX, maxX);
   panY = clamp(panY, -maxY, maxY);
 }
@@ -122,7 +111,6 @@ function applyView(){
   spaceZoom.style.setProperty('--zoom', zoom);
   spacePan.style.setProperty('--panX', panX + 'px');
   spacePan.style.setProperty('--panY', panY + 'px');
-
   const zr = document.getElementById('zoomReadout');
   if (zr) zr.textContent = `Zoom ${Math.round(zoom*100)}%`;
 }
@@ -143,17 +131,14 @@ function updateInfo(){
   const s = document.getElementById('workStatus');
   const c = document.getElementById('collectBtn');
   const i = document.getElementById('indexReadout');
-
   if (t) t.textContent = w ? w.title : 'Untitled';
   if (s) s.textContent = w ? w.status : '';
   if (c) c.href = w ? w.collect : 'https://collect.nellekristoff.art';
   if (i) i.textContent = `${active+1} / ${works.length}`;
 }
 
-/* 3D layout */
 function layout3D(){
   if (!panels.length) return;
-
   const panelW = numPx(cssVar('--panelW'));
   const angleStep = numDeg(cssVar('--angleStep'));
   const maxAngle  = numDeg(cssVar('--maxAngle'));
@@ -164,23 +149,17 @@ function layout3D(){
   panels.forEach((el, i) => {
     const d = i - active;
     const ad = Math.abs(d);
-
     const rot = clamp(-d * angleStep, -maxAngle, maxAngle);
     const x   = d * stepX;
     const z   = -ad * zStep;
-
     const op  = clamp(1 - ad * 0.05, 0.72, 1);
-
     el.style.transform = `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
     el.style.opacity = op;
-    el.style.filter = 'none';
-    el.style.pointerEvents = 'auto';
   });
 
   updateInfo();
 }
 
-/* Flow */
 function next(){
   if (animating || works.length < 2) return;
   animating = true;
@@ -191,18 +170,13 @@ function next(){
 
 const arrowRight = document.getElementById('arrowRight');
 if (arrowRight){
-  arrowRight.addEventListener('click', (e) => {
-    e.preventDefault();
-    next();
-  });
+  arrowRight.addEventListener('click', (e) => { e.preventDefault(); next(); });
 }
 
-/* Keyboard flow */
 window.addEventListener('keydown', (e) => {
   const lb = document.getElementById('lightbox');
   const lbOpen = lb && lb.classList.contains('open');
   if (lbOpen) return;
-
   if (e.key === 'ArrowRight') next();
   if (e.key === 'ArrowLeft'){
     active = (active - 1 + works.length) % works.length;
@@ -210,7 +184,7 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-/* Pan + Zoom */
+/* pan + zoom */
 let pointers = new Map();
 let lastPan = null;
 let pinchStart = null;
@@ -251,7 +225,6 @@ if (viewport){
   viewport.addEventListener('pointerdown', (e) => {
     viewport.setPointerCapture(e.pointerId);
     setPointer(e);
-
     if (pointers.size === 1){
       lastPan = { x: e.clientX, y: e.clientY };
       pinchStart = null;
@@ -296,12 +269,8 @@ if (viewport){
       const newZoom = pinchStart.z * (dNow / pinchStart.d);
       zoomTo(newZoom, cx, cy);
 
-      const mdx = mNow.x - pinchStart.m.x;
-      const mdy = mNow.y - pinchStart.m.y;
-
-      panX += mdx;
-      panY += mdy;
-
+      panX += (mNow.x - pinchStart.m.x);
+      panY += (mNow.y - pinchStart.m.y);
       pinchStart.m = mNow;
 
       clampPan();
@@ -311,71 +280,51 @@ if (viewport){
 
   function endPointer(e){
     pointers.delete(e.pointerId);
-    if (pointers.size === 0){
-      lastPan = null;
-      pinchStart = null;
-    }
+    if (pointers.size === 0){ lastPan = null; pinchStart = null; }
     if (pointers.size === 1){
       const remaining = Array.from(pointers.values())[0];
       lastPan = remaining ? { x: remaining.x, y: remaining.y } : null;
       pinchStart = null;
     }
   }
-
   viewport.addEventListener('pointerup', endPointer);
   viewport.addEventListener('pointercancel', endPointer);
 
   viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
     const rect = viewport.getBoundingClientRect();
-    const cx = e.clientX - rect.left;
-    const cy = e.clientY - rect.top;
-    const factor = (e.deltaY < 0) ? 1.08 : 0.92;
-    zoomAt(factor, cx, cy);
+    zoomAt((e.deltaY < 0) ? 1.08 : 0.92, e.clientX - rect.left, e.clientY - rect.top);
   }, { passive:false });
 }
 
-/* Reset */
+/* reset */
 const resetBtn = document.getElementById('resetView');
 if (resetBtn){
   resetBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    zoom = 1;
-    panX = 0;
-    panY = 0;
+    zoom = 1; panX = 0; panY = 0;
     applyView();
   });
 }
 
-/* init AFTER full load (prevents forced-layout warning) */
+/* init early (no flash / no late jump) */
 function init(){
   clampPan();
   applyView();
   layout3D();
 }
 
-window.addEventListener('load', () => {
-  init();
-});
+document.addEventListener('DOMContentLoaded', () => init());
+window.addEventListener('resize', () => requestAnimationFrame(init));
 
-window.addEventListener('resize', () => {
-  requestAnimationFrame(() => {
-    clampPan();
-    applyView();
-    layout3D();
-  });
-});
-
-/* Motion background */
+/* motion background */
 const bg = document.getElementById('spaceBg');
 const motionBtn = document.getElementById('motionBtn');
-
 let motionEnabled = false;
 
 let tRx = 0, tRy = 0, tPx = 0, tPy = 0;
 let cRx = 0, cRy = 0, cPx = 0, cPy = 0;
 let bgRaf = null;
-
 const inertia = 0.12;
 
 function setBgTarget(rx, ry, px, py){
@@ -403,11 +352,7 @@ function tickBg(){
     Math.abs(tPx - cPx) < 0.1  &&
     Math.abs(tPy - cPy) < 0.1;
 
-  if (!motionEnabled && still){
-    bgRaf = null;
-    return;
-  }
-
+  if (!motionEnabled && still){ bgRaf = null; return; }
   bgRaf = requestAnimationFrame(tickBg);
 }
 
@@ -433,14 +378,7 @@ function startMotion(){
   window.addEventListener('deviceorientation', (e) => {
     const beta  = e.beta ?? 0;
     const gamma = e.gamma ?? 0;
-
-    const rx = (beta - 20) * 0.08;
-    const ry = gamma * 0.10;
-
-    const px = gamma * 0.35;
-    const py = (beta - 20) * 0.25;
-
-    setBgTarget(rx, ry, px, py);
+    setBgTarget((beta - 20) * 0.08, gamma * 0.10, gamma * 0.35, (beta - 20) * 0.25);
   }, { passive:true });
 
   if (motionBtn){
@@ -474,7 +412,6 @@ if (motionBtn){
   });
 }
 
-/* Fallback parallax (finger) */
 if (viewport){
   viewport.addEventListener('pointermove', (e) => {
     if (motionEnabled) return;
