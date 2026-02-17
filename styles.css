@@ -150,14 +150,34 @@ h1{
   height: var(--maxFilmH);
   position:relative;
   border-radius: 14px;
-  border: 1px solid rgba(47,42,38,.14);
-  background: rgba(255,255,255,.18);
+
+  /* remove bubble outline */
+  border: none;
+  background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
-  backdrop-filter: blur(8px);
 
   overflow:hidden;
   touch-action: none;
   user-select: none;
+}
+
+/* vignette overlay */
+.space-viewport::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:14px;
+  pointer-events:none;
+  z-index:3;
+
+  /* corner fade */
+  background:
+    radial-gradient(120% 120% at 50% 50%,
+      rgba(0,0,0,0) 55%,
+      rgba(0,0,0,.14) 75%,
+      rgba(0,0,0,.26) 100%);
+  mix-blend-mode: multiply;
+  opacity:.9;
 }
 
 /* Background “cinema screen” */
