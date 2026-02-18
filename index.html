@@ -13,16 +13,15 @@
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
-    <!-- Header anchored to film corners -->
     <header class="film-header">
-      <div class="header-left">
-        <div class="title-row">
-          <h1>Nelle Kristoff</h1>
-          <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
-            <span></span><span></span><span></span>
-          </button>
-        </div>
-        <div class="subtitle">Selected Works</div>
+      <div class="title-row">
+        <h1>Nelle Kristoff</h1>
+
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+
+        <div class="subtitle-inline">Selected Works</div>
       </div>
 
       <div class="menu-wrap">
@@ -37,40 +36,29 @@
     <div class="space-viewport" id="viewport">
       <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
 
-      <div class="hint">Drag to pan · Pinch/scroll to zoom · → button flows one-by-one</div>
-
-      <!-- PAN + ZOOM split -->
       <div class="space-pan" id="spacePan">
         <div class="space-zoom" id="spaceZoom">
           <div class="leporello" id="leporello"></div>
 
-          <!-- Floating “lightbox” inside space -->
-          <div class="floatbox" id="floatbox" aria-hidden="false">
-            <div class="print floatbox-frame">
-              <img id="floatImg" alt="" />
-              <div class="noise"></div>
-
-              <div class="fb-meta">
-                <div class="fb-title" id="fbTitle">Untitled</div>
-                <div class="fb-status" id="fbStatus">Unveiling soon</div>
-              </div>
+          <!-- Controls attached to the ACTIVE (middle) panel position -->
+          <div class="active-ui" id="activeUI" aria-hidden="false">
+            <div class="active-meta">
+              <span class="am-title" id="amTitle">Untitled</span>
+              <span class="am-status" id="amStatus">Unveiling soon</span>
             </div>
 
-            <div class="fb-actions">
-              <button class="fb-btn fb-btn-primary" id="fbToggle" type="button">Select</button>
+            <div class="active-actions">
+              <button class="abtn abtn-primary" id="selectBtn" type="button">Select</button>
 
-              <div class="fb-right" id="fbRight">
-                <a href="#" class="fb-btn" id="fbInquire" onclick="contact(event)">Inquire</a>
-                <a href="#" class="fb-btn" id="fbCollect" target="_blank" rel="noopener">Collect</a>
+              <div class="active-right">
+                <a href="#" class="abtn" onclick="contact(event)">Inquire</a>
+                <a href="#" class="abtn" id="activeCollect" target="_blank" rel="noopener">Collect</a>
               </div>
             </div>
           </div>
-          <!-- /floatbox -->
-
+          <!-- /active-ui -->
         </div>
       </div>
-
-      <button class="collect-btn" id="motionBtn">Enable motion</button>
 
       <div class="arrow-slot">
         <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
@@ -81,25 +69,26 @@
       </div>
     </div>
 
-    <div class="info-row">
-      <div class="info">
-        <div class="info-top">
-          <p class="title" id="workTitle">Untitled</p>
-          <p class="status" id="workStatus">Unveiling soon</p>
+    <!-- TRUE FULLSCREEN OVERLAY -->
+    <div class="fullscreen" id="fullscreen" aria-hidden="true">
+      <div class="fs-inner">
+        <div class="fs-meta">
+          <span class="fs-title" id="fsTitle">Untitled</span>
+          <span class="fs-status" id="fsStatus">Unveiling soon</span>
         </div>
-        <div class="actions">
-          <a href="#" onclick="contact(event)" class="inquire-btn">Inquire</a>
-          <a href="https://collect.nellekristoff.art" target="_blank" class="collect-btn" rel="noopener" id="collectBtn">Collect</a>
-        </div>
-      </div>
 
-      <div class="info">
-        <div class="info-top">
-          <p class="title" id="zoomReadout">Zoom 100%</p>
-          <p class="status" id="indexReadout">1 / 1</p>
+        <div class="print fs-frame">
+          <img id="fsImg" alt="" />
+          <div class="noise"></div>
         </div>
-        <div class="actions">
-          <a href="#" class="collect-btn" id="resetView">Reset view</a>
+
+        <div class="fs-actions">
+          <button class="abtn abtn-primary" id="closeBtn" type="button">✕</button>
+
+          <div class="fs-right">
+            <a href="#" class="abtn" onclick="contact(event)">Inquire</a>
+            <a href="#" class="abtn" id="fsCollect" target="_blank" rel="noopener">Collect</a>
+          </div>
         </div>
       </div>
     </div>
