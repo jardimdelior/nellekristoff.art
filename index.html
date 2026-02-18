@@ -37,7 +37,36 @@
 
       <div class="space-pan" id="spacePan">
         <div class="space-zoom" id="spaceZoom">
+
           <div class="leporello" id="leporello"></div>
+
+          <!-- FLOATING LIGHTBOX IN SPACE (moves with pan/zoom) -->
+          <div class="floatbox" id="floatbox" aria-hidden="true">
+            <div class="print floatbox-frame" id="floatboxFrame">
+              <img id="floatImg" alt="" />
+              <div class="noise"></div>
+
+              <!-- title + status ALWAYS on the visible middle artwork -->
+              <div class="fb-meta">
+                <div class="fb-title" id="fbTitle">Untitled</div>
+                <div class="fb-status" id="fbStatus">Unveiling soon</div>
+              </div>
+            </div>
+
+            <!-- Buttons row under image -->
+            <div class="fb-actions">
+              <!-- center: Select (closed state) OR ✕ close (open state) -->
+              <button class="fb-btn fb-btn-primary" id="fbToggle" type="button">Select</button>
+
+              <!-- right side appears ONLY after Select -->
+              <div class="fb-right" id="fbRight">
+                <a href="#" class="fb-btn" id="fbInquire" onclick="contact(event)">Inquire</a>
+                <a href="#" class="fb-btn" id="fbCollect" target="_blank" rel="noopener">Collect</a>
+              </div>
+            </div>
+          </div>
+          <!-- /floatbox -->
+
         </div>
       </div>
 
@@ -72,13 +101,6 @@
         <div class="actions">
           <a href="#" class="collect-btn" id="resetView">Reset view</a>
         </div>
-      </div>
-    </div>
-
-    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-      <div class="print" onclick="event.stopPropagation()">
-        <img id="lightboxImg" alt="" />
-        <div class="noise"></div>
       </div>
     </div>
 
