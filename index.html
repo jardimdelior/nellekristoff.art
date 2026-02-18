@@ -13,21 +13,25 @@
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
+    <!-- Header anchored to film corners -->
     <header class="film-header">
-      <div class="title-row">
-        <h1>Nelle Kristoff</h1>
-        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
+      <div class="header-left">
+        <div class="title-row">
+          <h1>Nelle Kristoff</h1>
+          <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+        <div class="subtitle">Selected Works</div>
       </div>
 
-      <div class="subtitle">Selected Works</div>
-
-      <nav class="menu" id="menu" aria-label="Site menu">
-        <a href="about.html">About</a>
-        <a href="#" onclick="contact(event)">Contact</a>
-        <a href="posts.html">Posts</a>
-      </nav>
+      <div class="menu-wrap">
+        <nav class="menu" id="menu" aria-label="Site menu">
+          <a href="about.html">About</a>
+          <a href="#" onclick="contact(event)">Contact</a>
+          <a href="posts.html">Posts</a>
+        </nav>
+      </div>
     </header>
 
     <div class="space-viewport" id="viewport">
@@ -35,30 +39,26 @@
 
       <div class="hint">Drag to pan · Pinch/scroll to zoom · → button flows one-by-one</div>
 
+      <!-- PAN + ZOOM split -->
       <div class="space-pan" id="spacePan">
         <div class="space-zoom" id="spaceZoom">
-
           <div class="leporello" id="leporello"></div>
 
-          <!-- FLOATING LIGHTBOX IN SPACE (moves with pan/zoom) -->
-          <div class="floatbox" id="floatbox" aria-hidden="true">
-            <div class="print floatbox-frame" id="floatboxFrame">
+          <!-- Floating “lightbox” inside space -->
+          <div class="floatbox" id="floatbox" aria-hidden="false">
+            <div class="print floatbox-frame">
               <img id="floatImg" alt="" />
               <div class="noise"></div>
 
-              <!-- title + status ALWAYS on the visible middle artwork -->
               <div class="fb-meta">
                 <div class="fb-title" id="fbTitle">Untitled</div>
                 <div class="fb-status" id="fbStatus">Unveiling soon</div>
               </div>
             </div>
 
-            <!-- Buttons row under image -->
             <div class="fb-actions">
-              <!-- center: Select (closed state) OR ✕ close (open state) -->
               <button class="fb-btn fb-btn-primary" id="fbToggle" type="button">Select</button>
 
-              <!-- right side appears ONLY after Select -->
               <div class="fb-right" id="fbRight">
                 <a href="#" class="fb-btn" id="fbInquire" onclick="contact(event)">Inquire</a>
                 <a href="#" class="fb-btn" id="fbCollect" target="_blank" rel="noopener">Collect</a>
