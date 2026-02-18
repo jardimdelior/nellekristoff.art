@@ -2,28 +2,11 @@ document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.classList.add("ready");
 });
 
-/* for inline onclick */
+/* Contact (inline) */
 window.contact = function contact(e){
   if (e) e.preventDefault();
   window.location.href = "mailto:nellekristoff@gmail.com";
 };
-
-window.closeLightbox = function closeLightbox(){
-  const lightbox = document.getElementById('lightbox');
-  if (!lightbox) return;
-  lightbox.classList.remove('open');
-  document.body.classList.remove('noscroll');
-};
-
-function openLightbox(src, titleText){
-  const lightbox = document.getElementById('lightbox');
-  const img = document.getElementById('lightboxImg');
-  if (!lightbox || !img) return;
-  img.src = src;
-  img.alt = titleText || "";
-  lightbox.classList.add('open');
-  document.body.classList.add('noscroll');
-}
 
 /* Menu */
 const menuBtn = document.getElementById('menuBtn');
@@ -40,11 +23,6 @@ if (menuBtn && menu){
   });
 }
 
-/* Escape closes lightbox */
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') window.closeLightbox();
-});
-
 /* Works */
 const works = [
   { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
@@ -52,12 +30,67 @@ const works = [
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 
+/* preload */
 works.forEach(w => { const i = new Image(); i.src = w.src; });
 
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
+function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
+function num(v){ return parseFloat(v) || 0; }
+
+/* ===== FLOATBOX (always follows active / middle) ===== */
+const floatbox = document.getElementById('floatbox');
+const floatImg = document.getElementById('floatImg');
+const fbTitle = document.getElementById('fbTitle');
+const fbStatus = document.getElementById('fbStatus');
+const fbToggle = document.getElementById('fbToggle');
+const fbCollect = document.getElementById('fbCollect');
+
+/* closed -> only "Select" visible
+   open -> center becomes "✕" and right buttons appear */
+let floatOpen = false;
+
+function renderFloatbox(){
+  const w = works[active] || works[0];
+  if (!w || !floatbox || !floatImg) return;
+
+  floatImg.src = w.src;
+  floatImg.alt = w.title || "";
+
+  if (fbTitle) fbTitle.textContent = w.title || "Untitled";
+  if (fbStatus) fbStatus.textContent = w.status || "Unveiling soon";
+  if (fbCollect) fbCollect.href = w.collect || "https://collect.nellekristoff.art";
+
+  // toggle UI
+  if (fbToggle){
+    fbToggle.textContent = floatOpen ? "✕" : "Select";
+    fbToggle.setAttribute("aria-label", floatOpen ? "Close" : "Select");
+  }
+  floatbox.classList.toggle("is-open", floatOpen);
+}
+
+if (fbToggle){
+  fbToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    floatOpen = !floatOpen;
+    renderFloatbox();
+  });
+}
+
+/* Escape closes the floatbox if open */
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && floatOpen){
+    floatOpen = false;
+    renderFloatbox();
+  }
+});
+
+/* ===== Build leporello panels ===== */
 const lep = document.getElementById('leporello');
 const panels = [];
 if (lep){
-  works.forEach((w) => {
+  works.forEach((w, idx) => {
     const el = document.createElement('div');
     el.className = 'panel';
     el.tabIndex = 0;
@@ -67,24 +100,29 @@ if (lep){
         <div class="noise"></div>
       </div>
     `;
-    el.addEventListener('click', () => openLightbox(w.src, w.title));
+    // click selects + updates floatbox to that image
+    el.addEventListener('click', () => {
+      active = idx;
+      layout3D();
+      renderFloatbox();
+    });
     el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(w.src, w.title); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        active = idx;
+        layout3D();
+        renderFloatbox();
+      }
     });
     lep.appendChild(el);
     panels.push(el);
   });
 }
 
-function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
-function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
-function num(v){ return parseFloat(v) || 0; }
-
 let active = 0;
 let animating = false;
 
+/* View (pan/zoom) */
 const viewport = document.getElementById('viewport');
 const spacePan  = document.getElementById('spacePan');
 const spaceZoom = document.getElementById('spaceZoom');
@@ -96,7 +134,7 @@ let panY = 0;
 function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
 function zoomMax(){ return num(cssVar('--zoomMax')) || 2.2; }
 
-/* tighter, correct bounds */
+/* clamp so it can’t fly away */
 function clampPan(){
   if (!viewport) return;
   const rect = viewport.getBoundingClientRect();
@@ -111,6 +149,7 @@ function applyView(){
   spaceZoom.style.setProperty('--zoom', zoom);
   spacePan.style.setProperty('--panX', panX + 'px');
   spacePan.style.setProperty('--panY', panY + 'px');
+
   const zr = document.getElementById('zoomReadout');
   if (zr) zr.textContent = `Zoom ${Math.round(zoom*100)}%`;
 }
@@ -137,8 +176,10 @@ function updateInfo(){
   if (i) i.textContent = `${active+1} / ${works.length}`;
 }
 
+/* 3D layout */
 function layout3D(){
   if (!panels.length) return;
+
   const panelW = numPx(cssVar('--panelW'));
   const angleStep = numDeg(cssVar('--angleStep'));
   const maxAngle  = numDeg(cssVar('--maxAngle'));
@@ -149,10 +190,12 @@ function layout3D(){
   panels.forEach((el, i) => {
     const d = i - active;
     const ad = Math.abs(d);
+
     const rot = clamp(-d * angleStep, -maxAngle, maxAngle);
     const x   = d * stepX;
     const z   = -ad * zStep;
     const op  = clamp(1 - ad * 0.05, 0.72, 1);
+
     el.style.transform = `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
     el.style.opacity = op;
   });
@@ -160,11 +203,13 @@ function layout3D(){
   updateInfo();
 }
 
+/* Flow button */
 function next(){
   if (animating || works.length < 2) return;
   animating = true;
   active = (active + 1) % works.length;
   layout3D();
+  renderFloatbox(); /* floatbox always shows active/middle */
   setTimeout(() => { animating = false; }, 680);
 }
 
@@ -173,18 +218,17 @@ if (arrowRight){
   arrowRight.addEventListener('click', (e) => { e.preventDefault(); next(); });
 }
 
+/* Keyboard flow */
 window.addEventListener('keydown', (e) => {
-  const lb = document.getElementById('lightbox');
-  const lbOpen = lb && lb.classList.contains('open');
-  if (lbOpen) return;
   if (e.key === 'ArrowRight') next();
   if (e.key === 'ArrowLeft'){
     active = (active - 1 + works.length) % works.length;
     layout3D();
+    renderFloatbox();
   }
 });
 
-/* pan + zoom */
+/* Pan + Zoom */
 let pointers = new Map();
 let lastPan = null;
 let pinchStart = null;
@@ -210,7 +254,6 @@ function zoomTo(newZoom, cx, cy){
   zoom = newZoom;
   clampPan();
 }
-
 function zoomAt(factor, cx, cy){
   const newZoom = clamp(zoom * factor, zoomMin(), zoomMax());
   const k = newZoom / zoom;
@@ -225,6 +268,7 @@ if (viewport){
   viewport.addEventListener('pointerdown', (e) => {
     viewport.setPointerCapture(e.pointerId);
     setPointer(e);
+
     if (pointers.size === 1){
       lastPan = { x: e.clientX, y: e.clientY };
       pinchStart = null;
@@ -240,10 +284,8 @@ if (viewport){
     updatePointer(e);
 
     if (pointers.size === 1 && lastPan){
-      const dx = e.clientX - lastPan.x;
-      const dy = e.clientY - lastPan.y;
-      panX += dx;
-      panY += dy;
+      panX += (e.clientX - lastPan.x);
+      panY += (e.clientY - lastPan.y);
       lastPan = { x: e.clientX, y: e.clientY };
       clampPan();
       applyViewRaf();
@@ -266,8 +308,7 @@ if (viewport){
       const cx = mNow.x - rect.left;
       const cy = mNow.y - rect.top;
 
-      const newZoom = pinchStart.z * (dNow / pinchStart.d);
-      zoomTo(newZoom, cx, cy);
+      zoomTo(pinchStart.z * (dNow / pinchStart.d), cx, cy);
 
       panX += (mNow.x - pinchStart.m.x);
       panY += (mNow.y - pinchStart.m.y);
@@ -297,7 +338,7 @@ if (viewport){
   }, { passive:false });
 }
 
-/* reset */
+/* Reset */
 const resetBtn = document.getElementById('resetView');
 if (resetBtn){
   resetBtn.addEventListener('click', (e) => {
@@ -307,21 +348,21 @@ if (resetBtn){
   });
 }
 
-/* init early (no flash / no late jump) */
+/* init */
 function init(){
   clampPan();
   applyView();
   layout3D();
+  renderFloatbox(); /* always shows active/middle */
 }
-
-document.addEventListener('DOMContentLoaded', () => init());
+document.addEventListener('DOMContentLoaded', init);
 window.addEventListener('resize', () => requestAnimationFrame(init));
 
-/* motion background */
+/* Motion background */
 const bg = document.getElementById('spaceBg');
 const motionBtn = document.getElementById('motionBtn');
-let motionEnabled = false;
 
+let motionEnabled = false;
 let tRx = 0, tRy = 0, tPx = 0, tPy = 0;
 let cRx = 0, cRy = 0, cPx = 0, cPy = 0;
 let bgRaf = null;
@@ -331,14 +372,12 @@ function setBgTarget(rx, ry, px, py){
   tRx = rx; tRy = ry; tPx = px; tPy = py;
   ensureBgAnim();
 }
-
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && bgRaf){
     cancelAnimationFrame(bgRaf);
     bgRaf = null;
   }
 });
-
 function tickBg(){
   cRx += (tRx - cRx) * inertia;
   cRy += (tRy - cRy) * inertia;
@@ -355,12 +394,10 @@ function tickBg(){
   if (!motionEnabled && still){ bgRaf = null; return; }
   bgRaf = requestAnimationFrame(tickBg);
 }
-
 function ensureBgAnim(){
   if (bgRaf) return;
   bgRaf = requestAnimationFrame(tickBg);
 }
-
 function setBgMotion(rxDeg, ryDeg, px, py){
   if (!bg) return;
   const rx = Math.max(-6, Math.min(6, rxDeg));
@@ -370,7 +407,6 @@ function setBgMotion(rxDeg, ryDeg, px, py){
   bg.style.setProperty('--bgPanX', (px || 0).toFixed(1) + 'px');
   bg.style.setProperty('--bgPanY', (py || 0).toFixed(1) + 'px');
 }
-
 function startMotion(){
   if (motionEnabled) return;
   motionEnabled = true;
@@ -386,7 +422,6 @@ function startMotion(){
     motionBtn.style.opacity = '0.75';
   }
 }
-
 async function requestMotionPermission(){
   try{
     if (typeof DeviceMotionEvent !== 'undefined' &&
@@ -404,14 +439,12 @@ async function requestMotionPermission(){
     alert('Motion permission blocked. On iPhone: Settings → Safari → Motion & Orientation Access → ON, and open on HTTPS in Safari.');
   }
 }
-
 if (motionBtn){
   motionBtn.addEventListener('click', (e) => {
     e.preventDefault();
     requestMotionPermission();
   });
 }
-
 if (viewport){
   viewport.addEventListener('pointermove', (e) => {
     if (motionEnabled) return;
