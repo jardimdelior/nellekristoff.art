@@ -2,11 +2,21 @@ document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.classList.add("ready");
 });
 
-/* Contact (inline) */
+/* Contact */
 window.contact = function contact(e){
   if (e) e.preventDefault();
   window.location.href = "mailto:nellekristoff@gmail.com";
 };
+
+/* Works */
+const works = [
+  { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+];
+
+/* preload */
+works.forEach(w => { const i = new Image(); i.src = w.src; });
 
 /* Menu */
 const menuBtn = document.getElementById('menuBtn');
@@ -23,72 +33,123 @@ if (menuBtn && menu){
   });
 }
 
-/* Works */
-const works = [
-  { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-];
-
-/* preload */
-works.forEach(w => { const i = new Image(); i.src = w.src; });
-
+/* helpers */
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
 function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
 function num(v){ return parseFloat(v) || 0; }
 
-/* ===== FLOATBOX (always follows active / middle) ===== */
-const floatbox = document.getElementById('floatbox');
-const floatImg = document.getElementById('floatImg');
-const fbTitle = document.getElementById('fbTitle');
-const fbStatus = document.getElementById('fbStatus');
-const fbToggle = document.getElementById('fbToggle');
-const fbCollect = document.getElementById('fbCollect');
+/* Elements */
+const viewport = document.getElementById('viewport');
+const spacePan  = document.getElementById('spacePan');
+const spaceZoom = document.getElementById('spaceZoom');
 
-/* closed -> only "Select" visible
-   open -> center becomes "✕" and right buttons appear */
-let floatOpen = false;
+/* ===== Smooth pan/zoom state (animated easing) ===== */
+let zoom = 1, panX = 0, panY = 0;
+let tZoom = 1, tPanX = 0, tPanY = 0;   // targets
+let animRaf = null;
 
-function renderFloatbox(){
-  const w = works[active] || works[0];
-  if (!w || !floatbox || !floatImg) return;
+function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
+function zoomMax(){ return num(cssVar('--zoomMax')) || 2.2; }
 
-  floatImg.src = w.src;
-  floatImg.alt = w.title || "";
-
-  if (fbTitle) fbTitle.textContent = w.title || "Untitled";
-  if (fbStatus) fbStatus.textContent = w.status || "Unveiling soon";
-  if (fbCollect) fbCollect.href = w.collect || "https://collect.nellekristoff.art";
-
-  // toggle UI
-  if (fbToggle){
-    fbToggle.textContent = floatOpen ? "✕" : "Select";
-    fbToggle.setAttribute("aria-label", floatOpen ? "Close" : "Select");
-  }
-  floatbox.classList.toggle("is-open", floatOpen);
+/* clamp so it can’t fly away */
+function clampPanTarget(){
+  if (!viewport) return;
+  const rect = viewport.getBoundingClientRect();
+  const maxX = (rect.width  * (tZoom - 1)) / 2;
+  const maxY = (rect.height * (tZoom - 1)) / 2;
+  tPanX = clamp(tPanX, -maxX, maxX);
+  tPanY = clamp(tPanY, -maxY, maxY);
 }
 
-if (fbToggle){
-  fbToggle.addEventListener('click', (e) => {
+function applyViewImmediate(){
+  if (!spacePan || !spaceZoom) return;
+
+  // subtle “towards me” feel (perspective push)
+  const zoomZ = Math.max(0, (zoom - 1)) * 220; // px
+
+  spaceZoom.style.setProperty('--zoom', zoom);
+  spaceZoom.style.setProperty('--zoomZ', zoomZ.toFixed(1) + 'px');
+
+  spacePan.style.setProperty('--panX', panX + 'px');
+  spacePan.style.setProperty('--panY', panY + 'px');
+
+  const zr = document.getElementById('zoomReadout');
+  if (zr) zr.textContent = `Zoom ${Math.round(zoom*100)}%`;
+}
+
+/* Smooth animation loop */
+function ensureAnim(){
+  if (animRaf) return;
+  const ease = 0.16; // smaller = floaty, larger = snappy
+
+  const tick = () => {
+    // ease zoom + pan to target
+    zoom += (tZoom - zoom) * ease;
+    panX += (tPanX - panX) * ease;
+    panY += (tPanY - panY) * ease;
+
+    applyViewImmediate();
+
+    const done =
+      Math.abs(tZoom - zoom) < 0.001 &&
+      Math.abs(tPanX - panX) < 0.15 &&
+      Math.abs(tPanY - panY) < 0.15;
+
+    if (done){
+      zoom = tZoom; panX = tPanX; panY = tPanY;
+      applyViewImmediate();
+      animRaf = null;
+      return;
+    }
+    animRaf = requestAnimationFrame(tick);
+  };
+
+  animRaf = requestAnimationFrame(tick);
+}
+
+/* zoom toward a point in viewport coords (cx, cy) */
+function setZoomAt(newZoom, cx, cy){
+  newZoom = clamp(newZoom, zoomMin(), zoomMax());
+
+  // Use CURRENT displayed zoom/pan as base (feels stable)
+  const baseZoom = zoom;
+  const k = newZoom / baseZoom;
+
+  // adjust target pan so point stays under cursor/fingers
+  tPanX = (panX - cx) * k + cx;
+  tPanY = (panY - cy) * k + cy;
+
+  tZoom = newZoom;
+  clampPanTarget();
+  ensureAnim();
+}
+
+/* pan target update */
+function addPan(dx, dy){
+  tPanX += dx;
+  tPanY += dy;
+  clampPanTarget();
+  ensureAnim();
+}
+
+/* Reset */
+const resetBtn = document.getElementById('resetView');
+if (resetBtn){
+  resetBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    floatOpen = !floatOpen;
-    renderFloatbox();
+    tZoom = 1; tPanX = 0; tPanY = 0;
+    ensureAnim();
   });
 }
 
-/* Escape closes the floatbox if open */
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && floatOpen){
-    floatOpen = false;
-    renderFloatbox();
-  }
-});
-
-/* ===== Build leporello panels ===== */
+/* ===== Leporello panels ===== */
 const lep = document.getElementById('leporello');
 const panels = [];
+let active = 0;
+let animating = false;
+
 if (lep){
   works.forEach((w, idx) => {
     const el = document.createElement('div');
@@ -100,7 +161,6 @@ if (lep){
         <div class="noise"></div>
       </div>
     `;
-    // click selects + updates floatbox to that image
     el.addEventListener('click', () => {
       active = idx;
       layout3D();
@@ -119,51 +179,6 @@ if (lep){
   });
 }
 
-let active = 0;
-let animating = false;
-
-/* View (pan/zoom) */
-const viewport = document.getElementById('viewport');
-const spacePan  = document.getElementById('spacePan');
-const spaceZoom = document.getElementById('spaceZoom');
-
-let zoom = 1;
-let panX = 0;
-let panY = 0;
-
-function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
-function zoomMax(){ return num(cssVar('--zoomMax')) || 2.2; }
-
-/* clamp so it can’t fly away */
-function clampPan(){
-  if (!viewport) return;
-  const rect = viewport.getBoundingClientRect();
-  const maxX = (rect.width  * (zoom - 1)) / 2;
-  const maxY = (rect.height * (zoom - 1)) / 2;
-  panX = clamp(panX, -maxX, maxX);
-  panY = clamp(panY, -maxY, maxY);
-}
-
-function applyView(){
-  if (!spacePan || !spaceZoom) return;
-  spaceZoom.style.setProperty('--zoom', zoom);
-  spacePan.style.setProperty('--panX', panX + 'px');
-  spacePan.style.setProperty('--panY', panY + 'px');
-
-  const zr = document.getElementById('zoomReadout');
-  if (zr) zr.textContent = `Zoom ${Math.round(zoom*100)}%`;
-}
-
-let rafPending = false;
-function applyViewRaf(){
-  if (rafPending) return;
-  rafPending = true;
-  requestAnimationFrame(() => {
-    rafPending = false;
-    applyView();
-  });
-}
-
 function updateInfo(){
   const w = works[active] || works[0];
   const t = document.getElementById('workTitle');
@@ -176,7 +191,6 @@ function updateInfo(){
   if (i) i.textContent = `${active+1} / ${works.length}`;
 }
 
-/* 3D layout */
 function layout3D(){
   if (!panels.length) return;
 
@@ -203,22 +217,19 @@ function layout3D(){
   updateInfo();
 }
 
-/* Flow button */
+/* Flow next */
 function next(){
   if (animating || works.length < 2) return;
   animating = true;
   active = (active + 1) % works.length;
   layout3D();
-  renderFloatbox(); /* floatbox always shows active/middle */
+  renderFloatbox();
   setTimeout(() => { animating = false; }, 680);
 }
-
 const arrowRight = document.getElementById('arrowRight');
 if (arrowRight){
   arrowRight.addEventListener('click', (e) => { e.preventDefault(); next(); });
 }
-
-/* Keyboard flow */
 window.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowRight') next();
   if (e.key === 'ArrowLeft'){
@@ -228,7 +239,49 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-/* Pan + Zoom */
+/* ===== Floatbox logic (Select -> ✕ + right buttons) ===== */
+const floatbox = document.getElementById('floatbox');
+const floatImg = document.getElementById('floatImg');
+const fbTitle  = document.getElementById('fbTitle');
+const fbStatus = document.getElementById('fbStatus');
+const fbToggle = document.getElementById('fbToggle');
+const fbCollect = document.getElementById('fbCollect');
+
+let floatOpen = false;
+
+function renderFloatbox(){
+  const w = works[active] || works[0];
+  if (!w || !floatbox || !floatImg) return;
+
+  floatImg.src = w.src;
+  floatImg.alt = w.title || "";
+
+  if (fbTitle) fbTitle.textContent = w.title || "Untitled";
+  if (fbStatus) fbStatus.textContent = w.status || "Unveiling soon";
+  if (fbCollect) fbCollect.href = w.collect || "https://collect.nellekristoff.art";
+
+  if (fbToggle){
+    fbToggle.textContent = floatOpen ? "✕" : "Select";
+    fbToggle.setAttribute("aria-label", floatOpen ? "Close" : "Select");
+  }
+  floatbox.classList.toggle("is-open", floatOpen);
+}
+
+if (fbToggle){
+  fbToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    floatOpen = !floatOpen;
+    renderFloatbox();
+  });
+}
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && floatOpen){
+    floatOpen = false;
+    renderFloatbox();
+  }
+});
+
+/* ===== Pointer pan/zoom (touch + mouse) ===== */
 let pointers = new Map();
 let lastPan = null;
 let pinchStart = null;
@@ -246,24 +299,6 @@ function getTwoPointers(){
 function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
 function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
 
-function zoomTo(newZoom, cx, cy){
-  newZoom = clamp(newZoom, zoomMin(), zoomMax());
-  const k = newZoom / zoom;
-  panX = (panX - cx) * k + cx;
-  panY = (panY - cy) * k + cy;
-  zoom = newZoom;
-  clampPan();
-}
-function zoomAt(factor, cx, cy){
-  const newZoom = clamp(zoom * factor, zoomMin(), zoomMax());
-  const k = newZoom / zoom;
-  panX = (panX - cx) * k + cx;
-  panY = (panY - cy) * k + cy;
-  zoom = newZoom;
-  clampPan();
-  applyViewRaf();
-}
-
 if (viewport){
   viewport.addEventListener('pointerdown', (e) => {
     viewport.setPointerCapture(e.pointerId);
@@ -274,7 +309,7 @@ if (viewport){
       pinchStart = null;
     } else if (pointers.size === 2){
       const [p1, p2] = getTwoPointers();
-      pinchStart = { d: dist(p1,p2), z: zoom, m: mid(p1,p2) };
+      pinchStart = { d: dist(p1,p2), z: tZoom, m: mid(p1,p2) };
       lastPan = null;
     }
   });
@@ -284,11 +319,8 @@ if (viewport){
     updatePointer(e);
 
     if (pointers.size === 1 && lastPan){
-      panX += (e.clientX - lastPan.x);
-      panY += (e.clientY - lastPan.y);
+      addPan(e.clientX - lastPan.x, e.clientY - lastPan.y);
       lastPan = { x: e.clientX, y: e.clientY };
-      clampPan();
-      applyViewRaf();
     }
 
     if (pointers.size >= 2){
@@ -300,7 +332,7 @@ if (viewport){
       const mNow = mid(p1,p2);
 
       if (!pinchStart){
-        pinchStart = { d: dNow, z: zoom, m: mNow };
+        pinchStart = { d: dNow, z: tZoom, m: mNow };
         return;
       }
 
@@ -308,14 +340,12 @@ if (viewport){
       const cx = mNow.x - rect.left;
       const cy = mNow.y - rect.top;
 
-      zoomTo(pinchStart.z * (dNow / pinchStart.d), cx, cy);
+      const newZoom = pinchStart.z * (dNow / pinchStart.d);
+      setZoomAt(newZoom, cx, cy);
 
-      panX += (mNow.x - pinchStart.m.x);
-      panY += (mNow.y - pinchStart.m.y);
+      // two-finger pan (screen space)
+      addPan(mNow.x - pinchStart.m.x, mNow.y - pinchStart.m.y);
       pinchStart.m = mNow;
-
-      clampPan();
-      applyViewRaf();
     }
   });
 
@@ -331,34 +361,37 @@ if (viewport){
   viewport.addEventListener('pointerup', endPointer);
   viewport.addEventListener('pointercancel', endPointer);
 
+  /* Wheel zoom toward cursor */
   viewport.addEventListener('wheel', (e) => {
     e.preventDefault();
     const rect = viewport.getBoundingClientRect();
-    zoomAt((e.deltaY < 0) ? 1.08 : 0.92, e.clientX - rect.left, e.clientY - rect.top);
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+
+    const factor = (e.deltaY < 0) ? 1.08 : 0.92;
+    setZoomAt(tZoom * factor, cx, cy);
   }, { passive:false });
 }
 
-/* Reset */
-const resetBtn = document.getElementById('resetView');
-if (resetBtn){
-  resetBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    zoom = 1; panX = 0; panY = 0;
-    applyView();
-  });
-}
-
-/* init */
+/* Init */
 function init(){
-  clampPan();
-  applyView();
+  // ensure targets start at current
+  zoom = tZoom = 1;
+  panX = tPanX = 0;
+  panY = tPanY = 0;
+  applyViewImmediate();
+
   layout3D();
-  renderFloatbox(); /* always shows active/middle */
+  renderFloatbox();
 }
 document.addEventListener('DOMContentLoaded', init);
-window.addEventListener('resize', () => requestAnimationFrame(init));
+window.addEventListener('resize', () => {
+  clampPanTarget();
+  ensureAnim();
+  layout3D();
+});
 
-/* Motion background */
+/* ===== Motion background (optional) ===== */
 const bg = document.getElementById('spaceBg');
 const motionBtn = document.getElementById('motionBtn');
 
