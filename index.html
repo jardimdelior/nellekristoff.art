@@ -13,25 +13,42 @@
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
-    <header class="film-header">
-      <div class="title-row">
-        <h1>Nelle Kristoff</h1>
+    <header class="film-header" id="siteHeader">
+  <div class="title-row">
 
-        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
+    <!-- Burger LEFT -->
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" type="button">
+      <svg class="icon-burger" viewBox="0 0 1536 1024" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="currentColor"
+          d="m 571.76604,351.49699 v 43.5293 h 359.98828 v -43.5293 z
+             m 0,126.67383 v 43.52929 h 359.98828 v -43.52929 z
+             m 0,126.71679 v 43.52735 h 359.98828 v -43.52735 z"/>
+      </svg>
+    </button>
 
-        <div class="subtitle-inline">Selected Works</div>
-      </div>
+    <!-- Brand (TEXT by default, MONOGRAM when menu opens) -->
+    <div class="brand" aria-label="Site title">
+      <span class="brand-text">Nelle Kristoff</span>
 
-      <div class="menu-wrap">
-        <nav class="menu" id="menu" aria-label="Site menu">
-          <a href="about.html">About</a>
-          <a href="#" onclick="contact(event)">Contact</a>
-          <a href="posts.html">Posts</a>
-        </nav>
-      </div>
-    </header>
+      <span class="brand-mark" aria-hidden="true">
+        <svg class="icon-monogram" viewBox="0 0 1536 1024" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="currentColor"
+            d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
+        </svg>
+      </span>
+    </div>
+
+    <div class="subtitle-inline">Selected Works</div>
+  </div>
+
+  <div class="menu-wrap">
+    <nav class="menu" id="menu" aria-label="Site menu">
+      <a href="about.html">About</a>
+      <a href="#" onclick="contact(event)">Contact</a>
+      <a href="posts.html">Posts</a>
+    </nav>
+  </div>
+</header>
 
     <div class="space-viewport" id="viewport">
       <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
