@@ -21,15 +21,34 @@ works.forEach(w => { const i = new Image(); i.src = w.src; });
 /* Menu */
 const menuBtn = document.getElementById('menuBtn');
 const menu = document.getElementById('menu');
+const header = document.querySelector('.film-header');
+
+function setMenu(open){
+  if (!menuBtn || !menu) return;
+  menu.classList.toggle('open', open);
+  menuBtn.setAttribute('aria-expanded', String(open));
+  if (header) header.classList.toggle('menu-open', open); // <-- this triggers text → monogram
+}
+
 if (menuBtn && menu){
   menuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    const open = menu.classList.toggle('open');
-    menuBtn.setAttribute('aria-expanded', String(open));
+    const open = !menu.classList.contains('open');
+    setMenu(open);
   });
+
   document.addEventListener('click', () => {
-    menu.classList.remove('open');
-    menuBtn.setAttribute('aria-expanded', 'false');
+    setMenu(false);
+  });
+
+  // Prevent clicks inside the menu from closing it
+  menu.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // Optional: Escape closes menu too (nice UX)
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setMenu(false);
   });
 }
 
