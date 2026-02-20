@@ -90,6 +90,7 @@ main{
   text-transform:uppercase;
   line-height:1;
   display:block;
+  color: var(--ink);
 }
 .subtitle-inline{
   opacity:.65;
@@ -102,14 +103,35 @@ main{
 
 /* burger (SVG) */
 .menu-btn{
-  width:44px;
-  height:44px;
+  height: var(--iconH);
+  width: var(--iconH);   /* make it square and aligned */
   border:0;
   background:transparent;
   cursor:pointer;
   padding:0;
-  display:grid;
+  display:flex;
   place-items:center;
+  row-gap: 7px;
+  align-items:center;
+  justify-content:center;
+}
+
+/* burger stack */
+.menu-btn span{
+  display:block;
+  width: var(--iconH);        /* make burger as wide as its height */
+  height: 2px;
+  background:var(--ink);
+  border-radius:2px;
+}
+
+/* spacing between lines scales too */
+.menu-btn{
+  row-gap: calc(var(--iconH) * 0.22);
+}
+.menu-btn{
+  grid-auto-flow: row;
+  grid-auto-rows: min-content;
 }
 
 .menu-btn svg{
@@ -153,13 +175,17 @@ main{
 .menu a{
   position:relative;
   z-index:1;
-  display:inline-block;
-  padding:10px 14px;
+  display:inline-flex;
+  padding: 0 16px;
   text-decoration:none;
   color:var(--ink);
   font-size:19px;
   letter-spacing:.2px;
   border-radius:2px;
+  min-height: var(--iconH);
+  align-items:center;
+  justify-content:center;
+  line-height: 1;
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
@@ -515,7 +541,10 @@ footer{
   pointer-events: auto;   /* but the burger + menu stay clickable */
 }
 
-/* optional: the brand itself clickable later */
+/* the brand itself clickable later */
 .film-header .brand{
   pointer-events: auto;
+}
+.title-row{
+  align-items: center;
 }
