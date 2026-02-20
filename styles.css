@@ -29,6 +29,8 @@
   --headerText: 49px;   /* size of “Nelle Kristoff” */
   --iconH: 49px;        /* burger + monogram height (match) */
   --linkH: 49px;        /* menu button height (nice tap target) */
+  --burgerScale: 1.12;   /* optical fix if burger looks smaller */
+  --monoScale: 1.00;
 }
 
 html, body{ height:100%; }
@@ -88,9 +90,11 @@ main{
   margin:0;
   font-size: var(--headerText);
   text-transform:uppercase;
-  line-height:1;
-  display:block;
   color: var(--ink);
+  line-height: var(--iconH);
+  height: var(--iconH);
+  display:flex;
+  align-items:center;
 }
 .subtitle-inline{
   opacity:.65;
@@ -135,9 +139,11 @@ main{
 }
 
 .menu-btn svg{
-  height: var(--iconH);
+  height: 100%;
   width: auto;
   display:block;
+  transform: scale(var(--burgerScale));
+  transform-origin: center;
 }
 
 /* menu */
@@ -196,11 +202,18 @@ main{
   min-height: var(--iconH);
 }
 
-.brand-mark{ display:none; }
-.brand-mark svg{
+/* Monogram box */
+.brand-mark{
   height: var(--iconH);
+  display:flex;
+  align-items:center;
+}
+.brand-mark svg{
+  height: 100%;
   width:auto;
   display:block;
+  transform: scale(var(--monoScale));
+  transform-origin: center;
 }
 
 /* when menu opens */
@@ -546,5 +559,7 @@ footer{
   pointer-events: auto;
 }
 .title-row{
+  display:flex;
   align-items: center;
+  gap:10px;
 }
