@@ -26,11 +26,11 @@
   --zoomMax: 2.2;
 
   --brand: #C4A160;
-  --headerText: 49px;   /* size of “Nelle Kristoff” */
-  --iconH: 49px;        /* burger + monogram height (match) */
-  --linkH: 49px;        /* menu button height (nice tap target) */
-  --burgerScale: 1.19;   /* optical fix if burger looks smaller */
-  --monoScale: 1.00;
+  --headerText: 32px;   /* size of “Nelle Kristoff” */
+  --iconH: 32px;        /* burger + monogram height (match) */
+  --linkH: 44px;        /* menu button height (nice tap target) */
+  --burgerScale: 2.2;   /* optical fix if burger looks smaller */
+  --monoScale: 1.25;
 }
 
 html, body{ height:100%; }
