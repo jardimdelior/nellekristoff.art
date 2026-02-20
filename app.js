@@ -27,26 +27,25 @@ function setMenu(open){
   if (!menuBtn || !menu) return;
   menu.classList.toggle('open', open);
   menuBtn.setAttribute('aria-expanded', String(open));
-  if (header) header.classList.toggle('menu-open', open); // <-- this triggers text → monogram
+  if (header) header.classList.toggle('menu-open', open);
 }
 
 if (menuBtn && menu){
   menuBtn.addEventListener('click', (e) => {
+    e.preventDefault();
     e.stopPropagation();
     const open = !menu.classList.contains('open');
     setMenu(open);
   });
 
+  // Prevent clicks inside the menu/header from closing it
+  menu.addEventListener('click', (e) => e.stopPropagation());
+  if (header) header.addEventListener('click', (e) => e.stopPropagation());
+
   document.addEventListener('click', () => {
     setMenu(false);
   });
 
-  // Prevent clicks inside the menu from closing it
-  menu.addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
-
-  // Optional: Escape closes menu too (nice UX)
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') setMenu(false);
   });
