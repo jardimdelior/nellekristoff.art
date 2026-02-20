@@ -29,7 +29,7 @@
   --headerText: 49px;   /* size of “Nelle Kristoff” */
   --iconH: 49px;        /* burger + monogram height (match) */
   --linkH: 49px;        /* menu button height (nice tap target) */
-  --burgerScale: 1.12;   /* optical fix if burger looks smaller */
+  --burgerScale: 1.19;   /* optical fix if burger looks smaller */
   --monoScale: 1.00;
 }
 
