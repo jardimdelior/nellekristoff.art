@@ -82,7 +82,8 @@ main{
 .title-row{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
+  width:100%;
 }
 .brand-text{
   font-weight:500;
@@ -91,9 +92,9 @@ main{
   font-size: var(--headerText);
   text-transform:uppercase;
   color: var(--ink);
-  line-height: var(--iconH);
+  line-height: 1;
   height: var(--iconH);
-  display:flex;
+  display:block;
   align-items:center;
 }
 .subtitle-inline{
@@ -118,6 +119,7 @@ main{
   row-gap: 7px;
   align-items:center;
   justify-content:center;
+  color: var(--brand);
 }
 
 /* burger stack */
@@ -188,7 +190,7 @@ main{
   font-size:19px;
   letter-spacing:.2px;
   border-radius:2px;
-  min-height: var(--iconH);
+  min-height: var(--linkH);
   align-items:center;
   justify-content:center;
   line-height: 1;
@@ -207,6 +209,7 @@ main{
   height: var(--iconH);
   display:flex;
   align-items:center;
+  color: var(--brand);
 }
 .brand-mark svg{
   height: 100%;
