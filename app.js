@@ -232,7 +232,7 @@ function syncActiveUI(){
   if (activeCollect) activeCollect.href = w.collect || "https://collect.nellekristoff.art";
 
   // Position UI exactly at the active panel transform
-  // We “mirror” the active panel’s transform so it’s attached.
+  // “mirror” the active panel’s transform so it’s attached.
   const p = panels[active];
   if (!p) return;
 
@@ -322,19 +322,24 @@ function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
 
 if (viewport){
   viewport.addEventListener('pointerdown', (e) => {
-    if (isFullscreenOpen()) return;
-    viewport.setPointerCapture(e.pointerId);
-    setPointer(e);
+  if (isFullscreenOpen()) return;
 
-    if (pointers.size === 1){
-      lastPan = { x: e.clientX, y: e.clientY };
-      pinchStart = null;
-    } else if (pointers.size === 2){
-      const [p1, p2] = getTwoPointers();
-      pinchStart = { d: dist(p1,p2), z: tZoom, m: mid(p1,p2) };
-      lastPan = null;
-    }
-  });
+  // If the user is pressing an interactive element, DON'T start panning/capturing
+  const interactive = e.target.closest('button, a, .abtn, .film-arrow, .menu, .menu-btn');
+  if (interactive) return;
+
+  viewport.setPointerCapture(e.pointerId);
+  setPointer(e);
+
+  if (pointers.size === 1){
+    lastPan = { x: e.clientX, y: e.clientY };
+    pinchStart = null;
+  } else if (pointers.size === 2){
+    const [p1, p2] = getTwoPointers();
+    pinchStart = { d: dist(p1,p2), z: tZoom, m: mid(p1,p2) };
+    lastPan = null;
+  }
+});
 
   viewport.addEventListener('pointermove', (e) => {
     if (isFullscreenOpen()) return;
