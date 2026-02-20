@@ -26,9 +26,9 @@
   --zoomMax: 2.2;
 
   --brand: #C4A160;
-  --headerText: 29px;   /* size of “Nelle Kristoff” */
-  --iconH: 29px;        /* burger + monogram height (match) */
-  --linkH: 44px;        /* menu button height (nice tap target) */
+  --headerText: 49px;   /* size of “Nelle Kristoff” */
+  --iconH: 49px;        /* burger + monogram height (match) */
+  --linkH: 49px;        /* menu button height (nice tap target) */
 }
 
 html, body{ height:100%; }
