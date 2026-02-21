@@ -325,7 +325,7 @@ if (viewport){
   if (isFullscreenOpen()) return;
 
   // If the user is pressing an interactive element, DON'T start panning/capturing
-  const interactive = e.target.closest('button, a, .abtn, .film-arrow, .menu, .menu-btn');
+  const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
   if (interactive) return;
 
   viewport.setPointerCapture(e.pointerId);
