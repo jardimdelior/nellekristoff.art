@@ -60,26 +60,37 @@ main{
   justify-content:center;
 }
 
-/* Film: header row + viewport row */
+/* film padding edge shared by header + viewport */
 .film-main{
   width:min(96vw, 1400px);
   margin:0 auto;
   box-sizing:border-box;
-  padding:0;
-
+  padding: 0 6px;
   display:grid;
   grid-template-rows: auto 1fr;
-  gap:10px;
+  gap: 10px;
 }
 
-/* ===== HEADER (stable height) ===== */
+/* header is grid: left icon, center brand, right area */
 .film-header{
   position:relative;
-  width:100%;
   z-index:20;
+  display:grid;
+  grid-template-columns: var(--headerH) 1fr auto;
+  align-items:center;
+  gap:12px;
+  padding: 0;           /* keeps it flush to film edge */
+  opacity:0;
+  pointer-events:none;
+}
 
-  padding: 12 var(--filmPad);
-  box-sizing:border-box;
+/* right container anchors menu */
+.header-right{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
 }
 
 .title-row{
@@ -189,7 +200,7 @@ main{
 }
 
 .menu{
-  position:relative;
+  position:absolute;
   width:min(520px, 56vw);
   margin:0;
   border-radius:14px;
@@ -198,9 +209,11 @@ main{
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   backdrop-filter: blur(10px);
 
-  display:none;
   padding:12px;
   overflow:hidden;
+  right:0;
+  top: calc(100% + 8px);
+  display:none; /* shown by .open */
 }
 
 .menu::after{
