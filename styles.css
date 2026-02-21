@@ -33,6 +33,7 @@
   /* header sizing */
   --headerBarH: 32px;     /* burger + brand + selected works */
   --menuBayH: 56px;       /* reserved area for About/Contact/Posts */
+  --headerH: 32px;
   --headerTotalH: calc(var(--headerBarH) + var(--menuBayH));
 
   /* optical corrections for your big-canvas SVGs */
@@ -69,15 +70,15 @@ main{
   margin:0 auto;
   box-sizing:border-box;
   padding: 0 var(--filmPad);
-
   display:grid;
   grid-template-rows: auto 1fr;
-  row-gap: 10px;
+  gap: 10px;
 }
 
 /* header row: fixed height, never changes */
 .film-header{
   width: 100%;
+  box-sizing:border-box;
   position:relative;
   min-height: var(--headerH);
   display:grid;
@@ -90,9 +91,9 @@ main{
 
 /* BAR ROW */
 .header-bar{
-  height: var(--headerBarH);
+  height: var(--headerH);
   display:grid;
-  grid-template-columns: var(--headerBarH) 1fr auto;
+  grid-template-columns: var(--headerH) 1fr auto;
   align-items:center;
   gap:12px;
 }
@@ -110,7 +111,7 @@ main{
 /* Selected Works */
 .subtitle-inline{
   opacity:.65;
-  font-size:11px;
+  font-size:9px;
   letter-spacing:.4px;
   white-space:nowrap;
   transform: translateY(1px);
@@ -127,10 +128,10 @@ main{
 /* BRAND swap (TEXT overlays MONOGRAM, no jumping) */
 .brand{
   position:relative;
-  font-size: var(--headerBarH);
+  font-size: var(--headerH);
   line-height:1;
   height:1em;
-  min-width: 12ch; /* reserve width so burger never overlaps */
+  min-width: 9ch; /* reserve width so burger never overlaps */
 }
 
 .brand-text,
@@ -146,17 +147,23 @@ main{
 
 .brand-text{
   opacity:1;
+  font-size: var(--headerH);
+  line-height:1;
   color: var(--ink);
   font-weight:500;
   letter-spacing:3px;
   text-transform:uppercase;
 }
+/* monogram */
 .brand-mark{
   opacity:0;
+  height: var(--headerH);
+  display:flex;
+  align-items:center;
   color: var(--brand);
 }
 .brand-mark svg{
-  height: 1em;
+  height: 100%;
   width:auto;
   display:block;
   transform: scale(var(--monoScale));
@@ -169,8 +176,8 @@ main{
 
 /* BURGER button (YOUR SVG) */
 .menu-btn{
-  width: var(--headerBarH);
-  height: var(--headerBarH);
+  width: var(--headerH);
+  height: var(--headerH);
   border:0;
   background:transparent;
   cursor:pointer;
@@ -187,7 +194,7 @@ main{
 }
 .menu-btn svg{
   height: 100%;
-  width: 100%;
+  width: auto;
   display:block;
   transform: scale(var(--burgerScale));
   transform-origin:center;
@@ -195,7 +202,7 @@ main{
 
 /* MENU BAY (reserved space, never overlaps viewport) */
 .menu-bay{
-  height: var(--menuBayH);
+  height: var(--headerH);
   display:flex;
   align-items:center;
   justify-content:flex-end;
@@ -208,58 +215,25 @@ main{
   top:calc(100% + 8px);
   width:min(520px, 56vw);
   margin:0;
-  padding:12px;
-  display:none;
+  opacity:0;
+  display:flex;
   justify-content:flex-end;
   gap:8px;
   flex-wrap:nowrap;
   white-space:nowrap;
   align-items:center;
-  border-radius:14px;
   box-sizing:border-box;
-  overflow:hidden;
+  pointer-events:none;
+  transform: translateY(-2px);
+  transition: opacity .18s ease, transform .18s ease;
   /* SAME matte base as viewport */
   background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   backdrop-filter: blur(10px);
-  opacity:0;
-  pointer-events:none;
-  transform: translateY(-4px);
-  transition: opacity .18s ease, transform .18s ease;
+  border-radius:14px;
+  padding:10px;
+  overflow:hidden;
 }
-.menu.open{
-  display:flex;
-  opacity:1;
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-  flex-wrap:nowrap;
-  pointer-events:auto;
-  transform: translateY(0);
-}
-
-.menu a{
-  position:relative;
-  z-index:1;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  flex: 1 1 auto;
-  height: var(--headerBarH);
-  min-height: var(--headerBarH);
-  padding: 0 14px;
-  border-radius:10px;
-  font-size: clamp(14px, 2.2vw,var(--headerH));
-  line-height:1;
-  text-decoration:none;
-  color:var(--ink);
-  letter-spacing:.2px;
-  background: rgba(255,255,255,.10);
-  box-shadow: 0 12px 44px rgba(0,0,0,.10);
-  backdrop-filter: blur(10px);
-  transition: background .2s ease;
-}
-.menu a:hover{ background: rgba(0,0,0,.32); }
 
 .menu::after{
   content:"";
@@ -282,6 +256,44 @@ main{
   mix-blend-mode:multiply;
   opacity:.85;
 }
+
+/* OPEN */
+.menu.open{
+  display:flex;
+  opacity:1;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:nowrap;
+  pointer-events:auto;
+  transform: translateY(0);
+}
+
+/* LINKS */
+.menu a{
+  position:relative;
+  z-index:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex: 1 1 auto;
+  height: var(--headerH);
+  min-height: var(--headerH);
+  padding: 0 14px;
+  border-radius:10px;
+  font-size: clamp(14px, 2.2vw,var(--headerH));
+  letter-spacing:.2px;
+  line-height:1;
+  text-decoration:none;
+  color:var(--ink);
+  letter-spacing:.2px;
+  background: rgba(255,255,255,.10);
+  box-shadow: 0 12px 44px rgba(0,0,0,.10);
+  backdrop-filter: blur(11px);
+  transition: background .2s ease;
+  white-space:nowrap;
+}
+.menu a:hover{ background: rgba(0,0,0,.32); }
 
 /* ===== VIEWPORT ===== */
 .space-viewport{
