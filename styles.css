@@ -71,18 +71,21 @@ main{
   padding: 0 var(--filmPad);
 
   display:grid;
-  grid-template-rows: var(--headerTotalH) 1fr;
-  gap: 10px;
+  grid-template-rows: auto 1fr;
+  row-gap: 10px;
 }
 
 /* header row: fixed height, never changes */
 .film-header{
-  height: var(--headerTotalH);
-  display:grid;
-  grid-template-rows: var(--headerBarH) var(--menuBayH);
-  align-items:stretch;
+  width: 100%;
   position:relative;
-  z-index:50;
+  min-height: var(--headerH);
+  display:grid;
+  grid-template-columns: var(--headerBarH) 1fr auto;
+  align-items:center;
+  column-gap: 12px;
+  position:relative;
+  z-index:20;
 }
 
 /* BAR ROW */
@@ -96,10 +99,11 @@ main{
 
 /* RIGHT side */
 .header-right{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 /* Selected Works */
