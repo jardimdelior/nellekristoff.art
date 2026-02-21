@@ -141,7 +141,7 @@ main{
 }
 
 .menu-btn svg{
-  height: 100%;
+  height: 1em;
   width: auto;
   display:block;
   transform: scale(var(--burgerScale));
@@ -181,19 +181,20 @@ main{
   flex-wrap:wrap;
 }
 .menu a{
+  height: 1em;
   position:relative;
   z-index:1;
   display:inline-flex;
   padding: 0 16px;
   text-decoration:none;
   color:var(--ink);
-  font-size:19px;
+  font-size: var(--headerText);  /* the same size as title */
   letter-spacing:.2px;
   border-radius:2px;
   min-height: var(--linkH);
   align-items:center;
   justify-content:center;
-  line-height: 1;
+  line-height: 1em;
 }
 .menu a:hover{ background:rgba(47,42,38,.08); }
 
@@ -202,6 +203,7 @@ main{
   display:flex;
   align-items:center;
   min-height: var(--iconH);
+  font-size: var(--headerText);
 }
 
 /* Monogram box */
@@ -212,7 +214,7 @@ main{
   color: var(--brand);
 }
 .brand-mark svg{
-  height: 100%;
+  height: 1em;
   width:auto;
   display:block;
   transform: scale(var(--monoScale));
