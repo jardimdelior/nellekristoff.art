@@ -557,6 +557,11 @@ footer{
   top:0;
 }
 
+/* Close button size tweak */
+#closeBtn{
+  font-size:16px;
+}
+
 @media (max-width: 520px){
   :root{
     --panelW: 86vw;
