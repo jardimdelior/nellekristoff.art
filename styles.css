@@ -179,12 +179,15 @@ main{
   width:min(520px, 56vw);
   margin:0;
   border-radius:14px;
-  border:none;
-  background: rgba(239,231,220,.78);
-  box-shadow: 0 10px 34px rgba(0,0,0,.10);
+  /* SAME glass base feeling as viewport */
+  background: rgba(255,255,255,.10);
+  box-shadow: 0 12px 44px rgba(0,0,0,.10);
   backdrop-filter: blur(10px);
+
   display:none;
-  padding:8px;
+  padding:12px;
+
+  overflow:hidden;
 }
 
 .menu::after{
@@ -194,10 +197,18 @@ main{
   border-radius:14px;
   pointer-events:none;
   z-index:0;
-  background: radial-gradient(120% 120% at 50% 50%,
-    rgba(255,255,255,.14) 0%,
-    rgba(0,0,0,.10) 100%);
-  opacity:.38;
+  background:
+    radial-gradient(120% 55% at 50% 56%,
+      rgba(0,0,0,.12) 0%,
+      rgba(0,0,0,.07) 22%,
+      rgba(0,0,0,0) 62%),
+    radial-gradient(120% 120% at 50% 50%,
+      rgba(0,0,0,0) 58%,
+      rgba(0,0,0,.10) 84%,
+      rgba(0,0,0,.18) 100%);
+
+  mix-blend-mode: multiply;
+  opacity:.85;
 }
 
 .menu.open{
@@ -216,17 +227,20 @@ main{
   justify-content:center;
 
   min-height: var(--linkH);
-  padding: 0 16px;
+  padding: 0 18px;
 
   text-decoration:none;
   color:var(--ink);
   font-size: var(--headerText);
   letter-spacing:.2px;
-  border-radius:2px;
+  border-radius:10px;
   line-height:1;
+  background: rgba(0,0,0,.20);
+  backdrop-filter: blur(6px);
+  transition: background .2s ease;
 }
 
-.menu a:hover{ background:rgba(47,42,38,.08); }
+.menu a:hover{ background: rgba(0,0,0,.32); }
 
 /* viewport */
 .space-viewport{
