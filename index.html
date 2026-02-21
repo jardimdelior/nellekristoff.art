@@ -14,16 +14,21 @@
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
-    <!-- HEADER (fixed height: bar + reserved menu bay) -->
+    <!-- HEADER (single fixed bar) -->
     <header class="film-header" id="siteHeader">
 
-      <!-- BAR ROW -->
       <div class="header-bar">
+        <!-- LEFT: Selected Works (replaced by menu when burger opens) -->
+        <div class="subtitle-inline" aria-hidden="false">Selected Works</div>
 
-        <!-- LEFT CORNER: Selected Works (pinned left via CSS) -->
-        <div class="subtitle-inline">Selected Works</div>
+        <!-- LEFT: Menu (sits in EXACT same spot as Selected Works) -->
+        <nav class="menu" id="menu" aria-label="Site menu">
+          <a href="about.html">About</a>
+          <a href="#" onclick="contact(event)">Contact</a>
+          <a href="posts.html">Posts</a>
+        </nav>
 
-        <!-- RIGHT SIDE: Brand + Burger -->
+        <!-- RIGHT: Brand + Burger -->
         <div class="header-right">
 
           <!-- Brand (TEXT folds ↔ MONOGRAM unfolds, driven by .film-header.menu-open) -->
@@ -43,7 +48,7 @@
             </span>
           </div>
 
-          <!-- Burger (stays on top; moves slightly on open via CSS) -->
+          <!-- Burger -->
           <button class="menu-btn" id="menuBtn"
                   aria-label="Open menu"
                   aria-expanded="false"
@@ -64,22 +69,9 @@
         </div>
       </div>
 
-      <!-- MENU BAY ROW
-           IMPORTANT: About/Contact/Posts are on the LEFT now.
-           This is handled in CSS by anchoring .menu to left:0 instead of right:0.
-           (JS stays the same; it only toggles .open)
-      -->
-      <div class="menu-bay" aria-hidden="false">
-        <nav class="menu" id="menu" aria-label="Site menu">
-          <a href="about.html">About</a>
-          <a href="#" onclick="contact(event)">Contact</a>
-          <a href="posts.html">Posts</a>
-        </nav>
-      </div>
-
     </header>
 
-    <!-- VIEWPORT ROW -->
+    <!-- VIEWPORT -->
     <div class="space-viewport" id="viewport" aria-label="Artwork space">
       <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
 
@@ -91,7 +83,6 @@
 
           <!-- Active UI follows the active panel -->
           <div class="active-ui" id="activeUI" aria-hidden="false">
-
             <div class="active-meta">
               <span class="am-title" id="amTitle">Untitled</span>
               <span class="am-status" id="amStatus">Unveiling soon</span>
@@ -102,7 +93,6 @@
               <button class="abtn abtn-primary" id="selectBtn" type="button">Select</button>
               <a href="#" class="abtn active-right" id="activeCollect" target="_blank" rel="noopener">Collect</a>
             </div>
-
           </div>
 
         </div>
@@ -135,7 +125,7 @@
 
         <div class="fs-actions">
           <a href="#" class="abtn fs-left" onclick="contact(event)">Inquire</a>
-          <button class="abtn abtn-primary" id="closeBtn" type="button" aria-label="Close fullscreen">✕</button>
+          <button class="abtn" id="closeBtn" type="button" aria-label="Close fullscreen">✕</button>
           <a href="#" class="abtn fs-right" id="fsCollect" target="_blank" rel="noopener">Collect</a>
         </div>
 
