@@ -130,7 +130,7 @@ main{
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  gap: 19px;
+  gap: 14px;        /* more room for text */
   min-width:0;
   justify-self:end;
   z-index:5;
@@ -143,8 +143,9 @@ main{
   display:flex;
   align-items:center;
   justify-content:flex-end;
-
-  min-width: 14ch;
+  
+  flex: 1 1 auto;
+  min-width: 18ch;      /* gives more guaranteed space for “Nelle Kristoff” */
   overflow:visible; /* allow the fold to slide under burger */
 }
 
@@ -172,11 +173,11 @@ main{
   overflow: hidden;
   text-overflow:ellipsis;
   opacity:1;
-  font-size: var(--headerBarH);
+  font-size: clamp(14px, 2.1vw, 20px);
   line-height:1;
   color: var(--ink);
   font-weight:500;
-  letter-spacing:3px;
+  letter-spacing: 1.4px;
   text-transform:uppercase;
 
   /* stable closed state */
@@ -215,6 +216,7 @@ main{
   display:flex;
   align-items:center;
   justify-content:center;
+  flex: 0 0 auto;
 
   color: var(--brand);
 
