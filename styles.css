@@ -96,6 +96,14 @@ main{
   height: var(--iconH);
   display:block;
   align-items:center;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  transition: opacity .18s ease;
+  pointer-events: none;
+  opacity: 1;
 }
 .subtitle-inline{
   opacity:.65;
@@ -200,7 +208,7 @@ main{
 
 /* Brand swap: TEXT by default, MONOGRAM when menu opens */
 .brand{
-  display:flex;
+  display: inline-flex;
   align-items:center;
   min-height: var(--iconH);
   font-size: var(--headerText);
@@ -212,6 +220,14 @@ main{
   display:flex;
   align-items:center;
   color: var(--brand);
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  transition: opacity .18s ease;
+  pointer-events: none;
+  opacity: 0;
 }
 .brand-mark svg{
   height: 1em;
@@ -222,8 +238,12 @@ main{
 }
 
 /* when menu opens */
-.film-header.menu-open .brand-text{ display:none; }
-.film-header.menu-open .brand-mark{ display:block; }
+.film-header.menu-open .brand-text{ opacity: 0; }
+.film-header.menu-open .brand-mark{ opacity: 1; }
+
+/* allow brand to shrink when menu is open (monogram takes less space) */
+.film-header.menu-open .brand{ width: auto; }
+.brand{ width: max-content; }
 
 /* viewport */
 .space-viewport{
