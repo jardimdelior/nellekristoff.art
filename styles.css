@@ -37,8 +37,8 @@
   --headerTotalH: calc(var(--headerBarH) + var(--menuBayH));
 
   /* optical corrections (FIXED) */
-  --burgerScale: 1.15;
-  --monoScale: 1.05;
+  --burgerScale: 1;
+  --monoScale: 1;
 
   /* header motion tuning */
   --burgerShift: 10px;        /* how much burger slides on open */
@@ -130,7 +130,7 @@ main{
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  gap: 12px;
+  gap: 19px;
   min-width:0;
   justify-self:end;
   z-index:5;
