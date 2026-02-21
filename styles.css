@@ -27,17 +27,21 @@
 
   --brand: #C4A160;
 
-  /* One master header height */
-  --headerH: 32px;
-  --headerText: var(--headerH);
-  --iconH: var(--headerH);
-  --linkH: var(--headerH);
-  --iconBox: var(--headerH);
-  --iconScale: 1.85;
+  /* ===== Frame inset (header + viewport alignment) =====
+     Set to 0px for fully flush edges.
+     Set to 6px if you want the subtle inset you had before. */
+  --frameInset: 0px;
 
-  /* Optical corrections for big-canvas SVGs */
-  --burgerScale: 2.2;
-  --monoScale: 1.25;
+  /* ===== One master header height ===== */
+  --headerH: 32px;
+
+  /* Derived */
+  --headerText: var(--headerH);
+  --iconBox: var(--headerH);
+  --linkH: calc(var(--headerH) + 12px);
+
+  /* ONE shared optical scale for burger + monogram */
+  --iconScale: 1.85;
 }
 
 html, body{ height:100%; }
@@ -62,7 +66,7 @@ main{
   justify-content:center;
 }
 
-/* Film is now 2-row layout: header bar + viewport */
+/* Film is 2-row layout: header bar + viewport */
 .film-main{
   width:min(96vw, 1400px);
   margin:0 auto;
@@ -80,7 +84,7 @@ main{
   width:100%;
   z-index: 20;
 
-  padding: 0 6px; /* set to 0 if you want fully flush */
+  padding: 0 var(--frameInset);
   box-sizing:border-box;
 
   display:flex;
@@ -95,7 +99,6 @@ main{
   gap:12px;
   flex:1;
   min-width:0;
-  padding-left: 0;
 }
 
 .subtitle-inline{
@@ -120,7 +123,9 @@ main{
   font-size: var(--headerText);
   line-height:1;
   height: 1em;
-  min-width: 12ch; /* reserves space so burger never overlaps */
+
+  /* KEEP THIS STABLE to prevent the “jump” */
+  min-width: 12ch;
 }
 
 .brand-text,
@@ -141,10 +146,13 @@ main{
   letter-spacing:3px;
   text-transform:uppercase;
 }
+
 .brand-mark{
   opacity:0;
   color: var(--brand);
 }
+
+/* Monogram uses SAME sizing rules as burger */
 .brand-mark svg{
   height: 1em;
   width:auto;
@@ -156,7 +164,8 @@ main{
 /* swap when menu open */
 .film-header.menu-open .brand-text{ opacity:0; }
 .film-header.menu-open .brand-mark{ opacity:1; }
-.film-header.menu-open .brand{ min-width:0; }
+/* IMPORTANT: do NOT collapse brand width (removes jump) */
+/* .film-header.menu-open .brand{ min-width:0; }  <-- removed */
 
 /* ===== Burger (your SVG) ===== */
 .menu-btn{
@@ -174,7 +183,7 @@ main{
 
   color: var(--brand);
 
-  /* crucial so 1em matches header text */
+  /* Crucial: 1em matches header text height */
   font-size: var(--headerText);
   line-height:1;
 }
@@ -183,7 +192,9 @@ main{
   height: 1em;
   width:auto;
   display:block;
-  transform: scale(var(--burgerScale));
+
+  /* SAME scale as monogram */
+  transform: scale(var(--iconScale));
   transform-origin:center;
 }
 
@@ -238,7 +249,7 @@ main{
   flex-wrap:wrap;
 }
 
-/* About/Contact/Posts same height as header */
+/* About/Contact/Posts same height vibe as header */
 .menu a{
   position:relative;
   z-index:1;
@@ -272,7 +283,9 @@ main{
   background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   overflow:hidden;
-  margin: 0 6px;
+
+  /* Matches header inset */
+  margin: 0 var(--frameInset);
 
   touch-action:none;
   user-select:none;
