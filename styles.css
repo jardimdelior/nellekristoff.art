@@ -473,18 +473,25 @@ footer{
   cursor:pointer;
 }
 .abtn:hover{ background: rgba(0,0,0,.40); }
+/* Center button */
 .abtn-primary{
-  border-color: rgba(255,255,255,.92);
-  background: rgba(0,0,0,.52);
+  margin: 0 auto;
 }
 
-/* right group */
+/* LEFT button (Inquire) */
+.active-actions > .abtn:not(.abtn-primary){
+  position:absolute;
+  left:0;
+  top:0;
+  display:flex;
+}
+
+/* RIGHT button (Collect) */
 .active-right{
   position:absolute;
   right:0;
   top:0;
   display:flex;
-  gap:10px;
 }
 
 /* ===== Fullscreen overlay (Select opens this) ===== */
