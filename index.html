@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +14,7 @@
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
+    <!-- HEADER BAR (now part of layout, not absolute) -->
     <header class="film-header" id="siteHeader">
       <div class="title-row">
 
@@ -38,10 +40,11 @@
           </span>
         </div>
 
+        <!-- Right-side label (hides on menu open) -->
         <div class="subtitle-inline">Selected Works</div>
       </div>
 
-      <!-- Menu RIGHT -->
+      <!-- Menu RIGHT (opens/closes) -->
       <div class="menu-wrap">
         <nav class="menu" id="menu" aria-label="Site menu">
           <a href="about.html">About</a>
@@ -51,12 +54,12 @@
       </div>
     </header>
 
+    <!-- VIEWPORT ROW -->
     <div class="space-viewport" id="viewport">
       <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
 
       <div class="space-pan" id="spacePan">
         <div class="space-zoom" id="spaceZoom">
-
           <div class="leporello" id="leporello"></div>
 
           <!-- Controls attached to the ACTIVE (middle) panel position -->
@@ -73,17 +76,16 @@
             </div>
           </div>
           <!-- /active-ui -->
-
         </div>
+      </div>
 
-        <!-- ✅ Arrow INSIDE spacePan so it moves with pan -->
-        <div class="arrow-slot">
-          <button class="film-arrow" id="arrowRight" aria-label="Next artwork" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M9 6l6 6-6 6"/>
-            </svg>
-          </button>
-        </div>
+      <!-- ✅ Arrow pinned to viewport corner (fixed) -->
+      <div class="arrow-slot">
+        <button class="film-arrow" id="arrowRight" aria-label="Next artwork" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </button>
       </div>
     </div>
 
