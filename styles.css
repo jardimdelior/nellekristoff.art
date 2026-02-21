@@ -773,6 +773,13 @@ footer{
 
     --burgerShift: 8px;
     --foldShift: 14px;
+
+    .menu a,
+  .abtn{
+    height: 44px;
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 12px;
   }
 }
 
