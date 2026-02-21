@@ -88,7 +88,7 @@ main{
   height: var(--headerBarH);
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content: flex-end;  /* IMPORTANT */
   position:relative;
 }
 
@@ -152,6 +152,7 @@ main{
   gap: 14px;
   min-width:0;
   z-index:5;
+  margin-left: auto;          /* IMPORTANT */
 }
 
 /* BRAND swap */
