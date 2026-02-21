@@ -213,13 +213,17 @@ main{
   align-items:flex-start;
   justify-content:flex-end;
   position:relative;
+  overflow:hidden;
 }
 
 /* Menu container lives INSIDE the bay (no leaking) */
 .menu{
-  position:relative;          /* was absolute */
-  width:min(520px, 56vw);
+  position:relative;
+  right:auto;
+  width:100%;
+  max-width:100%;
   margin:0;
+  top:auto;
 
   opacity:0;
   pointer-events:none;
@@ -279,6 +283,7 @@ main{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  flex: 0 0 auto;
 
   height: var(--headerBarH);
   min-height: var(--headerBarH);
