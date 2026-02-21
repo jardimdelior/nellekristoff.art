@@ -1,3 +1,4 @@
+// app.js
 document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.classList.add("ready");
 });
@@ -37,7 +38,7 @@ if (menuBtn && menu){
     setMenu(!menu.classList.contains('open'));
   });
 
-  // Don't close when clicking inside menu/header
+  // don't close when clicking inside
   menu.addEventListener('click', (e) => e.stopPropagation());
   if (header) header.addEventListener('click', (e) => e.stopPropagation());
 
@@ -316,7 +317,6 @@ if (viewport){
   viewport.addEventListener('pointerdown', (e) => {
     if (isFullscreenOpen()) return;
 
-    // If tapping interactive UI, don't start pan capture
     const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
     if (interactive) return;
 
