@@ -218,6 +218,10 @@ main{
 }
 .menu.open{
   opacity:1;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:nowrap;
   pointer-events:auto;
   transform: translateY(0);
 }
