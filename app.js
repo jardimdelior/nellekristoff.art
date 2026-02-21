@@ -45,6 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const menu = document.getElementById('menu');
   const header = document.querySelector('.film-header');
 
+  const headerRight = document.querySelector('.header-right');
+  if (headerRight) headerRight.addEventListener('click', (e) => e.stopPropagation());
+
   function setMenu(open){
     if (!menuBtn || !menu) return;
     menu.classList.toggle('open', open);
