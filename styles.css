@@ -1,3 +1,4 @@
+/* styles.css */
 :root{
   --bg:#EFE7DC;
   --ink:#2F2A26;
@@ -8,7 +9,6 @@
   --radius:2px;
 
   --a3: 420 / 297;
-  --a3ratio: calc(420 / 297);
 
   --maxFilmH: 78vh;
 
@@ -27,12 +27,13 @@
 
   --brand: #C4A160;
 
-  /* Header sizing */
-  --headerText: 32px;
-  --iconH: 32px;
-  --linkH: 44px;
+  /* One master header height */
+  --headerH: 32px;
+  --headerText: var(--headerH);
+  --iconH: var(--headerH);
+  --linkH: var(--headerH);
 
-  /* Optical corrections for your big-canvas SVGs */
+  /* Optical corrections for big-canvas SVGs */
   --burgerScale: 2.2;
   --monoScale: 1.25;
 }
@@ -59,23 +60,26 @@ main{
   justify-content:center;
 }
 
+/* Film is now 2-row layout: header bar + viewport */
 .film-main{
   width:min(96vw, 1400px);
   margin:0 auto;
-  position:relative;
-  padding-top: 74px;
   box-sizing:border-box;
+
+  display:grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
 }
 
-/* header */
+/* ===== Header bar inside film ===== */
 .film-header{
-  position:absolute;
-  left:0;
-  top:0;
+  position:relative;
   width:100%;
-  z-index:9999;
-  padding:0 6px;
+  z-index: 20;
+
+  padding: 0 6px; /* set to 0 if you want fully flush */
   box-sizing:border-box;
+
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -86,31 +90,35 @@ main{
   display:flex;
   align-items:center;
   gap:12px;
-  flex: 1;
-  min-width: 0;
+  flex:1;
+  min-width:0;
 }
 
 .subtitle-inline{
+  margin-left:auto;
   opacity:.65;
   font-size:11px;
   letter-spacing:.4px;
   white-space:nowrap;
   transform: translateY(1px);
-  margin-left:auto;
+  line-height:1;
 }
 
-/* ===== Brand swap (TEXT overlays MONOGRAM, never side-by-side) ===== */
+/* Hide Selected Works when menu opens */
+.film-header.menu-open .subtitle-inline{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ===== Brand swap (TEXT overlays MONOGRAM) ===== */
 .brand{
   position:relative;
   font-size: var(--headerText);
   line-height:1;
   height: 1em;
-
-  /* reserves space so it never overlaps burger */
-  min-width: 12ch;
+  min-width: 12ch; /* reserves space so burger never overlaps */
 }
 
-/* layers */
 .brand-text,
 .brand-mark{
   position:absolute;
@@ -122,7 +130,6 @@ main{
   pointer-events:none;
 }
 
-/* default */
 .brand-text{
   opacity:1;
   color: var(--ink);
@@ -134,7 +141,6 @@ main{
   opacity:0;
   color: var(--brand);
 }
-
 .brand-mark svg{
   height: 1em;
   width:auto;
@@ -148,7 +154,7 @@ main{
 .film-header.menu-open .brand-mark{ opacity:1; }
 .film-header.menu-open .brand{ min-width:0; }
 
-/* ===== Burger (YOUR SVG) ===== */
+/* ===== Burger (your SVG) ===== */
 .menu-btn{
   width: var(--iconH);
   height: var(--iconH);
@@ -162,24 +168,26 @@ main{
   justify-content:center;
 
   color: var(--brand);
+
+  /* crucial so 1em matches header text */
+  font-size: var(--headerText);
+  line-height:1;
 }
 
 .menu-btn svg{
-  height: 1em;           /* equals the title’s text height */
+  height: 1em;
   width:auto;
   display:block;
   transform: scale(var(--burgerScale));
   transform-origin:center;
-  font-size: var(--headerText);
-  line-height: 1;
 }
 
-/* ===== menu ===== */
-.menu-wrap{ 
-  display:flex; 
-  flex-direction:column; 
+/* ===== Menu ===== */
+.menu-wrap{
+  margin-left:auto;
+  display:flex;
+  flex-direction:column;
   align-items:flex-end;
-  margin-left: auto;
 }
 
 .menu{
@@ -187,14 +195,14 @@ main{
   width:min(520px, 56vw);
   margin:0;
   border-radius:14px;
-  /* SAME glass base feeling as viewport */
+
+  /* same “glass” feeling as viewport */
   background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   backdrop-filter: blur(10px);
 
   display:none;
   padding:12px;
-
   overflow:hidden;
 }
 
@@ -214,7 +222,6 @@ main{
       rgba(0,0,0,0) 58%,
       rgba(0,0,0,.10) 84%,
       rgba(0,0,0,.18) 100%);
-
   mix-blend-mode: multiply;
   opacity:.85;
 }
@@ -226,7 +233,7 @@ main{
   flex-wrap:wrap;
 }
 
-/* About/Contact/Posts same height */
+/* About/Contact/Posts same height as header */
 .menu a{
   position:relative;
   z-index:1;
@@ -243,14 +250,14 @@ main{
   letter-spacing:.2px;
   border-radius:10px;
   line-height:1;
+
   background: rgba(0,0,0,.20);
   backdrop-filter: blur(6px);
   transition: background .2s ease;
 }
-
 .menu a:hover{ background: rgba(0,0,0,.32); }
 
-/* viewport */
+/* ===== Viewport ===== */
 .space-viewport{
   width:100%;
   height: var(--maxFilmH);
@@ -395,15 +402,14 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* arrow */
-.arrow-slot{ 
-  position:absolute; 
-  right:12px; 
-  bottom:12px; 
+/* arrow pinned to viewport */
+.arrow-slot{
+  position:absolute;
+  right:12px;
+  bottom:12px;
   z-index:3;
   pointer-events:auto;
 }
-
 .film-arrow{
   width:52px; height:52px;
   border-radius:999px;
@@ -429,17 +435,16 @@ footer{
   opacity:.5;
 }
 
-/* ===== Active UI under the active panel (does not resize panel) ===== */
+/* ===== Active UI under the active panel ===== */
 .active-ui{
   position:absolute;
   left:0;
   top:0;
   z-index: 8;
   transform: translate3d(0,0,0);
-  pointer-events:none; /* allow dragging */
+  pointer-events:none;
 }
 
-/* meta row sits at top-right of the active panel */
 .active-meta{
   position:absolute;
   right:0;
@@ -459,7 +464,6 @@ footer{
 .am-title{ font-size:13px; letter-spacing:.2px; opacity:.92; }
 .am-status{ font-size:12px; opacity:.68; }
 
-/* buttons row under the active panel */
 .active-actions{
   position:absolute;
   left:50%;
@@ -470,21 +474,10 @@ footer{
   align-items:center;
   justify-content:center;
   min-height: 44px;
-
-  pointer-events:auto; /* buttons clickable */
+  pointer-events:auto;
 }
-
-.active-left{
-  position:absolute;
-  left:0;
-  top:0;
-}
-
-.active-right{
-  position:absolute;
-  right:0;
-  top:0;
-}
+.active-left{ position:absolute; left:0; top:0; }
+.active-right{ position:absolute; right:0; top:0; }
 
 .abtn{
   display:inline-flex;
@@ -501,12 +494,9 @@ footer{
   cursor:pointer;
 }
 .abtn:hover{ background: rgba(0,0,0,.40); }
-/* Center button */
-.abtn-primary{
-  margin: 0 auto;
-}
+.abtn-primary{ margin: 0 auto; }
 
-/* ===== Fullscreen overlay (Select opens this) ===== */
+/* ===== Fullscreen overlay ===== */
 .fullscreen{
   position:fixed;
   inset:0;
@@ -524,7 +514,6 @@ footer{
   width: min(96vw, 1120px);
   position:relative;
 }
-
 .fs-meta{
   position:absolute;
   right:0;
@@ -553,30 +542,16 @@ footer{
   margin-top: 12px;
   width:100%;
   min-height:44px;
-
   position:relative;
   display:flex;
   align-items:center;
   justify-content:center;
 }
+.fs-left{ position:absolute; left:0; top:0; }
+.fs-right{ position:absolute; right:0; top:0; }
+#closeBtn{ font-size:16px; }
 
-.fs-left{
-  position:absolute;
-  left:0;
-  top:0;
-}
-
-.fs-right{
-  position:absolute;
-  right:0;
-  top:0;
-}
-
-/* Close button size tweak */
-#closeBtn{
-  font-size:16px;
-}
-
+/* Responsive */
 @media (max-width: 520px){
   :root{
     --panelW: 86vw;
@@ -585,11 +560,10 @@ footer{
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
-    --headerText: 24px;
-    --iconH: 24px;
-    --linkH: 40px;
+
+    --headerH: 24px;
   }
-  .film-main{ padding-top: 66px; }
+
   .menu{ width:min(92vw, 520px); }
 }
 
