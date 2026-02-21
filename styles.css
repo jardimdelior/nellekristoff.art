@@ -226,6 +226,7 @@ main{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  flex: 1 1 auto;
 
   min-height: var(--headerBarH);
   padding: 0 18px;
