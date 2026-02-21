@@ -1,3 +1,4 @@
+// app.js
 document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.classList.add("ready");
 });
@@ -38,13 +39,12 @@ if (menuBtn && menu){
     setMenu(open);
   });
 
-  // Prevent clicks inside the menu/header from closing it
+  // Prevent clicks inside header/menu from closing it
   menu.addEventListener('click', (e) => e.stopPropagation());
   if (header) header.addEventListener('click', (e) => e.stopPropagation());
 
-  document.addEventListener('click', () => {
-    setMenu(false);
-  });
+  // click anywhere else closes
+  document.addEventListener('click', () => setMenu(false));
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') setMenu(false);
@@ -203,10 +203,12 @@ function next(){
   syncActiveUI();
   setTimeout(() => { animating = false; }, 680);
 }
+
 const arrowRight = document.getElementById('arrowRight');
 if (arrowRight){
   arrowRight.addEventListener('click', (e) => { e.preventDefault(); next(); });
 }
+
 window.addEventListener('keydown', (e) => {
   if (isFullscreenOpen()) return;
   if (e.key === 'ArrowRight') next();
@@ -231,24 +233,19 @@ function syncActiveUI(){
   if (amStatus) amStatus.textContent = w.status || "Unveiling soon";
   if (activeCollect) activeCollect.href = w.collect || "https://collect.nellekristoff.art";
 
-  // Position UI exactly at the active panel transform
-  // “mirror” the active panel’s transform so it’s attached.
   const p = panels[active];
   if (!p) return;
 
-  // Read computed transform of active panel and apply to UI
-  // activeUI sits at leporello origin like panels do, so same transform works.
   const tf = p.style.transform || "";
   activeUI.style.transform = tf;
 
-  // And set width/height to match panel size (so right/center anchors work)
   activeUI.style.width = getComputedStyle(p).width;
   activeUI.style.height = getComputedStyle(p).height;
   activeUI.style.left = getComputedStyle(p).left;
   activeUI.style.top  = getComputedStyle(p).top;
 }
 
-/* ===== Fullscreen overlay (Select opens) ===== */
+/* ===== Fullscreen overlay ===== */
 const selectBtn = document.getElementById('selectBtn');
 const fullscreen = document.getElementById('fullscreen');
 const fsImg = document.getElementById('fsImg');
@@ -274,6 +271,7 @@ function openFullscreen(){
   fullscreen.classList.add('open');
   fullscreen.setAttribute('aria-hidden', 'false');
 }
+
 function closeFullscreen(){
   if (!fullscreen) return;
   fullscreen.classList.remove('open');
@@ -294,7 +292,6 @@ if (closeBtn){
 }
 if (fullscreen){
   fullscreen.addEventListener('click', (e) => {
-    // click outside closes
     if (e.target === fullscreen) closeFullscreen();
   });
 }
@@ -322,24 +319,24 @@ function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
 
 if (viewport){
   viewport.addEventListener('pointerdown', (e) => {
-  if (isFullscreenOpen()) return;
+    if (isFullscreenOpen()) return;
 
-  // If the user is pressing an interactive element, DON'T start panning/capturing
-  const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
-  if (interactive) return;
+    // If tapping interactive UI, don't start pan capture
+    const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
+    if (interactive) return;
 
-  viewport.setPointerCapture(e.pointerId);
-  setPointer(e);
+    viewport.setPointerCapture(e.pointerId);
+    setPointer(e);
 
-  if (pointers.size === 1){
-    lastPan = { x: e.clientX, y: e.clientY };
-    pinchStart = null;
-  } else if (pointers.size === 2){
-    const [p1, p2] = getTwoPointers();
-    pinchStart = { d: dist(p1,p2), z: tZoom, m: mid(p1,p2) };
-    lastPan = null;
-  }
-});
+    if (pointers.size === 1){
+      lastPan = { x: e.clientX, y: e.clientY };
+      pinchStart = null;
+    } else if (pointers.size === 2){
+      const [p1, p2] = getTwoPointers();
+      pinchStart = { d: dist(p1,p2), z: tZoom, m: mid(p1,p2) };
+      lastPan = null;
+    }
+  });
 
   viewport.addEventListener('pointermove', (e) => {
     if (isFullscreenOpen()) return;
