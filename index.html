@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Nelle Kristoff — Art</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="Cache-Control" content="no-store" />
-<link rel="stylesheet" href="styles.css" />
-<link rel="icon" href="favicon.ico" />
+  <meta charset="UTF-8" />
+  <title>Nelle Kristoff — Art</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="favicon.ico" />
 </head>
 
 <body>
@@ -14,47 +14,49 @@
   <section class="film-main" aria-label="Leporello space gallery">
 
     <header class="film-header" id="siteHeader">
-  <div class="title-row">
+      <div class="title-row">
 
-    <!-- Burger LEFT -->
-    <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" type="button">
-      <svg class="icon-burger" viewBox="571.766 351.497 359.988 296.918" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path fill="currentColor"
-          d="m 571.76604,351.49699 v 43.5293 h 359.98828 v -43.5293 z
-             m 0,126.67383 v 43.52929 h 359.98828 v -43.52929 z
-             m 0,126.71679 v 43.52735 h 359.98828 v -43.52735 z"/>
-      </svg>
-    </button>
+        <!-- Burger LEFT -->
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" type="button">
+          <svg class="icon-burger" viewBox="571.766 351.497 359.988 296.918" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path fill="currentColor"
+              d="m 571.76604,351.49699 v 43.5293 h 359.98828 v -43.5293 z
+                 m 0,126.67383 v 43.52929 h 359.98828 v -43.52929 z
+                 m 0,126.71679 v 43.52735 h 359.98828 v -43.52735 z"/>
+          </svg>
+        </button>
 
-    <!-- Brand (TEXT by default, MONOGRAM when menu opens) -->
-    <div class="brand" aria-label="Site title">
-      <span class="brand-text">Nelle Kristoff</span>
+        <!-- Brand (TEXT by default, MONOGRAM when menu opens) -->
+        <div class="brand" aria-label="Site title">
+          <span class="brand-text">Nelle Kristoff</span>
 
-      <span class="brand-mark" aria-hidden="true">
-        <svg class="icon-monogram" viewBox="516.693 329.310 496.951 359.707" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path fill="currentColor"
-            d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
-        </svg>
-      </span>
-    </div>
+          <span class="brand-mark" aria-hidden="true">
+            <svg class="icon-monogram" viewBox="516.693 329.310 496.951 359.707" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path fill="currentColor"
+                d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
+            </svg>
+          </span>
+        </div>
 
-    <div class="subtitle-inline">Selected Works</div>
-  </div>
+        <div class="subtitle-inline">Selected Works</div>
+      </div>
 
-  <div class="menu-wrap">
-    <nav class="menu" id="menu" aria-label="Site menu">
-      <a href="about.html">About</a>
-      <a href="#" onclick="contact(event)">Contact</a>
-      <a href="posts.html">Posts</a>
-    </nav>
-  </div>
-</header>
+      <!-- Menu RIGHT -->
+      <div class="menu-wrap">
+        <nav class="menu" id="menu" aria-label="Site menu">
+          <a href="about.html">About</a>
+          <a href="#" onclick="contact(event)">Contact</a>
+          <a href="posts.html">Posts</a>
+        </nav>
+      </div>
+    </header>
 
     <div class="space-viewport" id="viewport">
       <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
 
       <div class="space-pan" id="spacePan">
         <div class="space-zoom" id="spaceZoom">
+
           <div class="leporello" id="leporello"></div>
 
           <!-- Controls attached to the ACTIVE (middle) panel position -->
@@ -66,23 +68,22 @@
 
             <div class="active-actions">
               <a href="#" class="abtn active-left" onclick="contact(event)">Inquire</a>
-
               <button class="abtn abtn-primary" id="selectBtn" type="button">Select</button>
-
               <a href="#" class="abtn active-right" id="activeCollect" target="_blank" rel="noopener">Collect</a>
-              </div>
             </div>
           </div>
           <!-- /active-ui -->
-        </div>
-      </div>
 
-      <div class="arrow-slot">
-        <button class="film-arrow" id="arrowRight" aria-label="Next artwork">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 6l6 6-6 6"/>
-          </svg>
-        </button>
+        </div>
+
+        <!-- ✅ Arrow INSIDE spacePan so it moves with pan -->
+        <div class="arrow-slot">
+          <button class="film-arrow" id="arrowRight" aria-label="Next artwork" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M9 6l6 6-6 6"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -101,11 +102,8 @@
 
         <div class="fs-actions">
           <a href="#" class="abtn fs-left" onclick="contact(event)">Inquire</a>
-
           <button class="abtn abtn-primary" id="closeBtn" type="button">✕</button>
-          
           <a href="#" class="abtn fs-right" id="fsCollect" target="_blank" rel="noopener">Collect</a>
-          </div>
         </div>
       </div>
     </div>
