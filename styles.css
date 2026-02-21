@@ -108,11 +108,16 @@ main{
   left:0;
   top:50%;
   transform: translateY(-50%);
-  opacity:.65;
-  font-size:9px;
-  letter-spacing:.4px;
+  
+  font-size: clamp(11px, 1.2vw, 14px);
+  font-weight:500;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  
+  opacity:.75;
   white-space:nowrap;
   line-height:1;
+
   z-index:2;
   pointer-events:none;
   transition: opacity .22s ease, transform .22s ease;
