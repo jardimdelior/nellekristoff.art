@@ -36,9 +36,9 @@
   --headerH: 32px;
   --headerTotalH: calc(var(--headerBarH) + var(--menuBayH));
 
-  /* optical corrections for your big-canvas SVGs */
-  --burgerScale: 2.2;
-  --monoScale: 1.25;
+  /* optical corrections (FIXED) */
+  --burgerScale: 1.15;    /* was 2.2 */
+  --monoScale: 1.05;      /* was 1.25 */
 }
 
 /* base */
@@ -77,25 +77,24 @@ main{
 
 /* header row: fixed height, never changes */
 .film-header{
-  width: 100%;
+  width:100%;
   box-sizing:border-box;
   position:relative;
-  min-height: var(--headerH);
-  display:grid;
-  grid-template-columns: var(--headerBarH) 1fr auto;
-  align-items:center;
-  column-gap: 12px;
-  position:relative;
   z-index:20;
+
+  /* 2 rows: header bar + reserved menu bay */
+  display:grid;
+  grid-template-rows: var(--headerBarH) var(--menuBayH);
+  row-gap: 8px;
 }
 
 /* BAR ROW */
 .header-bar{
-  height: var(--headerH);
+  height: var(--headerBarH);
   display:grid;
-  grid-template-columns: var(--headerH) minmax(0, 1fr) auto;
+  grid-template-columns: var(--headerBarH) minmax(0, 1fr) auto;
   align-items:center;
-  gap:11px;
+  gap: 12px;
 }
 
 /* RIGHT side */
@@ -129,12 +128,14 @@ main{
 /* BRAND swap (TEXT overlays MONOGRAM, no jumping) */
 .brand{
   position:relative;
-  font-size: var(--headerH);
-  line-height:1;
-  height: var(--headerH);
+  height: var(--headerBarH);
+  display:flex;
+  align-items:center;
+
+  /* spacing + stability */
+  padding-left: 0;
+  min-width: 14ch;
   overflow:hidden;
-  min-width: 0;
-  padding-left: 6px;
 }
 
 .brand-text,
@@ -153,17 +154,18 @@ main{
   overflow: hidden;
   text-overflow:ellipsis;
   opacity:1;
-  font-size: var(--headerH);
+  font-size: var(--headerBarH);
   line-height:1;
   color: var(--ink);
   font-weight:500;
   letter-spacing:3px;
   text-transform:uppercase;
 }
+
 /* monogram */
 .brand-mark{
   opacity:0;
-  height: var(--headerH);
+  height: var(--headerBarH);
   display:flex;
   align-items:center;
   color: var(--brand);
@@ -180,26 +182,25 @@ main{
 .film-header.menu-open .brand-text{ opacity:0; }
 .film-header.menu-open .brand-mark{ opacity:1; }
 
-/* BURGER button (YOUR SVG) */
+/* BURGER button (FIXED sizing) */
 .menu-btn{
-  width: var(--headerH);
-  height: var(--headerH);
+  width: var(--headerBarH);
+  height: var(--headerBarH);
   border:0;
   background:transparent;
   cursor:pointer;
   padding:0;
   margin:0;
-  justify-self:start;
+
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size: var(--headerBarH);
-  line-height:1;
+
   color: var(--brand);
 }
 .menu-btn svg{
+  width: 100%;
   height: 100%;
-  width: auto;
   display:block;
   transform: scale(var(--burgerScale));
   transform-origin:center;
@@ -207,20 +208,24 @@ main{
 
 /* MENU BAY (reserved space, never overlaps viewport) */
 .menu-bay{
-  height: var(--headerH);
+  height: var(--menuBayH);
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:flex-end;
+  position:relative;
 }
 
-/* Menu container is always in the bay, but hidden when closed */
+/* Menu container lives INSIDE the bay (no leaking) */
 .menu{
-  position:absolute;
-  right:0;
-  top:calc(100% + 8px);
+  position:relative;          /* was absolute */
   width:min(520px, 56vw);
   margin:0;
+
   opacity:0;
+  pointer-events:none;
+  transform: translateY(-2px);
+  transition: opacity .18s ease, transform .18s ease;
+
   display:flex;
   justify-content:flex-end;
   gap:8px;
@@ -228,9 +233,7 @@ main{
   white-space:nowrap;
   align-items:center;
   box-sizing:border-box;
-  pointer-events:none;
-  transform: translateY(-2px);
-  transition: opacity .18s ease, transform .18s ease;
+
   /* SAME matte base as viewport */
   background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
@@ -264,12 +267,7 @@ main{
 
 /* OPEN */
 .menu.open{
-  display:flex;
   opacity:1;
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-  flex-wrap:nowrap;
   pointer-events:auto;
   transform: translateY(0);
 }
@@ -281,21 +279,23 @@ main{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  flex: 1 1 auto;
-  height: var(--headerH);
-  min-height: var(--headerH);
+
+  height: var(--headerBarH);
+  min-height: var(--headerBarH);
   padding: 0 14px;
   border-radius:10px;
-  font-size: clamp(14px, 2.2vw,var(--headerH));
-  letter-spacing:.2px;
+
+  font-size: clamp(12px, 1.4vw, 14px);
   line-height:1;
   text-decoration:none;
   color:var(--ink);
   letter-spacing:.2px;
+
   background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   backdrop-filter: blur(11px);
   transition: background .2s ease;
+
   white-space:nowrap;
 }
 .menu a:hover{ background: rgba(0,0,0,.32); }
@@ -605,8 +605,12 @@ footer{
 
     --headerBarH: 24px;
     --menuBayH: 48px;
+
+    --burgerScale: 1.10;
+    --monoScale: 1.00;
   }
 }
+
 @media (prefers-reduced-motion: reduce){
   .panel{ transition:none !important; }
   .noise{ animation:none !important; }
