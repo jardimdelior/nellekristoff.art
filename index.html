@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,19 +13,12 @@
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
-    <!-- HEADER BAR (part of layout, not absolute) -->
+    <!-- HEADER BAR (stable height, menu overlays - no pushing layout) -->
     <header class="film-header" id="siteHeader">
       <div class="title-row">
 
         <!-- Burger LEFT -->
-        <button
-          class="menu-btn"
-          id="menuBtn"
-          type="button"
-          aria-label="Open menu"
-          aria-expanded="false"
-          aria-controls="menu"
-        >
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" type="button">
           <svg class="icon-burger" viewBox="571.766 351.497 359.988 296.918" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path fill="currentColor"
               d="m 571.76604,351.49699 v 43.5293 h 359.98828 v -43.5293 z
@@ -47,11 +39,11 @@
           </span>
         </div>
 
-        <!-- Right-side label (hides on menu open via CSS) -->
+        <!-- Right-side label (hides on menu open) -->
         <div class="subtitle-inline">Selected Works</div>
       </div>
 
-      <!-- Menu RIGHT -->
+      <!-- Menu overlays (does not change header height) -->
       <div class="menu-wrap">
         <nav class="menu" id="menu" aria-label="Site menu">
           <a href="about.html">About</a>
@@ -69,7 +61,7 @@
         <div class="space-zoom" id="spaceZoom">
           <div class="leporello" id="leporello"></div>
 
-          <!-- Controls attached to the ACTIVE (middle) panel position -->
+          <!-- Controls attached to ACTIVE panel -->
           <div class="active-ui" id="activeUI" aria-hidden="false">
             <div class="active-meta">
               <span class="am-title" id="amTitle">Untitled</span>
