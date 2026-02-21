@@ -38,7 +38,7 @@
 
   /* optical corrections (FIXED) */
   --burgerScale: 1;
-  --monoScale: 1;
+  --monoScale: 0,90;
 
   /* header motion tuning */
   --burgerShift: 10px;        /* how much burger slides on open */
