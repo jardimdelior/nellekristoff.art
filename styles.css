@@ -537,18 +537,24 @@ footer{
 .fs-actions{
   margin-top: 12px;
   width:100%;
+  min-height:44px;
+
+  position:relative;
   display:flex;
   align-items:center;
   justify-content:center;
-  position:relative;
-  min-height: 44px;
 }
+
+.fs-left{
+  position:absolute;
+  left:0;
+  top:0;
+}
+
 .fs-right{
   position:absolute;
   right:0;
   top:0;
-  display:flex;
-  gap:10px;
 }
 
 @media (max-width: 520px){
