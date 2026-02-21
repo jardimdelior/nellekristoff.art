@@ -32,6 +32,8 @@
   --headerText: var(--headerH);
   --iconH: var(--headerH);
   --linkH: var(--headerH);
+  --iconBox: var(--headerH);
+  --iconScale: 1.85;
 
   /* Optical corrections for big-canvas SVGs */
   --burgerScale: 2.2;
@@ -65,6 +67,7 @@ main{
   width:min(96vw, 1400px);
   margin:0 auto;
   box-sizing:border-box;
+  padding: 0;
 
   display:grid;
   grid-template-rows: auto 1fr;
@@ -92,6 +95,7 @@ main{
   gap:12px;
   flex:1;
   min-width:0;
+  padding-left: 0;
 }
 
 .subtitle-inline{
@@ -145,7 +149,7 @@ main{
   height: 1em;
   width:auto;
   display:block;
-  transform: scale(var(--monoScale));
+  transform: scale(var(--iconScale));
   transform-origin:center;
 }
 
@@ -156,12 +160,13 @@ main{
 
 /* ===== Burger (your SVG) ===== */
 .menu-btn{
-  width: var(--iconH);
-  height: var(--iconH);
+  width: var(--iconBox);
+  height: var(--iconBox);
   border:0;
   background:transparent;
   cursor:pointer;
   padding:0;
+  margin: 0;
 
   display:flex;
   align-items:center;
@@ -267,6 +272,7 @@ main{
   background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   overflow:hidden;
+  margin: 0 6px;
 
   touch-action:none;
   user-select:none;
