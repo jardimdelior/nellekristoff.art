@@ -350,14 +350,8 @@ main{
   color:var(--ink);
   letter-spacing:.2px;
 
-  background: rgba(255,255,255,.10);
-  box-shadow: 0 12px 44px rgba(0,0,0,.10);
-  backdrop-filter: blur(11px);
-  transition: background .2s ease;
-
   white-space:nowrap;
 }
-.menu a:hover{ background: rgba(0,0,0,.32); }
 
 /* ===== VIEWPORT ===== */
 .space-viewport{
@@ -543,6 +537,85 @@ main{
 .film-arrow:active{ transform:scale(.98); }
 .film-arrow svg{ width:18px; height:18px; }
 
+/* ===== Unified button system (match film-arrow) ===== */
+.ui-btn{
+  height: 52px;
+  min-height: 52px;
+  padding: 0 18px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(47,42,38,.28);
+
+  background: rgba(239,231,220,.78);
+  backdrop-filter: blur(6px);
+
+  box-shadow: 0 10px 24px rgba(0,0,0,.14);
+
+  color: var(--ink);
+  text-decoration:none;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size: 13px;
+  letter-spacing: .2px;
+  line-height: 1;
+
+  cursor:pointer;
+  transition: transform .2s ease, background .2s ease, color .2s ease;
+  opacity:.96;
+  white-space:nowrap;
+}
+
+.ui-btn:hover{
+  background: rgba(239,231,220,.92);
+  transform: scale(1.04);
+}
+
+.ui-btn:active{
+  transform: scale(.98);
+}
+
+/* Apply unified style */
+.menu a,
+.abtn{
+  height: 52px;
+  min-height: 52px;
+  padding: 0 18px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(47,42,38,.28);
+  background: rgba(239,231,220,.78);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.14);
+
+  color: var(--ink);
+  text-decoration:none;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size: 13px;
+  letter-spacing:.2px;
+  line-height:1;
+
+  transition: transform .2s ease, background .2s ease;
+  opacity:.96;
+}
+
+.menu a:hover,
+.abtn:hover{
+  background: rgba(239,231,220,.92);
+  transform: scale(1.04);
+}
+
+.menu a:active,
+.abtn:active{
+  transform: scale(.98);
+}
+
 /* footer */
 footer{
   text-align:center;
@@ -614,18 +687,8 @@ footer{
   border-radius:10px;
   border:none;
 
-  background: rgba(255,255,255,.10);
-  box-shadow: 0 12px 44px rgba(0,0,0,.10);
-  backdrop-filter: blur(11px);
-
-  transition: background .2s ease, transform .15s ease;
   cursor:pointer;
   white-space:nowrap;
-}
-
-.abtn:hover{
-  background: rgba(0,0,0,.32);
-  color:#fff;
 }
 
 .abtn:active{
