@@ -1,4 +1,3 @@
-// app.js
 document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.classList.add("ready");
 });
@@ -19,16 +18,16 @@ const works = [
 /* preload */
 works.forEach(w => { const i = new Image(); i.src = w.src; });
 
-/* ===== Menu ===== */
+/* Menu */
 const menuBtn = document.getElementById('menuBtn');
 const menu = document.getElementById('menu');
 const header = document.querySelector('.film-header');
 
 function setMenu(open){
   if (!menuBtn || !menu) return;
-  menu.classList.toggle('open', open);              // menu panel open/close
+  menu.classList.toggle('open', open);
   menuBtn.setAttribute('aria-expanded', String(open));
-  if (header) header.classList.toggle('menu-open', open); // triggers brand swap + hides Selected Works
+  if (header) header.classList.toggle('menu-open', open);
 }
 
 if (menuBtn && menu){
@@ -38,19 +37,19 @@ if (menuBtn && menu){
     setMenu(!menu.classList.contains('open'));
   });
 
-  // clicks inside the menu should NOT close it
+  // Don't close when clicking inside menu/header
   menu.addEventListener('click', (e) => e.stopPropagation());
+  if (header) header.addEventListener('click', (e) => e.stopPropagation());
 
   // click anywhere else closes
   document.addEventListener('click', () => setMenu(false));
 
-  // Esc closes
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') setMenu(false);
   });
 }
 
-/* ===== helpers ===== */
+/* helpers */
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
@@ -235,13 +234,11 @@ function syncActiveUI(){
   const p = panels[active];
   if (!p) return;
 
-  const tf = p.style.transform || "";
-  activeUI.style.transform = tf;
-
-  activeUI.style.width  = getComputedStyle(p).width;
+  activeUI.style.transform = p.style.transform || "";
+  activeUI.style.width = getComputedStyle(p).width;
   activeUI.style.height = getComputedStyle(p).height;
-  activeUI.style.left   = getComputedStyle(p).left;
-  activeUI.style.top    = getComputedStyle(p).top;
+  activeUI.style.left = getComputedStyle(p).left;
+  activeUI.style.top  = getComputedStyle(p).top;
 }
 
 /* ===== Fullscreen overlay ===== */
@@ -270,7 +267,6 @@ function openFullscreen(){
   fullscreen.classList.add('open');
   fullscreen.setAttribute('aria-hidden', 'false');
 }
-
 function closeFullscreen(){
   if (!fullscreen) return;
   fullscreen.classList.remove('open');
@@ -321,7 +317,7 @@ if (viewport){
     if (isFullscreenOpen()) return;
 
     // If tapping interactive UI, don't start pan capture
-    const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot');
+    const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
     if (interactive) return;
 
     viewport.setPointerCapture(e.pointerId);
@@ -365,7 +361,6 @@ if (viewport){
       const cy = mNow.y - rect.top;
 
       setZoomAt(pinchStart.z * (dNow / pinchStart.d), cx, cy);
-
       addPan(mNow.x - pinchStart.m.x, mNow.y - pinchStart.m.y);
       pinchStart.m = mNow;
     }
