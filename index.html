@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,43 +14,49 @@
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
-    <!-- HEADER BAR: separate row, does NOT move with pan/zoom -->
+    <!-- HEADER (fixed height: bar + reserved menu bay) -->
     <header class="film-header" id="siteHeader">
 
-      <!-- LEFT: burger -->
-      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" type="button">
-        <!-- your burger SVG -->
-        <svg class="icon-burger" viewBox="571.766 351.497 359.988 296.918" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-          <path fill="currentColor"
-            d="m 571.76604,351.49699 v 43.5293 h 359.98828 v -43.5293 z
-               m 0,126.67383 v 43.52929 h 359.98828 v -43.52929 z
-               m 0,126.71679 v 43.52735 h 359.98828 v -43.52735 z"/>
-        </svg>
-      </button>
-
-      <!-- CENTER: brand (text ↔ monogram swap) -->
-      <div class="brand" aria-label="Site title">
-        <span class="brand-text">Nelle Kristoff</span>
-        <span class="brand-mark" aria-hidden="true">
-          <!-- your monogram SVG -->
-          <svg class="icon-monogram" viewBox="516.693 329.310 496.951 359.707" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+      <!-- BAR ROW -->
+      <div class="header-bar">
+        <!-- Burger LEFT -->
+        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" type="button">
+          <!-- YOUR BURGER SVG -->
+          <svg class="icon-burger" viewBox="571.766 351.497 359.988 296.918" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
             <path fill="currentColor"
-              d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
+              d="m 571.76604,351.49699 v 43.5293 h 359.98828 v -43.5293 z
+                 m 0,126.67383 v 43.52929 h 359.98828 v -43.52929 z
+                 m 0,126.71679 v 43.52735 h 359.98828 v -43.52735 z"/>
           </svg>
-        </span>
+        </button>
+
+        <!-- Brand (TEXT ↔ MONOGRAM) -->
+        <div class="brand" aria-label="Site title">
+          <span class="brand-text">Nelle Kristoff</span>
+          <span class="brand-mark" aria-hidden="true">
+            <!-- YOUR MONOGRAM SVG -->
+            <svg class="icon-monogram" viewBox="516.693 329.310 496.951 359.707" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+              <path fill="currentColor"
+                d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
+            </svg>
+          </span>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="header-right">
+          <div class="subtitle-inline">Selected Works</div>
+        </div>
       </div>
 
-      <!-- RIGHT: Selected Works + menu overlay anchor -->
-      <div class="header-right">
-        <div class="subtitle-inline">Selected Works</div>
-
-        <!-- MENU OVERLAY (anchors to the right edge of film, no layout push) -->
+      <!-- MENU BAY ROW (reserved space, never overlaps viewport) -->
+      <div class="menu-bay">
         <nav class="menu" id="menu" aria-label="Site menu">
           <a href="about.html">About</a>
           <a href="#" onclick="contact(event)">Contact</a>
           <a href="posts.html">Posts</a>
         </nav>
       </div>
+
     </header>
 
     <!-- VIEWPORT ROW -->
@@ -60,7 +67,7 @@
         <div class="space-zoom" id="spaceZoom">
           <div class="leporello" id="leporello"></div>
 
-          <!-- Controls attached to ACTIVE panel -->
+          <!-- Active UI follows active panel -->
           <div class="active-ui" id="activeUI" aria-hidden="false">
             <div class="active-meta">
               <span class="am-title" id="amTitle">Untitled</span>
@@ -77,7 +84,7 @@
         </div>
       </div>
 
-      <!-- Arrow pinned to viewport (NOT in space-pan, so it won't drift) -->
+      <!-- Arrow pinned to viewport corner (will NOT drift) -->
       <div class="arrow-slot">
         <button class="film-arrow" id="arrowRight" aria-label="Next artwork" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -87,7 +94,7 @@
       </div>
     </div>
 
-    <!-- TRUE FULLSCREEN OVERLAY -->
+    <!-- FULLSCREEN OVERLAY -->
     <div class="fullscreen" id="fullscreen" aria-hidden="true">
       <div class="fs-inner">
         <div class="fs-meta">
