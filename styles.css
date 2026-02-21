@@ -86,7 +86,8 @@ main{
   display:flex;
   align-items:center;
   gap:12px;
-  width:100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .subtitle-inline{
@@ -172,7 +173,12 @@ main{
 }
 
 /* ===== menu ===== */
-.menu-wrap{ display:flex; flex-direction:column; align-items:flex-end; }
+.menu-wrap{ 
+  display:flex; 
+  flex-direction:column; 
+  align-items:flex-end;
+  margin-left: auto;
+}
 
 .menu{
   position:relative;
