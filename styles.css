@@ -197,19 +197,24 @@ main{
 
 /* Menu container is always in the bay, but hidden when closed */
 .menu{
+  position:absolute;
+  right:0;
+  top:calc(100% + 8px);
   width:min(520px, 56vw);
-  display:flex;
+  margin:0;
+  padding:12px;
+  display:none;
   justify-content:flex-end;
   gap:8px;
   flex-wrap:nowrap;
 
   border-radius:14px;
+  box-sizing:border-box;
+  overflow:hidden;
+  /* SAME matte base as viewport */
   background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   backdrop-filter: blur(10px);
-  padding:12px;
-  box-sizing:border-box;
-  overflow:hidden;
 
   opacity:0;
   pointer-events:none;
@@ -227,6 +232,8 @@ main{
 }
 
 .menu a{
+  position:relative;
+  z-index:1;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -247,6 +254,28 @@ main{
   transition: background .2s ease;
 }
 .menu a:hover{ background: rgba(0,0,0,.32); }
+
+.menu::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:14px;
+  pointer-events:none;
+  z-index:0;
+
+  background:
+    radial-gradient(120% 55% at 50% 56%,
+      rgba(0,0,0,.12) 0%,
+      rgba(0,0,0,.07) 22%,
+      rgba(0,0,0,0) 62%),
+    radial-gradient(120% 120% at 50% 50%,
+      rgba(0,0,0,0) 58%,
+      rgba(0,0,0,.10) 84%,
+      rgba(0,0,0,.18) 100%);
+
+  mix-blend-mode:multiply;
+  opacity:.85;
+}
 
 /* ===== VIEWPORT ===== */
 .space-viewport{
