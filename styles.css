@@ -104,6 +104,7 @@ main{
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
+  min-width:0;
 }
 
 /* Selected Works */
@@ -120,6 +121,7 @@ main{
 .film-header.menu-open .subtitle-inline{
   opacity:0;
   pointer-events:none;
+  display:none;
 }
 
 /* BRAND swap (TEXT overlays MONOGRAM, no jumping) */
@@ -211,7 +213,8 @@ main{
   justify-content:flex-end;
   gap:8px;
   flex-wrap:nowrap;
-
+  white-space:nowrap;
+  align-items:center;
   border-radius:14px;
   box-sizing:border-box;
   overflow:hidden;
@@ -219,13 +222,13 @@ main{
   background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   backdrop-filter: blur(10px);
-
   opacity:0;
   pointer-events:none;
   transform: translateY(-4px);
   transition: opacity .18s ease, transform .18s ease;
 }
 .menu.open{
+  display:flex;
   opacity:1;
   display:flex;
   justify-content:flex-end;
@@ -242,19 +245,18 @@ main{
   align-items:center;
   justify-content:center;
   flex: 1 1 auto;
-
+  height: var(--headerBarH);
   min-height: var(--headerBarH);
-  padding: 0 18px;
-
-  font-size: var(--headerBarH);
+  padding: 0 14px;
+  border-radius:10px;
+  font-size: clamp(14px, 2.2vw,var(--headerH));
   line-height:1;
   text-decoration:none;
   color:var(--ink);
   letter-spacing:.2px;
-
-  border-radius:10px;
-  background: rgba(0,0,0,.20);
-  backdrop-filter: blur(6px);
+  background: rgba(255,255,255,.10);
+  box-shadow: 0 12px 44px rgba(0,0,0,.10);
+  backdrop-filter: blur(10px);
   transition: background .2s ease;
 }
 .menu a:hover{ background: rgba(0,0,0,.32); }
