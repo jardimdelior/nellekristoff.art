@@ -210,20 +210,22 @@ main{
 .menu-bay{
   height: var(--menuBayH);
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content:flex-end;
   position:relative;
-  overflow:hidden;
+  overflow:visible;
 }
 
 /* Menu container lives INSIDE the bay (no leaking) */
 .menu{
   position:relative;
   right:auto;
-  width:100%;
+  width:max-content;
   max-width:100%;
   margin:0;
+  margin-left:auto;
   top:auto;
+  overflow-x:auto;
 
   opacity:0;
   pointer-events:none;
