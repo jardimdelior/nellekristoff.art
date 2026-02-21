@@ -1,3 +1,4 @@
+/* styles.css */
 :root{
   --bg:#EFE7DC;
   --ink:#2F2A26;
@@ -29,10 +30,12 @@
   /* shared inset so header + viewport align perfectly */
   --filmPad: 6px;
 
-  /* one master header height */
-  --headerH: 32px;
+  /* header sizing */
+  --headerBarH: 32px;     /* burger + brand + selected works */
+  --menuBayH: 56px;       /* reserved area for About/Contact/Posts */
+  --headerTotalH: calc(var(--headerBarH) + var(--menuBayH));
 
-  /* optical corrections for big-canvas SVGs */
+  /* optical corrections for your big-canvas SVGs */
   --burgerScale: 2.2;
   --monoScale: 1.25;
 }
@@ -45,13 +48,11 @@ body{
   background:var(--bg);
   color:var(--ink);
   line-height:1.6;
-  opacity:1;
+  opacity:0;
   padding:0;
   box-sizing:border-box;
 }
-html.ready body{ 
-  animation:fadein 1.0s ease-in-out both;
-}
+html.ready body{ animation:fadein 1.0s ease-in-out forwards; }
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
 main{
@@ -62,49 +63,47 @@ main{
   justify-content:center;
 }
 
-/* film padding edge shared by header + viewport */
+/* film: 2-row grid: header row + viewport row */
 .film-main{
   width:min(96vw, 1400px);
   margin:0 auto;
   box-sizing:border-box;
-  padding: 0 6px;
+  padding: 0 var(--filmPad);
+
   display:grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: var(--headerTotalH) 1fr;
   gap: 10px;
 }
 
-/* header is grid: left icon, center brand, right area */
+/* header row: fixed height, never changes */
 .film-header{
-  position:relative;
-  z-index:20;
+  height: var(--headerTotalH);
   display:grid;
-  grid-template-columns: var(--headerH) 1fr auto;
-  align-items:center;
-  gap:12px;
-  padding: 0;           /* keeps it flush to film edge */
-  opacity:1;
-  pointer-events:auto;
+  grid-template-rows: var(--headerBarH) var(--menuBayH);
+  align-items:stretch;
+  position:relative;
+  z-index:50;
 }
 
-/* right container anchors menu */
+/* BAR ROW */
+.header-bar{
+  height: var(--headerBarH);
+  display:grid;
+  grid-template-columns: var(--headerBarH) 1fr auto;
+  align-items:center;
+  gap:12px;
+}
+
+/* RIGHT side */
 .header-right{
-  position:relative;
   display:flex;
   align-items:center;
   justify-content:flex-end;
   gap:12px;
 }
 
-.title-row{
-  height: var(--headerH);
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-width:0;
-}
-
+/* Selected Works */
 .subtitle-inline{
-  margin-left:auto;
   opacity:.65;
   font-size:11px;
   letter-spacing:.4px;
@@ -119,15 +118,13 @@ main{
   pointer-events:none;
 }
 
-/* ===== Brand swap (TEXT overlays MONOGRAM) ===== */
+/* BRAND swap (TEXT overlays MONOGRAM, no jumping) */
 .brand{
   position:relative;
-  font-size: var(--headerH);
+  font-size: var(--headerBarH);
   line-height:1;
   height:1em;
-
-  /* keep a stable reserved width (prevents any jump) */
-  min-width: 12ch;
+  min-width: 12ch; /* reserve width so burger never overlaps */
 }
 
 .brand-text,
@@ -148,12 +145,10 @@ main{
   letter-spacing:3px;
   text-transform:uppercase;
 }
-
 .brand-mark{
   opacity:0;
   color: var(--brand);
 }
-
 .brand-mark svg{
   height: 1em;
   width:auto;
@@ -166,10 +161,10 @@ main{
 .film-header.menu-open .brand-text{ opacity:0; }
 .film-header.menu-open .brand-mark{ opacity:1; }
 
-/* ===== Burger (your SVG) ===== */
+/* BURGER button (YOUR SVG) */
 .menu-btn{
-  width: var(--headerH);
-  height: var(--headerH);
+  width: var(--headerBarH);
+  height: var(--headerBarH);
   border:0;
   background:transparent;
   cursor:pointer;
@@ -180,82 +175,62 @@ main{
   align-items:center;
   justify-content:center;
 
-  font-size: var(--headerH); /* makes 1em match text height */
+  font-size: var(--headerBarH);
   line-height:1;
   color: var(--brand);
 }
-
 .menu-btn svg{
   height: 100%;
-  width:100%;
+  width: 100%;
   display:block;
   transform: scale(var(--burgerScale));
   transform-origin:center;
 }
 
-/* ===== Menu overlay (NO LAYOUT PUSH) ===== */
-.menu-wrap{
-  position:relative;
-  right: var(--filmPad);
-  top: calc(var(--headerH) + 10px);
-  z-index:30;
+/* MENU BAY (reserved space, never overlaps viewport) */
+.menu-bay{
+  height: var(--menuBayH);
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
 }
 
+/* Menu container is always in the bay, but hidden when closed */
 .menu{
-  position:absolute;
   width:min(520px, 56vw);
-  margin:0;
-  border-radius:14px;
-
-  background: rgba(255,255,255,.10);
-  box-shadow: 0 12px 44px rgba(0,0,0,.10);
-  backdrop-filter: blur(10px);
-
-  padding:12px;
-  overflow:hidden;
-  right:0;
-  top: calc(100% + 8px);
-  display:none; /* shown by .open */
-}
-
-.menu::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:14px;
-  pointer-events:none;
-  z-index:0;
-  background:
-    radial-gradient(120% 55% at 50% 56%,
-      rgba(0,0,0,.12) 0%,
-      rgba(0,0,0,.07) 22%,
-      rgba(0,0,0,0) 62%),
-    radial-gradient(120% 120% at 50% 50%,
-      rgba(0,0,0,0) 58%,
-      rgba(0,0,0,.10) 84%,
-      rgba(0,0,0,.18) 100%);
-  mix-blend-mode:multiply;
-  opacity:.85;
-}
-
-.menu.open{
   display:flex;
   justify-content:flex-end;
   gap:8px;
   flex-wrap:wrap;
+
+  border-radius:14px;
+  background: rgba(255,255,255,.10);
+  box-shadow: 0 12px 44px rgba(0,0,0,.10);
+  backdrop-filter: blur(10px);
+  padding:12px;
+  box-sizing:border-box;
+  overflow:hidden;
+
+  opacity:0;
+  pointer-events:none;
+  transform: translateY(-4px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.menu.open{
+  opacity:1;
+  pointer-events:auto;
+  transform: translateY(0);
 }
 
 .menu a{
-  position:relative;
-  z-index:1;
   display:inline-flex;
   align-items:center;
   justify-content:center;
 
-  min-height: var(--headerH);
+  min-height: var(--headerBarH);
   padding: 0 18px;
 
-  font-size: var(--headerH);
+  font-size: var(--headerBarH);
   line-height:1;
   text-decoration:none;
   color:var(--ink);
@@ -268,7 +243,7 @@ main{
 }
 .menu a:hover{ background: rgba(0,0,0,.32); }
 
-/* ===== VIEWPORT aligned to header edges ===== */
+/* ===== VIEWPORT ===== */
 .space-viewport{
   width:100%;
   height: var(--maxFilmH);
@@ -279,13 +254,14 @@ main{
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   overflow:hidden;
   margin: 0;
+
   touch-action:none;
   user-select:none;
+
   perspective: var(--persp);
   perspective-origin: 50% 55%;
 }
 
-/* subtle horizon + edge fade */
 .space-viewport::after{
   content:"";
   position:absolute;
@@ -570,12 +546,10 @@ footer{
     --zStep: 62px;
     --xStep: 74%;
 
-    --headerH: 24px;
+    --headerBarH: 24px;
+    --menuBayH: 48px;
   }
-
-  .menu{ width:min(92vw, 520px); }
 }
-
 @media (prefers-reduced-motion: reduce){
   .panel{ transition:none !important; }
   .noise{ animation:none !important; }
