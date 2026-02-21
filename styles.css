@@ -458,6 +458,19 @@ footer{
 
   pointer-events:auto; /* buttons clickable */
 }
+
+.active-left{
+  position:absolute;
+  left:0;
+  top:0;
+}
+
+.active-right{
+  position:absolute;
+  right:0;
+  top:0;
+}
+
 .abtn{
   display:inline-flex;
   justify-content:center;
@@ -476,22 +489,6 @@ footer{
 /* Center button */
 .abtn-primary{
   margin: 0 auto;
-}
-
-/* LEFT button (Inquire) */
-.active-actions > .abtn:not(.abtn-primary){
-  position:absolute;
-  left:0;
-  top:0;
-  display:flex;
-}
-
-/* RIGHT button (Collect) */
-.active-right{
-  position:absolute;
-  right:0;
-  top:0;
-  display:flex;
 }
 
 /* ===== Fullscreen overlay (Select opens this) ===== */
