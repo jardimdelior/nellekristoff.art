@@ -90,7 +90,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyView(){
     if (!spacePan || !spaceZoom) return;
-    const zoomZ = Math.max(0, (zoom - 1)) * 210;
+
+    // Stronger “toward me” feel
+    const zoomZ = Math.max(0, (zoom - 1)) * 320;
+
     spaceZoom.style.setProperty('--zoom', zoom);
     spaceZoom.style.setProperty('--zoomZ', zoomZ.toFixed(1) + 'px');
     spacePan.style.setProperty('--panX', panX + 'px');
@@ -125,12 +128,22 @@ document.addEventListener("DOMContentLoaded", () => {
     animRaf = requestAnimationFrame(tick);
   }
 
+  // IMPORTANT FIX: Convert zoom anchor to center-based coords
   function setZoomAt(newZoom, cx, cy){
     newZoom = clamp(newZoom, zoomMin(), zoomMax());
+    if (!viewport) return;
+    const rect = viewport.getBoundingClientRect();
+
+    // Convert from top-left coords to center coords
+    const ccx = cx - rect.width  / 2;
+    const ccy = cy - rect.height / 2;
+
     const baseZoom = zoom;
     const k = newZoom / baseZoom;
-    tPanX = (panX - cx) * k + cx;
-    tPanY = (panY - cy) * k + cy;
+
+    tPanX = (panX - ccx) * k + ccx;
+    tPanY = (panY - ccy) * k + ccy;
+
     tZoom = newZoom;
     clampPanTarget();
     ensureAnim();
@@ -161,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      // Ensure any browser that still tries selection/drag is blocked
       const im = el.querySelector('img');
       if (im){
         im.addEventListener('dragstart', (e) => e.preventDefault());
@@ -384,13 +396,16 @@ document.addEventListener("DOMContentLoaded", () => {
     viewport.addEventListener('pointerup', endPointer);
     viewport.addEventListener('pointercancel', endPointer);
 
+    // UPDATED: smoother wheel zoom, no corner jump
     viewport.addEventListener('wheel', (e) => {
       if (isFullscreenOpen()) return;
       e.preventDefault();
+
       const rect = viewport.getBoundingClientRect();
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
-      const factor = (e.deltaY < 0) ? 1.08 : 0.92;
+
+      const factor = Math.exp(-e.deltaY * 0.0015); // smooth zoom
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
   }
@@ -403,7 +418,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     fsImg.addEventListener('mousedown', (e) => e.preventDefault());
 
-    // Pan/zoom state for fullscreen image
     let x = 0, y = 0, s = 1;
     let isPanning = false;
     let startX = 0, startY = 0;
@@ -412,7 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const clamp2 = (v, a, b) => Math.max(a, Math.min(b, v));
 
     function applyFS(){
-      const z = (s - 1) * 420; // “toward me” depth feel
+      const z = (s - 1) * 420;
       fsImg.style.transformOrigin = '50% 50%';
       fsImg.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(${s})`;
     }
@@ -423,13 +437,11 @@ document.addEventListener("DOMContentLoaded", () => {
       applyFS();
     }
 
-    // Reset whenever fullscreen opens
     const obs = new MutationObserver(() => {
       if (fullscreen.classList.contains('open')) resetFS();
     });
     obs.observe(fullscreen, { attributes:true, attributeFilter:['class'] });
 
-    // Perspective for the translateZ feel
     fullscreen.style.perspective = fullscreen.style.perspective || '1200px';
     fullscreen.style.transformStyle = 'preserve-3d';
     fsImg.style.transformStyle = 'preserve-3d';
