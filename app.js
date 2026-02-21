@@ -40,19 +40,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const spacePan  = document.getElementById('spacePan');
   const spaceZoom = document.getElementById('spaceZoom');
 
-  /* Menu */
+  /* ===== Menu (About/Contact/Posts live in #menu; CSS anchors it LEFT now) ===== */
   const menuBtn = document.getElementById('menuBtn');
   const menu = document.getElementById('menu');
   const header = document.querySelector('.film-header');
-
-  const headerRight = document.querySelector('.header-right');
-  if (headerRight) headerRight.addEventListener('click', (e) => e.stopPropagation());
 
   function setMenu(open){
     if (!menuBtn || !menu) return;
     menu.classList.toggle('open', open);
     menuBtn.setAttribute('aria-expanded', String(open));
-    if (header) header.classList.toggle('menu-open', open);
+    if (header) header.classList.toggle('menu-open', open); // drives fold/unfold CSS
   }
 
   if (menuBtn && menu){
@@ -62,9 +59,13 @@ document.addEventListener("DOMContentLoaded", () => {
       setMenu(!menu.classList.contains('open'));
     });
 
-    // don't close when clicking inside
+    // don't close when clicking inside menu
     menu.addEventListener('click', (e) => e.stopPropagation());
     if (header) header.addEventListener('click', (e) => e.stopPropagation());
+
+    // extra: right cluster (brand + burger) should not trigger "outside click closes"
+    const headerRight = document.querySelector('.header-right');
+    if (headerRight) headerRight.addEventListener('click', (e) => e.stopPropagation());
 
     // click anywhere else closes
     document.addEventListener('click', () => setMenu(false));
@@ -94,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function applyView(){
     if (!spacePan || !spaceZoom) return;
 
-    // Stronger “toward me” feel
+    // “toward me” feel: translateZ increases with zoom
     const zoomZ = Math.max(0, (zoom - 1)) * 320;
 
     spaceZoom.style.setProperty('--zoom', zoom);
@@ -131,13 +132,14 @@ document.addEventListener("DOMContentLoaded", () => {
     animRaf = requestAnimationFrame(tick);
   }
 
-  // IMPORTANT FIX: Convert zoom anchor to center-based coords
+  // Center-anchored zoom (prevents drift / corner jump)
   function setZoomAt(newZoom, cx, cy){
     newZoom = clamp(newZoom, zoomMin(), zoomMax());
     if (!viewport) return;
+
     const rect = viewport.getBoundingClientRect();
 
-    // Convert from top-left coords to center coords
+    // convert top-left coords to center coords
     const ccx = cx - rect.width  / 2;
     const ccy = cy - rect.height / 2;
 
@@ -170,6 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const el = document.createElement('div');
       el.className = 'panel';
       el.tabIndex = 0;
+
       el.innerHTML = `
         <div class="print">
           <img src="${w.src}" alt="${w.title}" draggable="false">
@@ -177,10 +180,12 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
+      // hard-block native drag/select on panel images
       const im = el.querySelector('img');
       if (im){
         im.addEventListener('dragstart', (e) => e.preventDefault());
         im.addEventListener('mousedown', (e) => e.preventDefault());
+        im.addEventListener('contextmenu', (e) => e.preventDefault());
       }
 
       el.addEventListener('click', () => {
@@ -188,6 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
         layout3D();
         syncActiveUI();
       });
+
       el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -304,12 +310,14 @@ document.addEventListener("DOMContentLoaded", () => {
       openFullscreen();
     });
   }
+
   if (closeBtn){
     closeBtn.addEventListener('click', (e) => {
       e.preventDefault();
       closeFullscreen();
     });
   }
+
   if (fullscreen){
     fullscreen.addEventListener('click', (e) => {
       if (e.target === fullscreen) closeFullscreen();
@@ -396,10 +404,11 @@ document.addEventListener("DOMContentLoaded", () => {
         pinchStart = null;
       }
     }
+
     viewport.addEventListener('pointerup', endPointer);
     viewport.addEventListener('pointercancel', endPointer);
 
-    // UPDATED: smoother wheel zoom, no corner jump
+    // smooth wheel zoom (trackpad-friendly)
     viewport.addEventListener('wheel', (e) => {
       if (isFullscreenOpen()) return;
       e.preventDefault();
@@ -408,7 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
 
-      const factor = Math.exp(-e.deltaY * 0.0015); // smooth zoom
+      const factor = Math.exp(-e.deltaY * 0.0015);
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
   }
@@ -496,6 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ===== Keyboard ===== */
   window.addEventListener('keydown', (e) => {
+    // ESC closes fullscreen first
     if (e.key === 'Escape' && isFullscreenOpen()){
       closeFullscreen();
       return;
