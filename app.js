@@ -405,3 +405,109 @@ window.addEventListener('resize', () => {
   layout3D();
   syncActiveUI();
 });
+
+(() => {
+  const lightbox = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  if (!lightbox || !img) return;
+
+  // ---- Hard block native drag/selection/context menu ----
+  img.setAttribute('draggable', 'false');
+  ['dragstart','contextmenu'].forEach(evt =>
+    img.addEventListener(evt, (e) => e.preventDefault())
+  );
+
+  // Prevent “blue selection” on desktop in weird cases
+  img.addEventListener('mousedown', (e) => e.preventDefault());
+
+  // ---- Our pan/zoom state ----
+  let x = 0, y = 0, s = 1;
+  let isPanning = false;
+  let startX = 0, startY = 0;
+  let lastTouchDist = null;
+
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  function apply(){
+    // “Toward me” feeling: we add a small translateZ that increases with scale.
+    // It’s still a 2D image, but with perspective it feels like it comes forward.
+    const z = (s - 1) * 420; // tweak 300–700 if you want stronger/weaker depth
+    img.style.transformOrigin = '50% 50%';
+    img.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(${s})`;
+  }
+
+  function reset(){
+    x = 0; y = 0; s = 1;
+    lastTouchDist = null;
+    apply();
+  }
+
+  // Call reset whenever you open the lightbox (optional but recommended)
+  // If you already have openLightbox(), just add `reset()` inside it.
+  // Otherwise, this will reset when lightbox becomes open by click.
+  const obs = new MutationObserver(() => {
+    if (lightbox.classList.contains('open')) reset();
+  });
+  obs.observe(lightbox, { attributes:true, attributeFilter:['class'] });
+
+  // Add perspective to parent for the Z effect
+  // (Safe to set inline; if you already do perspective in CSS, keep yours.)
+  lightbox.style.perspective = lightbox.style.perspective || '1200px';
+  lightbox.style.transformStyle = 'preserve-3d';
+  img.style.transformStyle = 'preserve-3d';
+
+  // ---- Pointer pan (mouse + touch via pointer events) ----
+  img.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    img.setPointerCapture(e.pointerId);
+    isPanning = true;
+    startX = e.clientX - x;
+    startY = e.clientY - y;
+  });
+
+  img.addEventListener('pointermove', (e) => {
+    if (!isPanning) return;
+    e.preventDefault();
+    x = e.clientX - startX;
+    y = e.clientY - startY;
+    apply();
+  });
+
+  img.addEventListener('pointerup', (e) => {
+    isPanning = false;
+    lastTouchDist = null;
+  });
+  img.addEventListener('pointercancel', () => {
+    isPanning = false;
+    lastTouchDist = null;
+  });
+
+  // ---- Wheel zoom (desktop) ----
+  img.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = -e.deltaY;
+    const zoom = delta > 0 ? 1.08 : 0.92;
+    s = clamp(s * zoom, 1, 6);
+    apply();
+  }, { passive:false });
+
+  // ---- Pinch zoom (mobile Safari/Chrome) ----
+  img.addEventListener('touchmove', (e) => {
+    if (e.touches.length !== 2) return;
+    e.preventDefault();
+
+    const [t1, t2] = e.touches;
+    const dx = t1.clientX - t2.clientX;
+    const dy = t1.clientY - t2.clientY;
+    const dist = Math.hypot(dx, dy);
+
+    if (lastTouchDist == null) lastTouchDist = dist;
+
+    const ratio = dist / lastTouchDist;
+    s = clamp(s * ratio, 1, 6);
+    lastTouchDist = dist;
+
+    apply();
+  }, { passive:false });
+
+})();
