@@ -184,8 +184,8 @@ main{
 }
 
 .menu-btn svg{
-  height: 1em;
-  width:auto;
+  height: 100%;
+  width:100%;
   display:block;
   transform: scale(var(--burgerScale));
   transform-origin:center;
@@ -276,12 +276,9 @@ main{
   background: rgba(255,255,255,.10);
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   overflow:hidden;
-
-  margin: 0 var(--filmPad);
-
+  margin: 0;
   touch-action:none;
   user-select:none;
-
   perspective: var(--persp);
   perspective-origin: 50% 55%;
 }
