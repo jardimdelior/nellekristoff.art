@@ -26,10 +26,14 @@
   --zoomMax: 2.2;
 
   --brand: #C4A160;
-  --headerText: 32px;   /* size of “Nelle Kristoff” */
-  --iconH: 32px;        /* burger + monogram height (match) */
-  --linkH: 44px;        /* menu button height (nice tap target) */
-  --burgerScale: 2.2;   /* optical fix if burger looks smaller */
+
+  /* Header sizing */
+  --headerText: 32px;
+  --iconH: 32px;
+  --linkH: 44px;
+
+  /* Optical corrections for your big-canvas SVGs */
+  --burgerScale: 2.2;
   --monoScale: 1.25;
 }
 
@@ -76,7 +80,6 @@ main{
   align-items:flex-start;
   justify-content:space-between;
   gap:12px;
-  color: var(--brand);
 }
 
 .title-row{
@@ -85,79 +88,92 @@ main{
   gap:12px;
   width:100%;
 }
-.brand-text{
-  font-weight:500;
-  letter-spacing:3px;
-  margin:0;
-  font-size: var(--headerText);
-  text-transform:uppercase;
-  color: var(--ink);
-  line-height: 1;
-  height: var(--iconH);
-  display:block;
-  align-items:center;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  white-space: nowrap;
-  transition: opacity .18s ease;
-  pointer-events: none;
-  opacity: 1;
-}
+
 .subtitle-inline{
   opacity:.65;
   font-size:11px;
   letter-spacing:.4px;
   white-space:nowrap;
   transform: translateY(1px);
-  margin-left: auto;
+  margin-left:auto;
 }
 
-/* burger (SVG) */
+/* ===== Brand swap (TEXT overlays MONOGRAM, never side-by-side) ===== */
+.brand{
+  position:relative;
+  font-size: var(--headerText);
+  line-height:1;
+  height: 1em;
+
+  /* reserves space so it never overlaps burger */
+  min-width: 12ch;
+}
+
+/* layers */
+.brand-text,
+.brand-mark{
+  position:absolute;
+  left:0;
+  top:50%;
+  transform: translateY(-50%);
+  white-space:nowrap;
+  transition: opacity .18s ease;
+  pointer-events:none;
+}
+
+/* default */
+.brand-text{
+  opacity:1;
+  color: var(--ink);
+  font-weight:500;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+.brand-mark{
+  opacity:0;
+  color: var(--brand);
+}
+
+.brand-mark svg{
+  height: 1em;
+  width:auto;
+  display:block;
+  transform: scale(var(--monoScale));
+  transform-origin:center;
+}
+
+/* swap when menu open */
+.film-header.menu-open .brand-text{ opacity:0; }
+.film-header.menu-open .brand-mark{ opacity:1; }
+.film-header.menu-open .brand{ min-width:0; }
+
+/* ===== Burger (YOUR SVG) ===== */
 .menu-btn{
+  width: var(--iconH);
   height: var(--iconH);
-  width: var(--iconH);   /* make it square and aligned */
   border:0;
   background:transparent;
   cursor:pointer;
   padding:0;
+
   display:flex;
-  place-items:center;
-  row-gap: 7px;
   align-items:center;
   justify-content:center;
+
   color: var(--brand);
 }
 
-/* burger stack */
-.menu-btn span{
-  display:block;
-  width: var(--iconH);        /* make burger as wide as its height */
-  height: 2px;
-  background:var(--ink);
-  border-radius:2px;
-}
-
-/* spacing between lines scales too */
-.menu-btn{
-  row-gap: calc(var(--iconH) * 0.22);
-}
-.menu-btn{
-  grid-auto-flow: row;
-  grid-auto-rows: min-content;
-}
-
 .menu-btn svg{
-  height: 1em;
-  width: auto;
+  height: 1em;           /* equals the title’s text height */
+  width:auto;
   display:block;
   transform: scale(var(--burgerScale));
-  transform-origin: center;
+  transform-origin:center;
 }
 
-/* menu */
+/* ===== menu ===== */
 .menu-wrap{ display:flex; flex-direction:column; align-items:flex-end; }
+
 .menu{
   position:relative;
   width:min(520px, 56vw);
@@ -170,6 +186,7 @@ main{
   display:none;
   padding:8px;
 }
+
 .menu::after{
   content:"";
   position:absolute;
@@ -182,79 +199,34 @@ main{
     rgba(0,0,0,.10) 100%);
   opacity:.38;
 }
+
 .menu.open{
   display:flex;
   justify-content:flex-end;
   gap:8px;
   flex-wrap:wrap;
 }
+
+/* About/Contact/Posts same height */
 .menu a{
-  height: 1em;
   position:relative;
   z-index:1;
   display:inline-flex;
-  padding: 0 16px;
-  text-decoration:none;
-  color:var(--ink);
-  font-size: var(--headerText);  /* the same size as title */
-  letter-spacing:.2px;
-  border-radius:2px;
-  min-height: var(--linkH);
   align-items:center;
   justify-content:center;
-  line-height: 1em;
-}
-.menu a:hover{ background:rgba(47,42,38,.08); }
 
-/* Brand swap: TEXT by default, MONOGRAM when menu opens */
-.brand{
-  display: inline-flex;
-  align-items:center;
-  min-height: var(--iconH);
+  min-height: var(--linkH);
+  padding: 0 16px;
+
+  text-decoration:none;
+  color:var(--ink);
   font-size: var(--headerText);
-
-  position: relative;
-  display: inline-block;
-  line-height: 1;
-  height: 1em;
-
-  /* reserve width based on the text version */
-  min-width: 12ch;          /* adjust if needed */
+  letter-spacing:.2px;
+  border-radius:2px;
+  line-height:1;
 }
 
-/* Monogram box */
-.brand-mark{
-  height: var(--iconH);
-  display:flex;
-  align-items:center;
-  color: var(--brand);
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  white-space: nowrap;
-  transition: opacity .18s ease;
-  pointer-events: none;
-  opacity: 0;
-}
-.brand-mark svg{
-  height: 1em;
-  width:auto;
-  display:block;
-  transform: scale(var(--monoScale));
-  transform-origin: center;
-}
-
-/* when menu opens */
-.film-header.menu-open .brand-text{ opacity: 0; }
-.film-header.menu-open .brand-mark{ opacity: 1; }
-
-/* allow brand to shrink when menu is open (monogram takes less space) */
-.film-header.menu-open .brand{ 
-  width: auto;
-  min-width: 0;
-}
-.brand{ width: max-content; }
+.menu a:hover{ background:rgba(47,42,38,.08); }
 
 /* viewport */
 .space-viewport{
@@ -569,37 +541,15 @@ footer{
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
+    --headerText: 24px;
+    --iconH: 24px;
+    --linkH: 40px;
   }
-  .brand-text{ font-size:24px; }
   .film-main{ padding-top: 66px; }
   .menu{ width:min(92vw, 520px); }
 }
+
 @media (prefers-reduced-motion: reduce){
   .panel{ transition:none !important; }
   .noise{ animation:none !important; }
 }
-
-/* FIX: prevent header from blocking viewport interactions */
-.film-header{
-  pointer-events: none;   /* header box can't steal touches/clicks */
-}
-
-.film-header .menu-btn,
-.film-header .menu,
-.film-header .menu a{
-  pointer-events: auto;   /* but the burger + menu stay clickable */
-}
-
-/* the brand itself clickable later */
-.film-header .brand{
-  pointer-events: auto;
-}
-.title-row{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  width:100%;
-}
-.subtitle-inline{ margin-left:auto; 
-}
-
