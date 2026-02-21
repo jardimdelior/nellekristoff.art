@@ -14,12 +14,19 @@
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
-    <!-- HEADER BAR (now part of layout, not absolute) -->
+    <!-- HEADER BAR (part of layout, not absolute) -->
     <header class="film-header" id="siteHeader">
       <div class="title-row">
 
         <!-- Burger LEFT -->
-        <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false" type="button">
+        <button
+          class="menu-btn"
+          id="menuBtn"
+          type="button"
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="menu"
+        >
           <svg class="icon-burger" viewBox="571.766 351.497 359.988 296.918" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path fill="currentColor"
               d="m 571.76604,351.49699 v 43.5293 h 359.98828 v -43.5293 z
@@ -40,11 +47,11 @@
           </span>
         </div>
 
-        <!-- Right-side label (hides on menu open) -->
+        <!-- Right-side label (hides on menu open via CSS) -->
         <div class="subtitle-inline">Selected Works</div>
       </div>
 
-      <!-- Menu RIGHT (opens/closes) -->
+      <!-- Menu RIGHT -->
       <div class="menu-wrap">
         <nav class="menu" id="menu" aria-label="Site menu">
           <a href="about.html">About</a>
@@ -79,7 +86,7 @@
         </div>
       </div>
 
-      <!-- ✅ Arrow pinned to viewport corner (fixed) -->
+      <!-- Arrow pinned to viewport corner (NOT inside space-pan) -->
       <div class="arrow-slot">
         <button class="film-arrow" id="arrowRight" aria-label="Next artwork" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
