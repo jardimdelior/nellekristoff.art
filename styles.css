@@ -212,6 +212,14 @@ main{
   align-items:center;
   min-height: var(--iconH);
   font-size: var(--headerText);
+
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  height: 1em;
+
+  /* reserve width based on the text version */
+  min-width: 12ch;          /* adjust if needed */
 }
 
 /* Monogram box */
@@ -242,7 +250,10 @@ main{
 .film-header.menu-open .brand-mark{ opacity: 1; }
 
 /* allow brand to shrink when menu is open (monogram takes less space) */
-.film-header.menu-open .brand{ width: auto; }
+.film-header.menu-open .brand{ 
+  width: auto;
+  min-width: 0;
+}
 .brand{ width: max-content; }
 
 /* viewport */
@@ -585,6 +596,10 @@ footer{
 }
 .title-row{
   display:flex;
-  align-items: center;
-  gap:10px;
+  align-items:center;
+  gap:12px;
+  width:100%;
 }
+.subtitle-inline{ margin-left:auto; 
+}
+
