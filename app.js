@@ -19,39 +19,38 @@ const works = [
 /* preload */
 works.forEach(w => { const i = new Image(); i.src = w.src; });
 
-/* Menu */
+/* ===== Menu ===== */
 const menuBtn = document.getElementById('menuBtn');
 const menu = document.getElementById('menu');
 const header = document.querySelector('.film-header');
 
 function setMenu(open){
   if (!menuBtn || !menu) return;
-  menu.classList.toggle('open', open);
+  menu.classList.toggle('open', open);              // menu panel open/close
   menuBtn.setAttribute('aria-expanded', String(open));
-  if (header) header.classList.toggle('menu-open', open);
+  if (header) header.classList.toggle('menu-open', open); // triggers brand swap + hides Selected Works
 }
 
 if (menuBtn && menu){
   menuBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const open = !menu.classList.contains('open');
-    setMenu(open);
+    setMenu(!menu.classList.contains('open'));
   });
 
-  // Prevent clicks inside header/menu from closing it
+  // clicks inside the menu should NOT close it
   menu.addEventListener('click', (e) => e.stopPropagation());
-  if (header) header.addEventListener('click', (e) => e.stopPropagation());
 
   // click anywhere else closes
   document.addEventListener('click', () => setMenu(false));
 
+  // Esc closes
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') setMenu(false);
   });
 }
 
-/* helpers */
+/* ===== helpers ===== */
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
@@ -219,7 +218,7 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-/* ===== Active UI positioning to match active panel ===== */
+/* ===== Active UI positioning ===== */
 const activeUI = document.getElementById('activeUI');
 const amTitle = document.getElementById('amTitle');
 const amStatus = document.getElementById('amStatus');
@@ -239,10 +238,10 @@ function syncActiveUI(){
   const tf = p.style.transform || "";
   activeUI.style.transform = tf;
 
-  activeUI.style.width = getComputedStyle(p).width;
+  activeUI.style.width  = getComputedStyle(p).width;
   activeUI.style.height = getComputedStyle(p).height;
-  activeUI.style.left = getComputedStyle(p).left;
-  activeUI.style.top  = getComputedStyle(p).top;
+  activeUI.style.left   = getComputedStyle(p).left;
+  activeUI.style.top    = getComputedStyle(p).top;
 }
 
 /* ===== Fullscreen overlay ===== */
@@ -322,7 +321,7 @@ if (viewport){
     if (isFullscreenOpen()) return;
 
     // If tapping interactive UI, don't start pan capture
-    const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
+    const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot');
     if (interactive) return;
 
     viewport.setPointerCapture(e.pointerId);
