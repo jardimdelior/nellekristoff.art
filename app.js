@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const spacePan  = document.getElementById('spacePan');
   const spaceZoom = document.getElementById('spaceZoom');
 
-  /* ===== Menu (About/Contact/Posts live in #menu; CSS anchors it LEFT now) ===== */
+  /* ===== Menu ===== */
   const menuBtn = document.getElementById('menuBtn');
   const menu = document.getElementById('menu');
   const header = document.querySelector('.film-header');
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!menuBtn || !menu) return;
     menu.classList.toggle('open', open);
     menuBtn.setAttribute('aria-expanded', String(open));
-    if (header) header.classList.toggle('menu-open', open); // drives fold/unfold CSS
+    if (header) header.classList.toggle('menu-open', open);
   }
 
   if (menuBtn && menu){
@@ -59,15 +59,12 @@ document.addEventListener("DOMContentLoaded", () => {
       setMenu(!menu.classList.contains('open'));
     });
 
-    // don't close when clicking inside menu
     menu.addEventListener('click', (e) => e.stopPropagation());
     if (header) header.addEventListener('click', (e) => e.stopPropagation());
 
-    // extra: right cluster (brand + burger) should not trigger "outside click closes"
     const headerRight = document.querySelector('.header-right');
     if (headerRight) headerRight.addEventListener('click', (e) => e.stopPropagation());
 
-    // click anywhere else closes
     document.addEventListener('click', () => setMenu(false));
 
     window.addEventListener('keydown', (e) => {
@@ -94,10 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyView(){
     if (!spacePan || !spaceZoom) return;
-
-    // “toward me” feel: translateZ increases with zoom
     const zoomZ = Math.max(0, (zoom - 1)) * 320;
-
     spaceZoom.style.setProperty('--zoom', zoom);
     spaceZoom.style.setProperty('--zoomZ', zoomZ.toFixed(1) + 'px');
     spacePan.style.setProperty('--panX', panX + 'px');
@@ -132,14 +126,11 @@ document.addEventListener("DOMContentLoaded", () => {
     animRaf = requestAnimationFrame(tick);
   }
 
-  // Center-anchored zoom (prevents drift / corner jump)
   function setZoomAt(newZoom, cx, cy){
     newZoom = clamp(newZoom, zoomMin(), zoomMax());
     if (!viewport) return;
 
     const rect = viewport.getBoundingClientRect();
-
-    // convert top-left coords to center coords
     const ccx = cx - rect.width  / 2;
     const ccy = cy - rect.height / 2;
 
@@ -180,7 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      // hard-block native drag/select on panel images
       const im = el.querySelector('img');
       if (im){
         im.addEventListener('dragstart', (e) => e.preventDefault());
@@ -232,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* Flow next */
   function next(){
     if (animating || works.length < 2) return;
     animating = true;
@@ -310,14 +299,12 @@ document.addEventListener("DOMContentLoaded", () => {
       openFullscreen();
     });
   }
-
   if (closeBtn){
     closeBtn.addEventListener('click', (e) => {
       e.preventDefault();
       closeFullscreen();
     });
   }
-
   if (fullscreen){
     fullscreen.addEventListener('click', (e) => {
       if (e.target === fullscreen) closeFullscreen();
@@ -408,7 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
     viewport.addEventListener('pointerup', endPointer);
     viewport.addEventListener('pointercancel', endPointer);
 
-    // smooth wheel zoom (trackpad-friendly)
     viewport.addEventListener('wheel', (e) => {
       if (isFullscreenOpen()) return;
       e.preventDefault();
@@ -422,90 +408,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }, { passive:false });
   }
 
-  /* ===== Fullscreen image: pan/zoom + hard block native drag/select ===== */
-  if (fullscreen && fsImg){
-    fsImg.setAttribute('draggable', 'false');
-    ['dragstart','contextmenu'].forEach(evt =>
-      fsImg.addEventListener(evt, (e) => e.preventDefault())
-    );
-    fsImg.addEventListener('mousedown', (e) => e.preventDefault());
-
-    let x = 0, y = 0, s = 1;
-    let isPanning = false;
-    let startX = 0, startY = 0;
-    let lastTouchDist = null;
-
-    const clamp2 = (v, a, b) => Math.max(a, Math.min(b, v));
-
-    function applyFS(){
-      const z = (s - 1) * 420;
-      fsImg.style.transformOrigin = '50% 50%';
-      fsImg.style.transform = `translate3d(${x}px, ${y}px, ${z}px) scale(${s})`;
-    }
-
-    function resetFS(){
-      x = 0; y = 0; s = 1;
-      lastTouchDist = null;
-      applyFS();
-    }
-
-    const obs = new MutationObserver(() => {
-      if (fullscreen.classList.contains('open')) resetFS();
-    });
-    obs.observe(fullscreen, { attributes:true, attributeFilter:['class'] });
-
-    fullscreen.style.perspective = fullscreen.style.perspective || '1200px';
-    fullscreen.style.transformStyle = 'preserve-3d';
-    fsImg.style.transformStyle = 'preserve-3d';
-
-    fsImg.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      fsImg.setPointerCapture(e.pointerId);
-      isPanning = true;
-      startX = e.clientX - x;
-      startY = e.clientY - y;
-    });
-
-    fsImg.addEventListener('pointermove', (e) => {
-      if (!isPanning) return;
-      e.preventDefault();
-      x = e.clientX - startX;
-      y = e.clientY - startY;
-      applyFS();
-    });
-
-    fsImg.addEventListener('pointerup', () => { isPanning = false; lastTouchDist = null; });
-    fsImg.addEventListener('pointercancel', () => { isPanning = false; lastTouchDist = null; });
-
-    fsImg.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const zoomFactor = (e.deltaY < 0) ? 1.08 : 0.92;
-      s = clamp2(s * zoomFactor, 1, 6);
-      applyFS();
-    }, { passive:false });
-
-    fsImg.addEventListener('touchmove', (e) => {
-      if (e.touches.length !== 2) return;
-      e.preventDefault();
-
-      const [t1, t2] = e.touches;
-      const dx = t1.clientX - t2.clientX;
-      const dy = t1.clientY - t2.clientY;
-      const distNow = Math.hypot(dx, dy);
-
-      if (lastTouchDist == null) lastTouchDist = distNow;
-
-      const ratio = distNow / lastTouchDist;
-      s = clamp2(s * ratio, 1, 6);
-      lastTouchDist = distNow;
-
-      applyFS();
-    }, { passive:false });
-  }
-
-  /* ===== Keyboard ===== */
+  /* keyboard */
   window.addEventListener('keydown', (e) => {
-    // ESC closes fullscreen first
     if (e.key === 'Escape' && isFullscreenOpen()){
       closeFullscreen();
       return;
@@ -520,7 +424,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* init */
   function init(){
     zoom = tZoom = 1;
     panX = tPanX = 0;
