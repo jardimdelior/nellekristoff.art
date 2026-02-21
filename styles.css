@@ -31,14 +31,18 @@
   --filmPad: 6px;
 
   /* header sizing */
-  --headerBarH: 32px;     /* burger + brand + selected works */
+  --headerBarH: 32px;     /* burger + brand text/monogram */
   --menuBayH: 56px;       /* reserved area for About/Contact/Posts */
   --headerH: 32px;
   --headerTotalH: calc(var(--headerBarH) + var(--menuBayH));
 
   /* optical corrections (FIXED) */
-  --burgerScale: 1.15;    /* was 2.2 */
-  --monoScale: 1.05;      /* was 1.25 */
+  --burgerScale: 1.15;
+  --monoScale: 1.05;
+
+  /* header motion tuning */
+  --burgerShift: 10px;        /* how much burger slides on open */
+  --foldShift: 18px;          /* how much brand text slides under burger */
 }
 
 /* base */
@@ -92,61 +96,75 @@ main{
 .header-bar{
   height: var(--headerBarH);
   display:grid;
-  grid-template-columns: var(--headerBarH) minmax(0, 1fr) auto;
+  grid-template-columns: 1fr auto; /* left corner text, right cluster */
   align-items:center;
   gap: 12px;
+  position:relative; /* for absolute/fixed pinning */
 }
 
-/* RIGHT side */
-.header-right{
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  min-width:0;
-  justify-self:end;
-}
-
-/* Selected Works */
+/* Selected Works pinned to far left corner */
 .subtitle-inline{
+  position:absolute;
+  left:0;
+  top:50%;
+  transform: translateY(-50%);
   opacity:.65;
   font-size:9px;
   letter-spacing:.4px;
   white-space:nowrap;
-  transform: translateY(1px);
   line-height:1;
+  z-index:2;
+  pointer-events:none;
+  transition: opacity .22s ease, transform .22s ease;
 }
 
-/* hide Selected Works when menu opens */
+/* fade out when menu opens (no display:none so it can animate) */
 .film-header.menu-open .subtitle-inline{
   opacity:0;
-  pointer-events:none;
-  display:none;
+  transform: translateY(-50%) translateX(-8px);
 }
 
-/* BRAND swap (TEXT overlays MONOGRAM, no jumping) */
+/* RIGHT cluster (Brand + Burger) */
+.header-right{
+  position: relative;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap: 12px;
+  min-width:0;
+  justify-self:end;
+  z-index:5;
+}
+
+/* BRAND swap (TEXT folds behind burger, MONOGRAM unfolds) */
 .brand{
   position:relative;
   height: var(--headerBarH);
   display:flex;
   align-items:center;
+  justify-content:flex-end;
 
-  /* spacing + stability */
-  padding-left: 0;
   min-width: 14ch;
-  overflow:hidden;
+  overflow:visible; /* allow the fold to slide under burger */
 }
 
 .brand-text,
 .brand-mark{
   position:absolute;
-  left:0;
+  right:0;
+  left:auto;
   top:50%;
   transform: translateY(-50%);
   white-space:nowrap;
-  transition: opacity .18s ease;
+
   pointer-events:none;
+  will-change: transform, opacity, filter;
+
+  transition:
+    opacity .22s ease,
+    transform .32s cubic-bezier(.18,.9,.2,1),
+    filter .22s ease;
+  transform-origin: 100% 50%;
 }
 
 .brand-text{
@@ -160,15 +178,21 @@ main{
   font-weight:500;
   letter-spacing:3px;
   text-transform:uppercase;
+
+  /* stable closed state */
+  transform: translateY(-50%) translateX(0) scaleX(1);
 }
 
-/* monogram */
+/* monogram starts folded (hidden) */
 .brand-mark{
   opacity:0;
   height: var(--headerBarH);
   display:flex;
   align-items:center;
   color: var(--brand);
+
+  transform: translateY(-50%) translateX(10px) scaleX(0.25);
+  filter: blur(0.2px);
 }
 .brand-mark svg{
   height: 100%;
@@ -178,11 +202,7 @@ main{
   transform-origin:center;
 }
 
-/* swap when menu open */
-.film-header.menu-open .brand-text{ opacity:0; }
-.film-header.menu-open .brand-mark{ opacity:1; }
-
-/* BURGER button (FIXED sizing) */
+/* BURGER button (stays top layer) */
 .menu-btn{
   width: var(--headerBarH);
   height: var(--headerBarH);
@@ -197,6 +217,10 @@ main{
   justify-content:center;
 
   color: var(--brand);
+
+  position:relative;
+  z-index:10; /* above brand so brand can "fold behind" it */
+  transition: transform .28s cubic-bezier(.18,.9,.2,1);
 }
 .menu-btn svg{
   width: 100%;
@@ -204,6 +228,27 @@ main{
   display:block;
   transform: scale(var(--burgerScale));
   transform-origin:center;
+}
+
+/* OPEN: burger shifts, text folds behind, monogram unfolds */
+.film-header.menu-open .menu-btn{
+  transform: translateX(calc(var(--burgerShift) * -1));
+}
+
+.film-header.menu-open .brand-text{
+  opacity:0;
+  transform:
+    translateY(-50%)
+    translateX(var(--foldShift))
+    scaleX(0.05)
+    skewY(6deg);
+  filter: blur(0.6px);
+}
+
+.film-header.menu-open .brand-mark{
+  opacity:1;
+  transform: translateY(-50%) translateX(0) scaleX(1);
+  filter:none;
 }
 
 /* MENU BAY (reserved space, never overlaps viewport) */
@@ -436,10 +481,12 @@ main{
   height:100%; 
   object-fit:contain; 
   display:block;
+
   pointer-events:none;
-  -webkit-user-drag: none;         /* prevents "drag image" */
+
+  -webkit-user-drag: none;
   user-drag: none;
-  -webkit-touch-callout: none;     /* iOS long-press menu */
+  -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -627,6 +674,9 @@ footer{
 
     --burgerScale: 1.10;
     --monoScale: 1.00;
+
+    --burgerShift: 8px;
+    --foldShift: 14px;
   }
 }
 
