@@ -589,22 +589,48 @@ footer{
 .active-left{ position:absolute; left:0; top:0; }
 .active-right{ position:absolute; right:0; top:0; }
 
+/* === Unified glass button style (same as menu links) === */
 .abtn{
   display:inline-flex;
-  justify-content:center;
   align-items:center;
-  padding:10px 14px;
-  font-size:13px;
-  border:1px solid rgba(255,255,255,.70);
-  color:#fff;
+  justify-content:center;
+  flex: 0 0 auto;
+
+  height: var(--headerBarH);
+  min-height: var(--headerBarH);
+  padding: 0 14px;
+
+  font-size: clamp(12px, 1.4vw, 14px);
+  line-height:1;
+  letter-spacing:.2px;
   text-decoration:none;
+  color: var(--ink);
+
   border-radius:10px;
-  background: rgba(0,0,0,.30);
-  backdrop-filter: blur(8px);
+  border:none;
+
+  background: rgba(255,255,255,.10);
+  box-shadow: 0 12px 44px rgba(0,0,0,.10);
+  backdrop-filter: blur(11px);
+
+  transition: background .2s ease, transform .15s ease;
   cursor:pointer;
+  white-space:nowrap;
 }
-.abtn:hover{ background: rgba(0,0,0,.40); }
-.abtn-primary{ margin: 0 auto; }
+
+.abtn:hover{
+  background: rgba(0,0,0,.32);
+  color:#fff;
+}
+
+.abtn:active{
+  transform: scale(.98);
+}
+
+/* remove special dark style */
+.abtn-primary{
+  margin: 0 auto;
+}
 
 /* ===== Fullscreen overlay ===== */
 .fullscreen{
