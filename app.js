@@ -157,8 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Motion feel
-  const DURATION = 820;
-  const EASING = 'cubic-bezier(.18,.9,.2,1)';
+  const DURATION = 1100;
+  const EASING = 'cubic-bezier(.16, .85, .18, 1)';
 
   let active = 0;
   let animating = false;
@@ -249,23 +249,48 @@ document.addEventListener("DOMContentLoaded", () => {
     syncActiveUIText(idxFrom);
     setActiveUITransformFromPanel(panels[idxFrom]);
 
-    const anims = panels.map((el, i) => el.animate(
-      [
-        { transform: from[i].transform, opacity: from[i].opacity },
-        { transform: to[i].transform,   opacity: to[i].opacity }
-      ],
-      { duration: DURATION, easing: EASING, fill: 'forwards' }
-    ));
+    function bubbleTransform(tStr, extraZ, extraRot){
+  // insert extra translateZ + rotateY just before the final rotateY
+  // our transform is: base translate(-50%,-50%,0) translate3d(x,0,z) rotateY(rot)
+  // we add: translate3d(0,0,extraZ) rotateY(extraRot)
+  return tStr.replace(/rotateY\(([-\d.]+)deg\)\s*$/, (m, rot) => {
+    const r = parseFloat(rot) || 0;
+    return `translate3d(0px, 0px, ${extraZ}px) rotateY(${r + extraRot}deg)`;
+  });
+}
+
+const bubbleZ = -18;       // “dip” into depth (negative = deeper)
+const bubbleRot = 4;       // slight extra bend at mid
+const bubbleOpBoost = 0.02; // tiny lift to keep it airy (optional)
+
+const anims = panels.map((el, i) => {
+  const midT = bubbleTransform(from[i].transform, bubbleZ, bubbleRot);
+
+  return el.animate(
+    [
+      { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
+      { transform: midT, opacity: String(Math.min(1, parseFloat(from[i].opacity) + bubbleOpBoost)), offset: 0.55 },
+      { transform: to[i].transform, opacity: to[i].opacity, offset: 1 }
+    ],
+    { duration: DURATION, easing: EASING, fill: 'forwards' }
+  );
+});
 
     // Animate Active UI transform so it follows smoothly (one movement per click)
     let uiAnim = null;
     if (activeUI){
       const uiFrom = from[idxFrom]?.transform || '';
       const uiTo   = to[idxTo]?.transform || '';
-      uiAnim = activeUI.animate(
-        [{ transform: uiFrom }, { transform: uiTo }],
-        { duration: DURATION, easing: EASING, fill: 'forwards' }
-      );
+      const uiMid = bubbleTransform(uiFrom, bubbleZ, bubbleRot);
+
+uiAnim = activeUI.animate(
+  [
+    { transform: uiFrom, offset: 0 },
+    { transform: uiMid, offset: 0.55 },
+    { transform: uiTo,  offset: 1 }
+  ],
+  { duration: DURATION, easing: EASING, fill: 'forwards' }
+);
     }
 
     return Promise.allSettled([
