@@ -534,12 +534,18 @@ main{
   height:1px;
   transform-style:preserve-3d;
 }
+
 .panel{
   position:absolute;
   width: var(--panelW);
   height: var(--panelH);
-  left: calc(var(--panelW) * -0.5);
-  top:  calc(var(--panelH) * -0.5);
+
+  left: 50%;
+  top: 50%;
+
+  /* subpixel-safe centering */
+  transform: translate3d(-50%, -50%, 0);
+
   transform-style: preserve-3d;
   will-change: transform, opacity;
   transition: transform 650ms cubic-bezier(.18,.9,.2,1),
