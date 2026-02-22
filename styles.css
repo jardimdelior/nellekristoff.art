@@ -873,22 +873,40 @@ footer{
 /* ===== Mobile landscape fullscreen fix (keep buttons visible) ===== */
 @media (max-width: 900px) and (orientation: landscape){
   .fullscreen{
-    overflow: auto; /* allow scroll if needed, never hide buttons */
-    padding: 12px;
+    overflow: hidden;              /* CHANGED: fit instead of scroll */
+    padding: 10px;                 /* CHANGED: slightly tighter */
+  }
+
+  /* NEW: slightly smaller controls in landscape */
+  :root{
+    --pillH: 34px;                 /* keep your idea */
+    --btnH: 40px;                  /* NEW: close button + circles */
   }
 
   .fs-inner{
     display:flex;
     flex-direction: column;
     width: min(96vw, 1120px);
-    max-height: calc(100vh - 24px);
+
+    /* CHANGED: use dynamic viewport height for mobile browsers */
+    max-height: calc(100dvh - 20px);   /* was 100vh - 24px */
   }
 
   /* image area must shrink */
   .fs-frame{
     flex: 1 1 auto;
     min-height: 0;
-    max-height: calc(100vh - 24px - 56px); /* reserve space for buttons */
+
+    /* NEW: keep A3 and cap by height budget (so buttons always fit) */
+    aspect-ratio: var(--a3);
+    width: auto;
+    height: auto;
+    max-width: 100%;
+
+    /* CHANGED: height budget uses dvh + reserves actions row */
+    max-height: calc(100dvh - 20px - 44px - 10px);
+    /* 20px padding total, ~44px controls row, ~10px gap */
+    margin: 0 auto;
   }
 
   .fs-frame img{
@@ -901,6 +919,11 @@ footer{
   .fs-actions{
     flex: 0 0 auto;
     margin-top: 10px;
+
+    /* NEW: keep the three buttons together, not stretching wide */
+    width: min(520px, 96%);
+    margin-left: auto;
+    margin-right: auto;
   }
 
   /* optional: slightly smaller pills in landscape so everything fits */
