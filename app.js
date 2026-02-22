@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function ensureAnim(){
     if (animRaf) return;
-    const ease = 0.22;    // <-- THIS is the one
+    const ease = 0.22;
 
     const tick = () => {
       zoom += (tZoom - zoom) * ease;
@@ -212,23 +212,46 @@ document.addEventListener("DOMContentLoaded", () => {
       const d = i - active;
       const ad = Math.abs(d);
 
-      const rot = clamp(-d * angleStep, -maxAngle, maxAngle);
-      const x   = d * stepX;
-      const z   = -ad * zStep;
-      const op  = clamp(1 - ad * 0.05, 0.72, 1);
+      // Force the active panel to be perfectly flat and centered
+      const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
+      const x   = (d === 0) ? 0 : d * stepX;
+      const z   = (d === 0) ? 0 : -ad * zStep;
+      const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
 
       el.style.transform = `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
       el.style.opacity = op;
     });
   }
 
+  // NEW: hard-snap active panel flat after transition to prevent “stuck bend”
+  function snapActiveFlat(){
+    const p = panels[active];
+    if (!p) return;
+
+    const prev = p.style.transition;
+    p.style.transition = 'none';
+    p.style.transform = 'translate3d(0px, 0px, 0px) rotateY(0deg)';
+    p.style.opacity = '1';
+
+    // Force reflow so the browser commits the snap
+    p.offsetHeight;
+
+    p.style.transition = prev;
+  }
+
   function next(){
     if (animating || works.length < 2) return;
     animating = true;
+
     active = (active + 1) % works.length;
     layout3D();
     syncActiveUI();
-    setTimeout(() => { animating = false; }, 680);
+
+    setTimeout(() => {
+      snapActiveFlat();   // NEW
+      syncActiveUI();     // keep UI perfectly aligned after snap
+      animating = false;
+    }, 680);
   }
 
   const arrowRight = document.getElementById('arrowRight');
@@ -403,7 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
 
-      const factor = Math.exp(-e.deltaY * 0.0018);    // <-- THIS is the other another one
+      const factor = Math.exp(-e.deltaY * 0.0018);
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
   }
@@ -421,6 +444,12 @@ document.addEventListener("DOMContentLoaded", () => {
       active = (active - 1 + works.length) % works.length;
       layout3D();
       syncActiveUI();
+
+      // Optional: keep left nav consistent with snap behavior too
+      setTimeout(() => {
+        snapActiveFlat();
+        syncActiveUI();
+      }, 680);
     }
   });
 
