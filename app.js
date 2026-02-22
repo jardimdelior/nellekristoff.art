@@ -158,8 +158,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let active = 0;
   let animating = false;
 
-  // NEW: queue clicks so none are lost
+  // Queue + token for robust step finishing
   let queuedSteps = 0;
+  let stepToken = 0;
 
   if (lep){
     works.forEach((w, idx) => {
@@ -242,13 +243,12 @@ document.addEventListener("DOMContentLoaded", () => {
     p.style.transition = prev;
   }
 
-  // Use the actual CSS transition duration (not a guessed timeout)
+  // Read real transition duration (fallback for missing transitionend)
   function getPanelTransitionMs(){
     const p = panels[active] || panels[0];
     if (!p) return 650;
 
     const cs = getComputedStyle(p);
-
     const durStr = (cs.transitionDuration || "0s").split(',')[0].trim();
     const delStr = (cs.transitionDelay || "0s").split(',')[0].trim();
 
@@ -261,7 +261,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.max(0, toMs(durStr) + toMs(delStr));
   }
 
-  function finishStep(){
+  function finishStep(localToken){
+    // ignore stale finishes from older steps
+    if (localToken !== stepToken) return;
+
     snapActiveFlat();
     syncActiveUI();
     animating = false;
@@ -276,18 +279,46 @@ document.addEventListener("DOMContentLoaded", () => {
     if (works.length < 2) return;
 
     if (animating){
-      queuedSteps++;     // don't lose fast clicks
+      queuedSteps++; // don't lose fast clicks
       return;
     }
 
     animating = true;
+    stepToken++;
+    const localToken = stepToken;
 
     active = (active + 1) % works.length;
     layout3D();
     syncActiveUI();
 
+    const p = panels[active];
+    if (!p){
+      finishStep(localToken);
+      return;
+    }
+
+    // One-time transitionend listener for THIS active panel (transform only)
+    let done = false;
+    const onEnd = (e) => {
+      if (done) return;
+      if (localToken !== stepToken) return;
+      if (e.target !== p) return;
+      if (e.propertyName !== 'transform') return;
+      done = true;
+      p.removeEventListener('transitionend', onEnd);
+      finishStep(localToken);
+    };
+    p.addEventListener('transitionend', onEnd);
+
+    // Fallback in case transitionend doesn't fire
     const ms = getPanelTransitionMs() || 650;
-    setTimeout(finishStep, ms + 60); // small buffer for slower devices
+    setTimeout(() => {
+      if (done) return;
+      if (localToken !== stepToken) return;
+      done = true;
+      p.removeEventListener('transitionend', onEnd);
+      finishStep(localToken);
+    }, ms + 120);
   }
 
   function prev(){
@@ -299,13 +330,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     animating = true;
+    stepToken++;
+    const localToken = stepToken;
 
     active = (active - 1 + works.length) % works.length;
     layout3D();
     syncActiveUI();
 
+    const p = panels[active];
+    if (!p){
+      finishStep(localToken);
+      return;
+    }
+
+    let done = false;
+    const onEnd = (e) => {
+      if (done) return;
+      if (localToken !== stepToken) return;
+      if (e.target !== p) return;
+      if (e.propertyName !== 'transform') return;
+      done = true;
+      p.removeEventListener('transitionend', onEnd);
+      finishStep(localToken);
+    };
+    p.addEventListener('transitionend', onEnd);
+
     const ms = getPanelTransitionMs() || 650;
-    setTimeout(finishStep, ms + 60);
+    setTimeout(() => {
+      if (done) return;
+      if (localToken !== stepToken) return;
+      done = true;
+      p.removeEventListener('transitionend', onEnd);
+      finishStep(localToken);
+    }, ms + 120);
   }
 
   const arrowRight = document.getElementById('arrowRight');
