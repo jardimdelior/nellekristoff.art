@@ -130,7 +130,7 @@ main{
   position:absolute;
   left:0;
   top:50%;
-  transform: translateY(-50%) translateX(-8px); /* starts slightly left like the SW fade */
+  transform: translateY(-32%) translateX(-8px); /* MATCHES Selected Works baseline */
   opacity:0;
   pointer-events:none;
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
@@ -155,7 +155,7 @@ main{
 .menu.open{
   opacity:1;
   pointer-events:auto;
-  transform: translateY(-50%) translateX(0);
+  transform: translateY(-32%) translateX(0);
 }
 
 .film-header.menu-open .menu{
@@ -163,9 +163,9 @@ main{
 }
 
 @keyframes menuSnap{
-  0%{ transform: translateY(-50%) translateX(-8px); }
-  70%{ transform: translateY(-50%) translateX(2px); }
-  100%{ transform: translateY(-50%) translateX(0); }
+  0%{ transform: translateY(-32%) translateX(-8px); }
+  70%{ transform: translateY(-32%) translateX(2px); }
+  100%{ transform: translateY(-32%) translateX(0); }
 }
 
 /* RIGHT cluster */
@@ -178,7 +178,7 @@ main{
   min-width:0;
   z-index:5;
   margin-left: auto;          /* IMPORTANT */
-  flex: 1 1 auto;      /* <-- NEW: take remaining width */
+  flex: 1 1 auto;      /* take remaining width */
 }
 
 /* BRAND swap */
@@ -190,7 +190,7 @@ main{
   justify-content:flex-end;
 
   flex: 1 1 auto;
-  min-width: 0;        /* <-- IMPORTANT: prevents forced ellipsis */
+  min-width: 0;        /* prevents forced ellipsis */
   overflow:visible;
 }
 
@@ -222,9 +222,9 @@ main{
   line-height:1;
   color: var(--ink);
   font-weight:400;
-  letter-spacing: 0.08em;    /* typographically correct solution */
+  letter-spacing: 0.08em;
   text-transform:uppercase;
-  
+
   transform: translateY(-50%) translateX(0) scaleX(1);
 }
 
@@ -549,7 +549,7 @@ main{
   width:100%;
   height:100%;
   background:var(--card);
-  padding: 16px;   /* ← fixed, stable margin */
+  padding: 16px;   /* fixed, stable margin */
   box-sizing:border-box;
   border-radius:var(--radius);
   box-shadow:var(--inset), var(--shadow);
@@ -630,14 +630,12 @@ footer{
 
   padding:4px 6px;    /* smaller bubble */
   border-radius:14px;
-  
+
   /* viewport-like base but brighter */
-  background: rgba(255,255,255,.28);  /* brighter */
+  background: rgba(255,255,255,.28);
   backdrop-filter: blur(10px) saturate(120%);
 
-  border: 1px solid rgba(255,255,255,.16);    /* bubble small .16 */
-  
-  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.16);
   pointer-events:none;
 }
 .am-title{ font-size:13px; letter-spacing:.2px; opacity:.92; }
@@ -685,10 +683,10 @@ footer{
 
   padding:4px 6px;    /* smaller bubble */
   border-radius:14px;
-  
+
   background: rgba(255,255,255,.28);
   backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(255,255,255,.16);    /* bubble small .16 */
+  border: 1px solid rgba(255,255,255,.16);
 
   box-shadow:
     inset 0 0 0 1px rgba(47,42,38,.04),
@@ -713,7 +711,6 @@ footer{
 .fullscreen .fs-title{
   color: rgba(255,255,255,.96);
 }
-
 .fullscreen .fs-status{
   color: rgba(255,255,255,.75);
 }
@@ -721,18 +718,10 @@ footer{
 .fs-title{ font-size:13px; letter-spacing:.2px; opacity:.92; }
 .fs-status{ font-size:12px; opacity:.68; }
 
-.fs-frame{ 
-  width:100%; 
-  aspect-ratio: var(--a3); 
-  height:auto;
-}
-
-/* Fullscreen frame stays A3 and always fits */
-.fullscreen .fs-frame{
+.fs-frame{
+  width:100%;
   aspect-ratio: var(--a3);
-  width: 100%;
-  height: auto;
-  max-height: calc(100vh - 24px - 64px); /* keeps room for actions */
+  height:auto;
 }
 
 .fs-actions{
@@ -748,58 +737,63 @@ footer{
 .fs-right{ position:absolute; right:0; top:0; }
 #closeBtn{ padding:0; width: var(--btnH); }
 
-/* ===== Fullscreen actions: never run off-screen ===== */
+/* ===== FULLSCREEN: single clean layout (A3 locked, buttons always visible) ===== */
+.fullscreen{
+  overflow:auto;
+}
+
+/* column layout */
+.fullscreen .fs-inner{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  width: min(96vw, 1120px);
+  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
+}
+
+/* A3 paper frame that fits BOTH width and height */
+.fullscreen .fs-frame{
+  flex: 1 1 auto;
+  min-height: 0;
+
+  aspect-ratio: var(--a3);
+
+  /* key: let HEIGHT drive, so A3 never gets too tall */
+  height: 100%;
+  width: auto;
+
+  max-width: 100%;
+  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px) - 60px); /* reserves actions */
+
+  margin: 0 auto;
+}
+
+/* keep the artwork perfectly centered inside the paper */
+.fullscreen .fs-frame img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* actions row: never runs away */
 .fullscreen .fs-actions{
+  flex: 0 0 auto;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap: 10px;
+  gap:10px;
 }
 
-/* Cancel the absolute positioning in fullscreen only */
+/* cancel abs positioning in fullscreen */
 .fullscreen .fs-left,
 .fullscreen .fs-right{
   position: static;
 }
 
-/* Keep close centered and circular */
+/* keep close perfectly circular */
 .fullscreen #closeBtn{
-  flex: 0 0 auto;
   width: var(--btnH);
   padding: 0;
-}
-
-/* ===== Fullscreen: keep actions always visible on resize ===== */
-.fullscreen{
-  overflow: auto; /* if needed, allow scrolling instead of hiding buttons */
-}
-
-.fs-inner{
-  display:flex;
-  flex-direction: column;
-  height: 100%;
-  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
-}
-
-/* Let the image area shrink to make room for buttons */
-.fs-frame{
-  flex: 1 1 auto;
-  min-height: 0;
-
-  /* cap height so buttons stay on screen */
-  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px) - 70px);
-}
-
-/* Make the image actually fit inside the capped frame */
-.fs-frame img{
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  max-height: 100%;
-}
-
-/* Keep buttons visible */
-.fs-actions{
   flex: 0 0 auto;
 }
 
@@ -824,11 +818,11 @@ footer{
     --pillH: 36px;
   }
 
-.brand-text{
-  font-size: clamp(16px, 5vw, 20px);
-  letter-spacing: .6px;
-}
-  
+  .brand-text{
+    font-size: clamp(16px, 5vw, 20px);
+    letter-spacing: .6px;
+  }
+
   .menu{ gap:8px; }
   .menu a,
   .abtn{ padding: 0 9px; font-size: 11px; }
