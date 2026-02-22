@@ -1,4 +1,4 @@
-// app.js (WAAPI deterministic 3D core + stable Active UI)
+// app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width)
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -27,11 +27,6 @@ function cssVar(name){ return getComputedStyle(document.documentElement).getProp
 function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
 function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
 function num(v){ return parseFloat(v) || 0; }
-function getPanelW(){
-  const p = panels[0];
-  if (!p) return 0;
-  return p.getBoundingClientRect().width || parseFloat(getComputedStyle(p).width) || 0;
-}
 
 document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.classList.add("ready");
@@ -153,6 +148,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const lep = document.getElementById('leporello');
   const panels = [];
 
+  // panel width must be measured from DOM, not CSS vars (clamp() cannot be parsed)
+  function getPanelW(){
+    const p = panels[0];
+    if (!p) return 0;
+    const r = p.getBoundingClientRect();
+    return r.width || parseFloat(getComputedStyle(p).width) || 0;
+  }
+
   // Motion feel
   const DURATION = 820;
   const EASING = 'cubic-bezier(.18,.9,.2,1)';
@@ -177,8 +180,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getTargets(targetActive){
-    // NOTE: panel is centered by left/top 50% in CSS.
-    // WAAPI transform includes the base centering translate:
     const base = 'translate3d(-50%, -50%, 0)';
 
     const panelW = getPanelW();
@@ -192,7 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const d = i - targetActive;
       const ad = Math.abs(d);
 
-      // Always land active perfectly flat and centered
       const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
       const z   = (d === 0) ? 0 : -ad * zStep;
@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       return {
         transform: `${base} translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`,
-        opacity: String(op)
+        opacity: String(op),
       };
     });
   }
@@ -218,8 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
     activeUI.style.transform = panelEl.style.transform || "";
     activeUI.style.width = getComputedStyle(panelEl).width;
     activeUI.style.height = getComputedStyle(panelEl).height;
-    activeUI.style.left = getComputedStyle(panelEl).left; // should be "50%"
-    activeUI.style.top  = getComputedStyle(panelEl).top;  // should be "50%"
+    activeUI.style.left = getComputedStyle(panelEl).left;
+    activeUI.style.top  = getComputedStyle(panelEl).top;
   }
 
   function applyInstant(idx){
@@ -233,20 +233,19 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveUITransformFromPanel(panels[idx]);
   }
 
-  // Deterministic animation: FROM = math(idxFrom), TO = math(idxTo)
   function animateBetween(idxFrom, idxTo){
     cancelAll();
 
     const from = getTargets(idxFrom);
     const to   = getTargets(idxTo);
 
-    // Ensure starting styles EXACTLY match "from" (prevents drift/margin illusion)
+    // Force exact "from" state before animating
     panels.forEach((el, i) => {
       el.style.transform = from[i].transform;
       el.style.opacity = from[i].opacity;
     });
 
-    // Active UI should start attached to FROM panel
+    // Active UI starts attached to FROM panel
     syncActiveUIText(idxFrom);
     setActiveUITransformFromPanel(panels[idxFrom]);
 
@@ -258,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { duration: DURATION, easing: EASING, fill: 'forwards' }
     ));
 
-    // Animate active UI transform to follow the active panel change smoothly
+    // Animate Active UI transform so it follows smoothly (one movement per click)
     let uiAnim = null;
     if (activeUI){
       const uiFrom = from[idxFrom]?.transform || '';
@@ -273,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ...anims.map(a => a.finished),
       uiAnim ? uiAnim.finished : Promise.resolve()
     ]).then(() => {
-      // Commit final styles EXACTLY
+      // Commit final styles exactly
       cancelAll();
       panels.forEach((el, i) => {
         el.style.transform = to[i].transform;
@@ -306,7 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const fromIdx = active;
     const toIdx = (active + dir + works.length) % works.length;
 
-    // Animate fully, then commit active index
     animateBetween(fromIdx, toIdx).then(() => {
       active = toIdx;
       animating = false;
@@ -317,6 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function next(){ step(+1); }
   function prev(){ step(-1); }
 
+  // Build panels
   if (lep){
     works.forEach((w, idx) => {
       const el = document.createElement('div');
@@ -547,13 +546,14 @@ document.addEventListener("DOMContentLoaded", () => {
     panY = tPanY = 0;
     applyView();
 
-    applyInstant(active);
+    // Wait one frame so layout widths are real before first measure
+    requestAnimationFrame(() => applyInstant(active));
   }
   init();
 
   window.addEventListener('resize', () => {
     clampPanTarget();
     ensureAnim();
-    applyInstant(active);
+    requestAnimationFrame(() => applyInstant(active));
   });
 });
