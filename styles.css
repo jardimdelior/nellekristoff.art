@@ -543,13 +543,13 @@ main{
   left: 50%;
   top: 50%;
 
-  /* subpixel-safe centering */
-  transform: translate3d(-50%, -50%, 0);
-
+  /* IMPORTANT: WAAPI controls transform */
   transform-style: preserve-3d;
   will-change: transform, opacity;
-  transition: transform 650ms cubic-bezier(.18,.9,.2,1),
-              opacity   650ms cubic-bezier(.18,.9,.2,1);
+
+  /* IMPORTANT: WAAPI controls animation timing, so no CSS transition */
+  transition: none;
+
   cursor:pointer;
 }
 
