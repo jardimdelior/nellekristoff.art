@@ -549,7 +549,7 @@ main{
   width:100%;
   height:100%;
   background:var(--card);
-  padding:clamp(12px, 2.2vw, 28px);
+  padding: 16px;   /* ← fixed, stable margin */
   box-sizing:border-box;
   border-radius:var(--radius);
   box-shadow:var(--inset), var(--shadow);
@@ -558,10 +558,12 @@ main{
   display:grid;
   place-items:center;
 }
+/* Image always centered, slightly smaller than the paper area */
 .print img{
   width:100%;
   height:100%;
   object-fit:contain;
+  margin: auto;
   display:block;
   pointer-events:none;
   -webkit-user-drag: none;
@@ -719,7 +721,19 @@ footer{
 .fs-title{ font-size:13px; letter-spacing:.2px; opacity:.92; }
 .fs-status{ font-size:12px; opacity:.68; }
 
-.fs-frame{ width:100%; aspect-ratio: var(--a3); height:auto; }
+.fs-frame{ 
+  width:100%; 
+  aspect-ratio: var(--a3); 
+  height:auto;
+}
+
+/* Fullscreen frame stays A3 and always fits */
+.fullscreen .fs-frame{
+  aspect-ratio: var(--a3);
+  width: 100%;
+  height: auto;
+  max-height: calc(100vh - 24px - 64px); /* keeps room for actions */
+}
 
 .fs-actions{
   margin-top: 12px;
@@ -733,6 +747,27 @@ footer{
 .fs-left{ position:absolute; left:0; top:0; }
 .fs-right{ position:absolute; right:0; top:0; }
 #closeBtn{ padding:0; width: var(--btnH); }
+
+/* ===== Fullscreen actions: never run off-screen ===== */
+.fullscreen .fs-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+}
+
+/* Cancel the absolute positioning in fullscreen only */
+.fullscreen .fs-left,
+.fullscreen .fs-right{
+  position: static;
+}
+
+/* Keep close centered and circular */
+.fullscreen #closeBtn{
+  flex: 0 0 auto;
+  width: var(--btnH);
+  padding: 0;
+}
 
 /* ===== Fullscreen: keep actions always visible on resize ===== */
 .fullscreen{
