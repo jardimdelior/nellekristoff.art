@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const ad = Math.abs(d);
 
       // Always land active perfectly flat and centered
-      const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
+      const rot = 0;
       const x   = (d === 0) ? 0 : d * stepX;
       const z   = (d === 0) ? 0 : -ad * zStep;
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
