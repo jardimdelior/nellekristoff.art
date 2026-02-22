@@ -692,6 +692,30 @@ footer{
     inset 0 0 0 1px rgba(47,42,38,.04),
     0 8px 20px rgba(0,0,0,.08);
 }
+
+/* ===== Fullscreen meta override (bright on dark overlay) ===== */
+.fullscreen .fs-meta{
+  background: rgba(255,255,255,.14);
+  backdrop-filter: blur(16px) saturate(150%);
+
+  border: 1px solid rgba(255,255,255,.35);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    0 12px 30px rgba(0,0,0,.45);
+
+  color: rgba(255,255,255,.92);
+}
+
+/* Make text bright */
+.fullscreen .fs-title{
+  color: rgba(255,255,255,.96);
+}
+
+.fullscreen .fs-status{
+  color: rgba(255,255,255,.75);
+}
+
 .fs-title{ font-size:13px; letter-spacing:.2px; opacity:.92; }
 .fs-status{ font-size:12px; opacity:.68; }
 
