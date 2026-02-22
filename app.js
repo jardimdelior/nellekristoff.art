@@ -1,4 +1,4 @@
-// app.js (WAAPI “clean modern animation core” version)
+// app.js (WAAPI “core” version)
 
 /* ===== Global hard-blocks (desktop drag-to-desktop + context menu) ===== */
 document.addEventListener('dragstart', (e) => {
