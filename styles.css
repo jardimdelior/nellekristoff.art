@@ -382,6 +382,35 @@ main{
   opacity:.92;
 }
 
+/* ===== Fullscreen button override (bright glass on dark bg) ===== */
+.fullscreen .abtn{
+
+  background: rgba(255,255,255,.18);
+  backdrop-filter: blur(14px) saturate(160%);
+
+  border: 1px solid rgba(255,255,255,.35);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.08),
+    0 10px 28px rgba(0,0,0,.45);
+
+  color: rgba(255,255,255,.92);
+  opacity:.95;
+}
+
+.fullscreen .abtn::before{
+  background: radial-gradient(120% 180% at 50% 20%,
+    rgba(255,255,255,.35) 0%,
+    rgba(255,255,255,.15) 35%,
+    rgba(255,255,255,0) 70%);
+}
+
+.fullscreen .abtn:hover{
+  background: rgba(255,255,255,.25);
+  border-color: rgba(255,255,255,.45);
+  opacity:1;
+}
+
 .menu a{
   text-transform: none;  /* or uppercase */
 }
