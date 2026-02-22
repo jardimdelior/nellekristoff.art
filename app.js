@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
 
       return {
-        transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`,
+        transform: `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`,
         opacity: String(op),
       };
     });
