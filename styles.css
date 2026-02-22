@@ -103,7 +103,7 @@ main{
   position:absolute;
   left:0;
   top:50%;
-  transform: translateY(-50%);
+  transform: translateY(-32%); /* was -50% */
 
   font-size: var(--leftLabelSize);
   font-weight: var(--leftLabelWeight);
@@ -122,7 +122,7 @@ main{
 /* When menu opens, Selected Works fades + slides out */
 .film-header.menu-open .subtitle-inline{
   opacity:0;
-  transform: translateY(-50%) translateX(-8px);
+  transform: translateY(-32%) translateX(-8px);
 }
 
 /* Menu sits EXACTLY where Selected Works is */
