@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const prev = p.style.transition;
     p.style.transition = 'none';
-    p.style.transform = 'translate3d(0px, 0px, 0px) rotateY(0deg)';
+    p.style.transform = 'translate3d(-50%, -50%, 0) translate3d(0px, 0px, 0px) rotateY(0deg)';
     p.style.opacity = '1';
 
     // Force reflow so the browser commits the snap
