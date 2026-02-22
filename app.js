@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const z   = (d === 0) ? 0 : -ad * zStep;
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
 
-      el.style.transform = `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
+      el.style.transform = `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
       el.style.opacity = op;
     });
   }
