@@ -35,7 +35,7 @@
 
   /* optical */
   --burgerScale: 1;
-  --monoScale: 1;
+  --monoScale: 1.06;
 
   /* header motion tuning */
   --burgerShift: 10px;
@@ -227,17 +227,19 @@ main{
 
 /* monogram folded */
 .brand-mark{
-  opacity:0;
+  width: var(--headerBarH);
   height: var(--headerBarH);
   display:flex;
   align-items:center;
+  justify-content:center;
+  opacity:0;
   color: var(--brand);
   transform: translateY(-50%) translateX(10px) scaleX(0.25);
   filter: blur(0.2px);
 }
 .brand-mark svg{
   height: 100%;
-  width:auto;
+  width:100%;
   display:block;
   transform: scale(var(--monoScale));
   transform-origin:center;
