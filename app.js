@@ -1,4 +1,4 @@
-// app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width)
+// app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width + AIR WAVE)
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -156,9 +156,23 @@ document.addEventListener("DOMContentLoaded", () => {
     return r.width || parseFloat(getComputedStyle(p).width) || 0;
   }
 
-  // Motion feel
-  const DURATION = 1100;
-  const EASING = 'cubic-bezier(.16, .85, .18, 1)';
+  // Build transform from NUMBERS (no regex string editing -> no flashing)
+  function buildT(x, z, rot, extraZ = 0, extraRot = 0, extraScale = 1){
+    return `translate3d(-50%, -50%, 0)
+            translate3d(${x}px, 0px, ${z + extraZ}px)
+            rotateY(${rot + extraRot}deg)
+            scale(${extraScale})`;
+  }
+
+  // Motion feel (calm)
+  const DURATION = 1350;
+  const EASING = 'cubic-bezier(.12,.82,.18,1)';
+
+  // Air-wave tuning
+  const WAVE_Z   = 36;     // + = towards you
+  const WAVE_ROT = 6;      // extra bend at peak (non-active only)
+  const WAVE_S   = 1.012;  // tiny “breath” scale
+  const MID      = 0.58;   // peak point of the wave
 
   let active = 0;
   let animating = false;
@@ -180,8 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getTargets(targetActive){
-    const base = 'translate3d(-50%, -50%, 0)';
-
     const panelW = getPanelW();
     const angleStep = numDeg(cssVar('--angleStep'));
     const maxAngle  = numDeg(cssVar('--maxAngle'));
@@ -199,8 +211,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
 
       return {
-        transform: `${base} translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`,
+        x, z, rot,
         opacity: String(op),
+        transform: buildT(x, z, rot)
       };
     });
   }
@@ -245,52 +258,42 @@ document.addEventListener("DOMContentLoaded", () => {
       el.style.opacity = from[i].opacity;
     });
 
-    // Active UI starts attached to FROM panel
+    // UI starts attached to FROM panel
     syncActiveUIText(idxFrom);
     setActiveUITransformFromPanel(panels[idxFrom]);
 
-    function bubbleTransform(tStr, extraZ, extraRot){
-  // insert extra translateZ + rotateY just before the final rotateY
-  // our transform is: base translate(-50%,-50%,0) translate3d(x,0,z) rotateY(rot)
-  // we add: translate3d(0,0,extraZ) rotateY(extraRot)
-  return tStr.replace(/rotateY\(([-\d.]+)deg\)\s*$/, (m, rot) => {
-    const r = parseFloat(rot) || 0;
-    return `translate3d(0px, 0px, ${extraZ}px) rotateY(${r + extraRot}deg)`;
-  });
-}
+    const anims = panels.map((el, i) => {
+      // wave: towards the viewer + a little extra bend (but keep active flatter)
+      const extraRot = (from[i].rot === 0) ? 0 : WAVE_ROT;
+      const midT = buildT(from[i].x, from[i].z, from[i].rot, +WAVE_Z, extraRot, WAVE_S);
 
-const bubbleZ = -18;       // “dip” into depth (negative = deeper)
-const bubbleRot = 4;       // slight extra bend at mid
-const bubbleOpBoost = 0.02; // tiny lift to keep it airy (optional)
+      return el.animate(
+        [
+          { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
+          { transform: midT,              opacity: from[i].opacity, offset: MID },
+          { transform: to[i].transform,   opacity: to[i].opacity,   offset: 1 }
+        ],
+        { duration: DURATION, easing: EASING, fill: 'forwards' }
+      );
+    });
 
-const anims = panels.map((el, i) => {
-  const midT = bubbleTransform(from[i].transform, bubbleZ, bubbleRot);
-
-  return el.animate(
-    [
-      { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
-      { transform: midT, opacity: String(Math.min(1, parseFloat(from[i].opacity) + bubbleOpBoost)), offset: 0.55 },
-      { transform: to[i].transform, opacity: to[i].opacity, offset: 1 }
-    ],
-    { duration: DURATION, easing: EASING, fill: 'forwards' }
-  );
-});
-
-    // Animate Active UI transform so it follows smoothly (one movement per click)
+    // UI follows with the same “breath”
     let uiAnim = null;
     if (activeUI){
-      const uiFrom = from[idxFrom]?.transform || '';
-      const uiTo   = to[idxTo]?.transform || '';
-      const uiMid = bubbleTransform(uiFrom, bubbleZ, bubbleRot);
+      const uiFrom = from[idxFrom].transform;
+      const uiTo   = to[idxTo].transform;
 
-uiAnim = activeUI.animate(
-  [
-    { transform: uiFrom, offset: 0 },
-    { transform: uiMid, offset: 0.55 },
-    { transform: uiTo,  offset: 1 }
-  ],
-  { duration: DURATION, easing: EASING, fill: 'forwards' }
-);
+      const uiExtraRot = (from[idxFrom].rot === 0) ? 0 : WAVE_ROT;
+      const uiMid = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, +WAVE_Z, uiExtraRot, WAVE_S);
+
+      uiAnim = activeUI.animate(
+        [
+          { transform: uiFrom, offset: 0 },
+          { transform: uiMid,  offset: MID },
+          { transform: uiTo,   offset: 1 }
+        ],
+        { duration: DURATION, easing: EASING, fill: 'forwards' }
+      );
     }
 
     return Promise.allSettled([
@@ -304,7 +307,6 @@ uiAnim = activeUI.animate(
         el.style.opacity = to[i].opacity;
       });
 
-      // Commit UI to TO panel
       syncActiveUIText(idxTo);
       setActiveUITransformFromPanel(panels[idxTo]);
     });
