@@ -1,4 +1,4 @@
-// app.js
+// app.js (WAAPI “clean modern animation core” version)
 
 /* ===== Global hard-blocks (desktop drag-to-desktop + context menu) ===== */
 document.addEventListener('dragstart', (e) => {
@@ -152,15 +152,17 @@ document.addEventListener("DOMContentLoaded", () => {
     ensureAnim();
   }
 
-  /* ===== Leporello ===== */
+  /* ===== Leporello (WAAPI animation core) ===== */
   const lep = document.getElementById('leporello');
   const panels = [];
   let active = 0;
-  let animating = false;
 
-  // Queue + token for robust step finishing
-  let queuedSteps = 0;
-  let stepToken = 0;
+  // WAAPI motion tuning (calm + paper-like)
+  const DURATION = 820;
+  const EASING = 'cubic-bezier(.18,.9,.2,1)';
+
+  let animating = false;
+  let queuedDir = 0; // accumulates +1/-1 clicks while animating
 
   if (lep){
     works.forEach((w, idx) => {
@@ -183,17 +185,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       el.addEventListener('click', () => {
+        // jump directly to clicked panel (no queue)
+        if (animating) return;
         active = idx;
-        layout3D();
         syncActiveUI();
+        animateTo(active).then(() => syncActiveUI());
       });
 
       el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          if (animating) return;
           active = idx;
-          layout3D();
           syncActiveUI();
+          animateTo(active).then(() => syncActiveUI());
         }
       });
 
@@ -202,9 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function layout3D(){
-    if (!panels.length) return;
-
+  function getTargets(targetActive){
     const panelW = numPx(cssVar('--panelW'));
     const angleStep = numDeg(cssVar('--angleStep'));
     const maxAngle  = numDeg(cssVar('--maxAngle'));
@@ -212,158 +215,111 @@ document.addEventListener("DOMContentLoaded", () => {
     const xStepPct  = num(cssVar('--xStep')) / 100;
     const stepX     = panelW * xStepPct;
 
-    panels.forEach((el, i) => {
-      const d = i - active;
+    return panels.map((_, i) => {
+      const d = i - targetActive;
       const ad = Math.abs(d);
 
-      // Force active panel to end perfectly flat + centered
+      // Always land the active panel perfectly flat
       const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
       const z   = (d === 0) ? 0 : -ad * zStep;
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
 
-      el.style.transform = `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`;
-      el.style.opacity = op;
+      return {
+        transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${rot}deg)`,
+        opacity: String(op),
+      };
     });
   }
 
-  // Hard-snap active panel flat after the transition (prevents “stuck bend”)
-  function snapActiveFlat(){
-    const p = panels[active];
-    if (!p) return;
-
-    const prev = p.style.transition;
-    p.style.transition = 'none';
-    p.style.transform = 'translate3d(-50%, -50%, 0) translate3d(0px, 0px, 0px) rotateY(0deg)';
-    p.style.opacity = '1';
-
-    // Force reflow so the browser commits the snap
-    p.offsetHeight;
-
-    p.style.transition = prev;
+  function cancelAllPanelAnimations(){
+    panels.forEach(el => {
+      // Cancel WAAPI animations (if any)
+      if (typeof el.getAnimations === 'function'){
+        el.getAnimations().forEach(a => a.cancel());
+      }
+    });
   }
 
-  // Read real transition duration (fallback for missing transitionend)
-  function getPanelTransitionMs(){
-    const p = panels[active] || panels[0];
-    if (!p) return 650;
+  // Apply instantly (init + resize)
+  function applyLayoutInstant(){
+    if (!panels.length) return;
+    cancelAllPanelAnimations();
 
-    const cs = getComputedStyle(p);
-    const durStr = (cs.transitionDuration || "0s").split(',')[0].trim();
-    const delStr = (cs.transitionDelay || "0s").split(',')[0].trim();
-
-    const toMs = (s) => {
-      if (s.endsWith('ms')) return parseFloat(s) || 0;
-      if (s.endsWith('s')) return (parseFloat(s) || 0) * 1000;
-      return parseFloat(s) || 0;
-    };
-
-    return Math.max(0, toMs(durStr) + toMs(delStr));
+    const targets = getTargets(active);
+    panels.forEach((el, i) => {
+      el.style.transform = targets[i].transform;
+      el.style.opacity = targets[i].opacity;
+    });
   }
 
-  function finishStep(localToken){
-    // ignore stale finishes from older steps
-    if (localToken !== stepToken) return;
+  // Animate to a given active index deterministically
+  function animateTo(targetActive){
+    if (!panels.length) return Promise.resolve();
 
-    snapActiveFlat();
-    syncActiveUI();
-    animating = false;
+    // Cancel any in-flight animations so we always start from a clean state
+    cancelAllPanelAnimations();
 
-    if (queuedSteps > 0){
-      queuedSteps--;
-      next();
-    }
+    const to = getTargets(targetActive);
+
+    const from = panels.map(el => ({
+      transform: el.style.transform || 'translate3d(0px,0px,0px) rotateY(0deg)',
+      opacity: getComputedStyle(el).opacity
+    }));
+
+    const anims = panels.map((el, i) => {
+      // WAAPI animates the transform/opac; 3D stays 3D because we animate translate3d + rotateY
+      return el.animate(
+        [
+          { transform: from[i].transform, opacity: from[i].opacity },
+          { transform: to[i].transform,   opacity: to[i].opacity }
+        ],
+        { duration: DURATION, easing: EASING, fill: 'forwards' }
+      );
+    });
+
+    return Promise.allSettled(anims.map(a => a.finished)).then(() => {
+      // Commit final styles EXACTLY (prevents “stuck in-between”)
+      cancelAllPanelAnimations();
+      panels.forEach((el, i) => {
+        el.style.transform = to[i].transform;
+        el.style.opacity = to[i].opacity;
+      });
+    });
   }
 
-  function next(){
+  function runQueued(){
+    if (queuedDir === 0) return;
+    const dir = Math.sign(queuedDir);
+    queuedDir -= dir;
+    step(dir);
+  }
+
+  function step(dir){
     if (works.length < 2) return;
 
     if (animating){
-      queuedSteps++; // don't lose fast clicks
+      queuedDir += dir; // queue clicks during animation
       return;
     }
 
     animating = true;
-    stepToken++;
-    const localToken = stepToken;
 
-    active = (active + 1) % works.length;
-    layout3D();
+    const nextActive = (active + dir + works.length) % works.length;
+
+    // Update active immediately so content order is always correct (1→2→3)
+    active = nextActive;
     syncActiveUI();
 
-    const p = panels[active];
-    if (!p){
-      finishStep(localToken);
-      return;
-    }
-
-    // One-time transitionend listener for THIS active panel (transform only)
-    let done = false;
-    const onEnd = (e) => {
-      if (done) return;
-      if (localToken !== stepToken) return;
-      if (e.target !== p) return;
-      if (e.propertyName !== 'transform') return;
-      done = true;
-      p.removeEventListener('transitionend', onEnd);
-      finishStep(localToken);
-    };
-    p.addEventListener('transitionend', onEnd);
-
-    // Fallback in case transitionend doesn't fire
-    const ms = getPanelTransitionMs() || 650;
-    setTimeout(() => {
-      if (done) return;
-      if (localToken !== stepToken) return;
-      done = true;
-      p.removeEventListener('transitionend', onEnd);
-      finishStep(localToken);
-    }, ms + 120);
+    animateTo(active).then(() => {
+      syncActiveUI();
+      animating = false;
+      runQueued();
+    });
   }
 
-  function prev(){
-    if (works.length < 2) return;
-
-    if (animating){
-      queuedSteps++;
-      return;
-    }
-
-    animating = true;
-    stepToken++;
-    const localToken = stepToken;
-
-    active = (active - 1 + works.length) % works.length;
-    layout3D();
-    syncActiveUI();
-
-    const p = panels[active];
-    if (!p){
-      finishStep(localToken);
-      return;
-    }
-
-    let done = false;
-    const onEnd = (e) => {
-      if (done) return;
-      if (localToken !== stepToken) return;
-      if (e.target !== p) return;
-      if (e.propertyName !== 'transform') return;
-      done = true;
-      p.removeEventListener('transitionend', onEnd);
-      finishStep(localToken);
-    };
-    p.addEventListener('transitionend', onEnd);
-
-    const ms = getPanelTransitionMs() || 650;
-    setTimeout(() => {
-      if (done) return;
-      if (localToken !== stepToken) return;
-      done = true;
-      p.removeEventListener('transitionend', onEnd);
-      finishStep(localToken);
-    }, ms + 120);
-  }
+  function next(){ step(+1); }
+  function prev(){ step(-1); }
 
   const arrowRight = document.getElementById('arrowRight');
   if (arrowRight){
@@ -387,6 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const p = panels[active];
     if (!p) return;
 
+    // Active UI follows the active panel in 3D space
     activeUI.style.transform = p.style.transform || "";
     activeUI.style.width = getComputedStyle(p).width;
     activeUI.style.height = getComputedStyle(p).height;
@@ -559,7 +516,9 @@ document.addEventListener("DOMContentLoaded", () => {
     panX = tPanX = 0;
     panY = tPanY = 0;
     applyView();
-    layout3D();
+
+    // Instant layout at load
+    applyLayoutInstant();
     syncActiveUI();
   }
   init();
@@ -567,7 +526,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener('resize', () => {
     clampPanTarget();
     ensureAnim();
-    layout3D();
+
+    applyLayoutInstant();
     syncActiveUI();
   });
 });
