@@ -157,22 +157,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Build transform from NUMBERS (no regex string editing -> no flashing)
-  function buildT(x, z, rot, extraZ = 0, extraRot = 0, extraScale = 1){
-    return `translate3d(-50%, -50%, 0)
-            translate3d(${x}px, 0px, ${z + extraZ}px)
-            rotateY(${rot + extraRot}deg)
-            scale(${extraScale})`;
+  function buildT(x, z, rotY, extraZ = 0, extraRotY = 0, extraRotX = 0, extraScale = 1){
+  return `translate3d(-50%, -50%, 0)
+          translate3d(${x}px, 0px, ${z + extraZ}px)
+          rotateY(${rotY + extraRotY}deg)
+          rotateX(${extraRotX}deg)
+          scale(${extraScale})`;
   }
 
   // Motion feel (calm)
-  const DURATION = 1350;
-  const EASING = 'cubic-bezier(.12,.82,.18,1)';
+  const DURATION = 1550;
+  const EASING = 'cubic-bezier(.10,.86,.16,1)';
 
   // Air-wave tuning
-  const WAVE_Z   = 36;     // + = towards you
-  const WAVE_ROT = 6;      // extra bend at peak (non-active only)
-  const WAVE_S   = 1.012;  // tiny “breath” scale
-  const MID      = 0.58;   // peak point of the wave
+  const WAVE_Z   = 56;     // + = towards you
+  const WAVE_ROT = 14;      // extra bend at peak (non-active only)
+  const WAVE_X   = -3.2;   // subtle “lift” (rotateX) = bubble feel
+  const WAVE_S   = 1.018;  // tiny “breath” scale
+  const MID      = 0.56;   // peak point of the wave
 
   let active = 0;
   let animating = false;
@@ -265,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const anims = panels.map((el, i) => {
       // wave: towards the viewer + a little extra bend (but keep active flatter)
       const extraRot = (from[i].rot === 0) ? 0 : WAVE_ROT;
-      const midT = buildT(from[i].x, from[i].z, from[i].rot, +WAVE_Z, extraRot, WAVE_S);
+      const midT = buildT(from[i].x, from[i].z, from[i].rot, +WAVE_Z, extraRot, WAVE_X, WAVE_S);
 
       return el.animate(
         [
@@ -284,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const uiTo   = to[idxTo].transform;
 
       const uiExtraRot = (from[idxFrom].rot === 0) ? 0 : WAVE_ROT;
-      const uiMid = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, +WAVE_Z, uiExtraRot, WAVE_S);
+      const uiMid = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, +WAVE_Z, uiExtraRot, WAVE_X, WAVE_S);
 
       uiAnim = activeUI.animate(
         [
@@ -364,17 +366,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       el.addEventListener('click', () => {
-        if (animating) return;
-        if (idx === active) return;
-        const fromIdx = active;
-        const toIdx = idx;
-        animating = true;
-        animateBetween(fromIdx, toIdx).then(() => {
-          active = toIdx;
-          animating = false;
-          queuedDir = 0;
-        });
-      });
+  if (animating) return;
+
+  // Only the ACTIVE (center) panel reacts to click.
+  // Side panels no “jump” anymore.
+  if (idx !== active) return;
+
+  // Optional: clicking the active panel open fullscreen
+  const selectBtn = document.getElementById('selectBtn');
+  if (selectBtn) selectBtn.click();
+});
 
       el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
