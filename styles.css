@@ -545,6 +545,7 @@ main{
   will-change: transform, opacity;
   transition: none;    /* IMPORTANT: WAAPI controls animation timing, so no CSS transition */
   cursor:pointer;
+  backface-visibility: hidden;
 }
 
 .print{
@@ -559,6 +560,8 @@ main{
   position:relative;
   display:grid;
   place-items:center;
+  backface-visibility: hidden;
+  transform: translateZ(0.01px);
 }
 /* Image always centered, slightly smaller than the paper area */
 .print img{
