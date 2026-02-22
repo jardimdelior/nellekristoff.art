@@ -620,6 +620,7 @@ footer{
   pointer-events:none;
 }
 .active-meta{
+  max-width: min(360px, 92%);    /* ===== Meta bubble: keep it compact ===== */
   position:absolute;
   right:0;
   top:-27px;    /* slightly closer */
@@ -638,27 +639,48 @@ footer{
   border: 1px solid rgba(255,255,255,.16);
   pointer-events:none;
 }
-.am-title{ font-size:13px; letter-spacing:.2px; opacity:.92; }
-.am-status{ font-size:12px; opacity:.68; }
+.am-title{ 
+  font-size:13px; 
+  letter-spacing:.2px; 
+  opacity:.92;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.am-status{ 
+  font-size:12px; 
+  opacity:.68;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .active-actions{
   position:absolute;
   left:50%;
   top: calc(100% + 12px);
   transform: translateX(-50%);
-  width: 100%;
+  width: min(520px, 92%);
+  margin: 0 auto;
+  justify-content: space-between;
   display:flex;
   align-items:center;
-  justify-content:center;
   min-height: 44px;
   pointer-events:auto;
 }
-.active-left{ position:absolute; left:0; top:0; }
-.active-right{ position:absolute; right:0; top:0; }
+/* Stop absolute edge-pinning for the cluster layout */
+.active-left,
+.active-right{
+  position: static;
+}
 .abtn-primary{ margin: 0 auto; }
 
 /* ===== Fullscreen overlay ===== */
 .fullscreen{
+  width: min(560px, 92%);
+  margin: 0 auto;
   position:fixed;
   inset:0;
   background: rgba(0,0,0,.92);
@@ -673,6 +695,7 @@ footer{
 
 .fs-inner{ width: min(96vw, 1120px); position:relative; }
 .fs-meta{
+  max-width: min(360px, 92%);    /* ===== Meta bubble: keep it compact ===== */
   position:absolute;
   right:0;
   top:-27px;
@@ -715,8 +738,23 @@ footer{
   color: rgba(255,255,255,.75);
 }
 
-.fs-title{ font-size:13px; letter-spacing:.2px; opacity:.92; }
-.fs-status{ font-size:12px; opacity:.68; }
+.fs-title{ 
+  font-size:13px; 
+  letter-spacing:.2px; 
+  opacity:.92;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fs-status{ 
+  font-size:12px; 
+  opacity:.68;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .fs-frame{
   width:100%;
@@ -725,8 +763,8 @@ footer{
 }
 
 .fs-actions{
-  margin-top: 12px;
-  width:100%;
+  width: min(560px, 92%);
+  margin: 0 auto;
   min-height:44px;
   position:relative;
   display:flex;
