@@ -222,7 +222,7 @@ main{
   line-height:1;
   color: var(--ink);
   font-weight:400;
-  letter-spacing: 0.9px;
+  letter-spacing: 0.08em;
   text-transform:uppercase;
 
   transform: translateY(-50%) translateX(0) scaleX(1);
