@@ -539,16 +539,11 @@ main{
   position:absolute;
   width: var(--panelW);
   height: var(--panelH);
-
   left: 50%;
   top: 50%;
-
-  /* IMPORTANT: WAAPI controls transform */
-  transform-style: preserve-3d;
+  transform-style: preserve-3d;    /* IMPORTANT: WAAPI controls transform */
   will-change: transform, opacity;
-
-  /* IMPORTANT: WAAPI controls animation timing, so no CSS transition */
-  transition: none;
+  transition: none;    /* IMPORTANT: WAAPI controls animation timing, so no CSS transition */
   cursor:pointer;
 }
 
