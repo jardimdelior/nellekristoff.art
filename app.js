@@ -403,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
 
-      const factor = Math.exp(-e.deltaY * 0.0015);
+      const factor = Math.exp(-e.deltaY * 0.0018);    // <-- THIS is the other another one
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
   }
