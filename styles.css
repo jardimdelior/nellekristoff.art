@@ -549,7 +549,6 @@ main{
 
   /* IMPORTANT: WAAPI controls animation timing, so no CSS transition */
   transition: none;
-
   cursor:pointer;
 }
 
