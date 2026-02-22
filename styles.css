@@ -802,3 +802,40 @@ footer{
   .panel{ transition:none !important; }
   .noise{ animation:none !important; }
 }
+
+/* ===== Mobile landscape fullscreen fix (keep buttons visible) ===== */
+@media (max-width: 900px) and (orientation: landscape){
+  .fullscreen{
+    overflow: auto; /* allow scroll if needed, never hide buttons */
+    padding: 12px;
+  }
+
+  .fs-inner{
+    display:flex;
+    flex-direction: column;
+    width: min(96vw, 1120px);
+    max-height: calc(100vh - 24px);
+  }
+
+  /* image area must shrink */
+  .fs-frame{
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: calc(100vh - 24px - 56px); /* reserve space for buttons */
+  }
+
+  .fs-frame img{
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .fs-actions{
+    flex: 0 0 auto;
+    margin-top: 10px;
+  }
+
+  /* optional: slightly smaller pills in landscape so everything fits */
+  :root{ --pillH: 34px; }
+}
