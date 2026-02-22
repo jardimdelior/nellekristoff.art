@@ -40,6 +40,10 @@
   /* header motion tuning */
   --burgerShift: 10px;
   --foldShift: 18px;
+
+  --leftLabelSize: clamp(12px, 1.4vw, 16px);
+  --leftLabelTrack: 1.6px;
+  --leftLabelWeight: 500;
 }
 
 /* base */
@@ -99,9 +103,9 @@ main{
   top:50%;
   transform: translateY(-50%);
 
-  font-size: clamp(12px, 1.4vw, 16px);
-  font-weight:500;
-  letter-spacing: 1.6px;
+  font-size: var(--leftLabelSize);
+  font-weight: var(--leftLabelWeight);
+  letter-spacing: var(--leftLabelTrack);
   text-transform: uppercase;
 
   opacity:.82;
@@ -110,7 +114,7 @@ main{
 
   z-index:2;
   pointer-events:none;
-  transition: opacity .22s ease, transform .22s ease;
+  transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
 }
 
 /* fade out when menu opens */
@@ -127,13 +131,22 @@ main{
   transform: translateY(-50%) translateX(-8px); /* starts slightly left like the SW fade */
   opacity:0;
   pointer-events:none;
-  transition: opacity .18s ease, transform .18s ease;
+  transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
 
   display:flex;
   gap:10px;
-  align-items:center;
+  align-items: baseline;
   white-space:nowrap;
   z-index:3;
+
+  font-size: var(--leftLabelSize);
+  font-weight: var(--leftLabelWeight);
+  letter-spacing: var(--leftLabelTrack);
+  text-transform: uppercase;
+  line-height: 1;
+
+  /* this makes baseline feel identical */
+  padding: 0;
 }
 
 /* open: replaces Selected Works */
@@ -141,6 +154,16 @@ main{
   opacity:1;
   pointer-events:auto;
   transform: translateY(-50%) translateX(0);
+}
+
+.film-header.menu-open .menu{
+  animation: menuSnap .24s cubic-bezier(.18,.9,.2,1);
+}
+
+@keyframes menuSnap{
+  0%{ transform: translateY(-50%) translateX(-8px); }
+  70%{ transform: translateY(-50%) translateX(2px); }
+  100%{ transform: translateY(-50%) translateX(0); }
 }
 
 /* RIGHT cluster */
@@ -270,6 +293,12 @@ main{
   filter:none;
 }
 
+/* When menu opens, Selected Works fades + slides out */
+.film-header.menu-open .subtitle-inline{
+  opacity:0;
+  transform: translateY(-50%) translateX(-8px);
+}
+
 /* ===== Unified button style (match arrow) ===== */
 .menu a,
 .abtn,
@@ -312,6 +341,10 @@ main{
 .abtn:active,
 .film-arrow:active{
   transform: scale(.98);
+}
+
+.menu a{
+  text-transform: none;  /* or uppercase */
 }
 
 /* arrow specifics (icon size only) */
