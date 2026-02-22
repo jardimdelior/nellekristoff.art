@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const to = getTargets(targetActive);
 
     const from = panels.map(el => ({
-      transform: el.style.transform || 'translate3d(0px,0px,0px) rotateY(0deg)',
+      transform: el.style.transform || 'translate3d(-50%, -50%, 0) translate3d(0px,0px,0px) rotateY(0deg)',
       opacity: getComputedStyle(el).opacity
     }));
 
