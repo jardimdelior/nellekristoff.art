@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function ensureAnim(){
     if (animRaf) return;
-    const ease = 0.16;
+    const ease = 0.22;    // <-- THIS is the one
 
     const tick = () => {
       zoom += (tZoom - zoom) * ease;
