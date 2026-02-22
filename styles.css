@@ -702,6 +702,11 @@ footer{
     --pillH: 36px;
   }
 
+.brand-text{
+  font-size: clamp(16px, 5vw, 20px);
+  letter-spacing: .6px;
+}
+  
   .menu{ gap:8px; }
   .menu a,
   .abtn{ padding: 0 9px; font-size: 11px; }
