@@ -925,7 +925,8 @@ footer{
     margin-left: auto;
     margin-right: auto;
   }
-
-  /* optional: slightly smaller pills in landscape so everything fits */
-  :root{ --pillH: 34px; }
-}
+  /* slightly smaller controls in landscape */
+  :root{
+    --pillH: 34px;
+    --btnH: 40px;   /* keep circles balanced */
+  }
