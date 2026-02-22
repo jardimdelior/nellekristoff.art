@@ -27,6 +27,11 @@ function cssVar(name){ return getComputedStyle(document.documentElement).getProp
 function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
 function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
 function num(v){ return parseFloat(v) || 0; }
+function getPanelW(){
+  const p = panels[0];
+  if (!p) return 0;
+  return p.getBoundingClientRect().width || parseFloat(getComputedStyle(p).width) || 0;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.classList.add("ready");
@@ -176,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // WAAPI transform includes the base centering translate:
     const base = 'translate3d(-50%, -50%, 0)';
 
-    const panelW = numPx(cssVar('--panelW'));
+    const panelW = getPanelW();
     const angleStep = numDeg(cssVar('--angleStep'));
     const maxAngle  = numDeg(cssVar('--maxAngle'));
     const zStep     = numPx(cssVar('--zStep'));
@@ -188,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const ad = Math.abs(d);
 
       // Always land active perfectly flat and centered
-      const rot = 0;
+      const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
       const z   = (d === 0) ? 0 : -ad * zStep;
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
