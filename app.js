@@ -158,6 +158,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let active = 0;
   let animating = false;
 
+  // NEW: queue clicks so none are lost
+  let queuedSteps = 0;
+
   if (lep){
     works.forEach((w, idx) => {
       const el = document.createElement('div');
@@ -212,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const d = i - active;
       const ad = Math.abs(d);
 
-      // Force the active panel to be perfectly flat and centered
+      // Force active panel to end perfectly flat + centered
       const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
       const z   = (d === 0) ? 0 : -ad * zStep;
@@ -223,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // NEW: hard-snap active panel flat after transition to prevent “stuck bend”
+  // Hard-snap active panel flat after the transition (prevents “stuck bend”)
   function snapActiveFlat(){
     const p = panels[active];
     if (!p) return;
@@ -239,19 +242,70 @@ document.addEventListener("DOMContentLoaded", () => {
     p.style.transition = prev;
   }
 
+  // Use the actual CSS transition duration (not a guessed timeout)
+  function getPanelTransitionMs(){
+    const p = panels[active] || panels[0];
+    if (!p) return 650;
+
+    const cs = getComputedStyle(p);
+
+    const durStr = (cs.transitionDuration || "0s").split(',')[0].trim();
+    const delStr = (cs.transitionDelay || "0s").split(',')[0].trim();
+
+    const toMs = (s) => {
+      if (s.endsWith('ms')) return parseFloat(s) || 0;
+      if (s.endsWith('s')) return (parseFloat(s) || 0) * 1000;
+      return parseFloat(s) || 0;
+    };
+
+    return Math.max(0, toMs(durStr) + toMs(delStr));
+  }
+
+  function finishStep(){
+    snapActiveFlat();
+    syncActiveUI();
+    animating = false;
+
+    if (queuedSteps > 0){
+      queuedSteps--;
+      next();
+    }
+  }
+
   function next(){
-    if (animating || works.length < 2) return;
+    if (works.length < 2) return;
+
+    if (animating){
+      queuedSteps++;     // don't lose fast clicks
+      return;
+    }
+
     animating = true;
 
     active = (active + 1) % works.length;
     layout3D();
     syncActiveUI();
 
-    setTimeout(() => {
-      snapActiveFlat();   // NEW
-      syncActiveUI();     // keep UI perfectly aligned after snap
-      animating = false;
-    }, 680);
+    const ms = getPanelTransitionMs() || 650;
+    setTimeout(finishStep, ms + 60); // small buffer for slower devices
+  }
+
+  function prev(){
+    if (works.length < 2) return;
+
+    if (animating){
+      queuedSteps++;
+      return;
+    }
+
+    animating = true;
+
+    active = (active - 1 + works.length) % works.length;
+    layout3D();
+    syncActiveUI();
+
+    const ms = getPanelTransitionMs() || 650;
+    setTimeout(finishStep, ms + 60);
   }
 
   const arrowRight = document.getElementById('arrowRight');
@@ -440,17 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isFullscreenOpen()) return;
 
     if (e.key === 'ArrowRight') next();
-    if (e.key === 'ArrowLeft'){
-      active = (active - 1 + works.length) % works.length;
-      layout3D();
-      syncActiveUI();
-
-      // Optional: keep left nav consistent with snap behavior too
-      setTimeout(() => {
-        snapActiveFlat();
-        syncActiveUI();
-      }, 680);
-    }
+    if (e.key === 'ArrowLeft') prev();
   });
 
   function init(){
