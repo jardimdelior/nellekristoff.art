@@ -44,6 +44,8 @@
   --leftLabelSize: clamp(12px, 1.4vw, 16px);
   --leftLabelTrack: 1.6px;
   --leftLabelWeight: 500;
+
+  --pillH: 40px;
 }
 
 /* base */
@@ -176,6 +178,7 @@ main{
   min-width:0;
   z-index:5;
   margin-left: auto;          /* IMPORTANT */
+  flex: 1 1 auto;      /* <-- NEW: take remaining width */
 }
 
 /* BRAND swap */
@@ -187,7 +190,7 @@ main{
   justify-content:flex-end;
 
   flex: 1 1 auto;
-  min-width: 22ch;
+  min-width: 0;        /* <-- IMPORTANT: prevents forced ellipsis */
   overflow:visible;
 }
 
@@ -215,11 +218,11 @@ main{
   text-overflow:ellipsis;
   opacity:1;
 
-  font-size: clamp(29px, 3.5vw, 34px);
+  font-size: clamp(26px, 3.2vw, 32px);
   line-height:1;
   color: var(--ink);
   font-weight:400;
-  letter-spacing: 1.2px;
+  letter-spacing: 0.9px;
   text-transform:uppercase;
 
   transform: translateY(-50%) translateX(0) scaleX(1);
@@ -300,8 +303,8 @@ main{
 .abtn,
 .film-arrow{
 
-  height: var(--btnH);
-  min-height: var(--btnH);
+  height: var(--pillH);
+  min-height: var(--pillH);
 
   border-radius: 999px;
 
@@ -309,11 +312,11 @@ main{
   backdrop-filter: blur(14px) saturate(140%);
 
   /* softer / more faded outline */
-  border: 1px solid rgba(255,255,255,.14);
-
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.10);
   box-shadow:
-    inset 0 0 0 1px rgba(47,42,38,.04),
-    0 10px 24px rgba(0,0,0,.10);
+    inset 0 0 0 1px rgba(47,42,38,.03),
+    0 8px 18px rgba(0,0,0,.08);
 
   color: rgba(47,42,38,.92);
   text-decoration:none;
@@ -322,7 +325,7 @@ main{
   align-items:center;
   justify-content:center;
 
-  font-size: 12.5px;
+  font-size: 12px;
   letter-spacing: .25px;
   line-height: 1;
 
@@ -385,12 +388,14 @@ main{
 
 .menu a,
 .abtn{
-  padding: 0 12px; /* less wide than before */
+  padding: 0 8px; /* less wide than before */
   white-space:nowrap;
 }
 
 /* Arrow stays circular + not wide (single clean block) */
 .film-arrow{
+  height: var(--btnH);
+  min-height: var(--btnH);
   width: var(--btnH);
   padding: 0;
   display:grid;
@@ -683,11 +688,13 @@ footer{
 
     --burgerShift: 8px;
     --foldShift: 14px;
+
+    --pillH: 36px;
   }
 
   .menu{ gap:8px; }
   .menu a,
-  .abtn{ font-size: 12px; padding: 0 12px; }
+  .abtn{ padding: 0 9px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce){
   .panel{ transition:none !important; }
