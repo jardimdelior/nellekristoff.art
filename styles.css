@@ -222,9 +222,9 @@ main{
   line-height:1;
   color: var(--ink);
   font-weight:400;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.08em;    /* typographically correct solution */
   text-transform:uppercase;
-
+  
   transform: translateY(-50%) translateX(0) scaleX(1);
 }
 
