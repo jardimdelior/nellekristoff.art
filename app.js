@@ -1,4 +1,6 @@
 // app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width + AIR WAVE)
+// With: stronger wave (Z + rotateX), no side-panel jump on click OR keydown,
+// single-line transform string (less Safari jitter)
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -16,6 +18,7 @@ const works = [
 
 works.forEach(w => { const i = new Image(); i.src = w.src; });
 
+/* Contact */
 window.contact = function contact(e){
   if (e) e.preventDefault();
   window.location.href = "mailto:nellekristoff@gmail.com";
@@ -148,7 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const lep = document.getElementById('leporello');
   const panels = [];
 
-  // panel width must be measured from DOM, not CSS vars (clamp() cannot be parsed)
   function getPanelW(){
     const p = panels[0];
     if (!p) return 0;
@@ -156,25 +158,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return r.width || parseFloat(getComputedStyle(p).width) || 0;
   }
 
-  // Build transform from NUMBERS (no regex string editing -> no flashing)
+  // single-line transform string (less jitter in some browsers)
   function buildT(x, z, rotY, extraZ = 0, extraRotY = 0, extraRotX = 0, extraScale = 1){
-  return `translate3d(-50%, -50%, 0)
-          translate3d(${x}px, 0px, ${z + extraZ}px)
-          rotateY(${rotY + extraRotY}deg)
-          rotateX(${extraRotX}deg)
-          scale(${extraScale})`;
+    return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale})`;
   }
 
   // Motion feel (calm)
   const DURATION = 1550;
-  const EASING = 'cubic-bezier(.10,.86,.16,1)';
+  const EASING   = 'cubic-bezier(.10,.86,.16,1)';
 
-  // Air-wave tuning
-  const WAVE_Z   = 56;     // + = towards you
-  const WAVE_ROT = 14;      // extra bend at peak (non-active only)
-  const WAVE_X   = -3.2;   // subtle “lift” (rotateX) = bubble feel
-  const WAVE_S   = 1.018;  // tiny “breath” scale
-  const MID      = 0.56;   // peak point of the wave
+  // Air-wave tuning (stronger bend)
+  const WAVE_Z   = 56;
+  const WAVE_ROT = 14;
+  const WAVE_X   = -3.2;   // try -4.6 for stronger bubble
+  const WAVE_S   = 1.018;
+  const MID      = 0.56;
 
   let active = 0;
   let animating = false;
@@ -212,11 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const z   = (d === 0) ? 0 : -ad * zStep;
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
 
-      return {
-        x, z, rot,
-        opacity: String(op),
-        transform: buildT(x, z, rot)
-      };
+      return { x, z, rot, opacity: String(op), transform: buildT(x, z, rot) };
     });
   }
 
@@ -265,9 +259,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveUITransformFromPanel(panels[idxFrom]);
 
     const anims = panels.map((el, i) => {
-      // wave: towards the viewer + a little extra bend (but keep active flatter)
       const extraRot = (from[i].rot === 0) ? 0 : WAVE_ROT;
-      const midT = buildT(from[i].x, from[i].z, from[i].rot, +WAVE_Z, extraRot, WAVE_X, WAVE_S);
+      const midT = buildT(from[i].x, from[i].z, from[i].rot, WAVE_Z, extraRot, WAVE_X, WAVE_S);
 
       return el.animate(
         [
@@ -279,14 +272,13 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
-    // UI follows with the same “breath”
     let uiAnim = null;
     if (activeUI){
       const uiFrom = from[idxFrom].transform;
       const uiTo   = to[idxTo].transform;
 
       const uiExtraRot = (from[idxFrom].rot === 0) ? 0 : WAVE_ROT;
-      const uiMid = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, +WAVE_Z, uiExtraRot, WAVE_X, WAVE_S);
+      const uiMid = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, WAVE_Z, uiExtraRot, WAVE_X, WAVE_S);
 
       uiAnim = activeUI.animate(
         [
@@ -302,7 +294,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ...anims.map(a => a.finished),
       uiAnim ? uiAnim.finished : Promise.resolve()
     ]).then(() => {
-      // Commit final styles exactly
       cancelAll();
       panels.forEach((el, i) => {
         el.style.transform = to[i].transform;
@@ -365,32 +356,22 @@ document.addEventListener("DOMContentLoaded", () => {
         im.addEventListener('contextmenu', (e) => e.preventDefault());
       }
 
+      // Only ACTIVE panel reacts to click (no side jump)
       el.addEventListener('click', () => {
-  if (animating) return;
+        if (animating) return;
+        if (idx !== active) return;
+        const selectButton = document.getElementById('selectBtn');
+        if (selectButton) selectButton.click();
+      });
 
-  // Only the ACTIVE (center) panel reacts to click.
-  // Side panels no “jump” anymore.
-  if (idx !== active) return;
-
-  // Optional: clicking the active panel open fullscreen
-  const selectBtn = document.getElementById('selectBtn');
-  if (selectBtn) selectBtn.click();
-});
-
+      // Also prevent side-jump on keyboard
       el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          if (animating) return;
-          if (idx === active) return;
-          const fromIdx = active;
-          const toIdx = idx;
-          animating = true;
-          animateBetween(fromIdx, toIdx).then(() => {
-            active = toIdx;
-            animating = false;
-            queuedDir = 0;
-          });
-        }
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        if (animating) return;
+        if (idx !== active) return;
+        const selectButton = document.getElementById('selectBtn');
+        if (selectButton) selectButton.click();
       });
 
       lep.appendChild(el);
