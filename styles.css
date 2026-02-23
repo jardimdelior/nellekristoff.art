@@ -561,7 +561,7 @@ main{
   display:grid;
   place-items:center;
   backface-visibility: hidden;
-  transform: translateZ(0.01px);
+  transform: translateZ(0.1px);    /* keeps it on its own layer */
 }
 /* Image always centered, slightly smaller than the paper area */
 .print img{
