@@ -501,7 +501,7 @@ main{
 
   /* extra: helps Safari/iOS avoid corner poke-through */
   transform-origin: 50% 50%;
-  outline: 0;
+  outline: 1px solid transparent;
 }
 
 .print{
@@ -519,6 +519,7 @@ main{
 
   /* ✅ important: no borders/outlines that shimmer */
   border: none;
+  transform: translateZ(0);
   outline: none;
 }
 
