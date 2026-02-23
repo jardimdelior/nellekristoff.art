@@ -560,6 +560,7 @@ main{
   position:relative;
   display:grid;
   place-items:center;
+  transform-style: preserve-3d;    /* IMPORTANT: WAAPI controls transform */
   backface-visibility: hidden;
   transform: translateZ(0.1px);    /* keeps it on its own layer */
 }
@@ -571,6 +572,7 @@ main{
   margin: auto;
   display:block;
   pointer-events:none;
+  backface-visibility: hidden;
   -webkit-user-drag: none;
   user-drag: none;
   -webkit-touch-callout: none;
