@@ -60,6 +60,7 @@
 
   /* distance between decks (visual split) */
   --deckOffset: 25vh;
+  --deckGap: clamp(24px, 4vh, 60px);
 }
 
 /* base */
