@@ -1,12 +1,13 @@
 // app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width
-//        + THEATRICAL “FEATHER BUBBLE” + VIRTUAL INDEX WRAP FIX)
+//        + THEATRICAL “FEATHER BUBBLE” + TRAVELING WAVE + VIRTUAL INDEX WRAP FIX)
 //
-// Key upgrades vs current:
-// - Stronger, more visible air-wave (extra Z + rotateX + extra rotateY + tiny scale “breath”)
-// - Wave strength is computed from the *virtual distance d* (not DOM index) -> no triple-flap on wrap (3 -> 1)
-// - Multi-peak wave (3 mids) for “bubble passing under paper”
+// Upgrades:
+// - Wave now TRAVELS left -> right (per-panel peak timing based on signed virtual distance d)
+// - Stronger bubble (extra Z + rotateX + rotateY + tiny scale “breath”)
+// - Strength computed from VIRTUAL distance (ad) -> wrap stays smooth (3 -> 1)
+// - Extra stable Z-bias + per-panel Z shim + backface hints -> reduces corner “sticking through”
 // - Active panel stays calmer; side panels get most bend
-// - Keeps “only active panel click opens fullscreen” + no side jump
+// - Only active panel click/keydown opens fullscreen (no side jump)
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -178,12 +179,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const EASING   = 'cubic-bezier(.06,.93,.12,1)';
 
   // THEATRICAL air-wave tuning (more visible)
-  // NOTE: extraZ is towards viewer (positive).
-  const WAVE_Z   = 110;     // BIG “bubble under paper”
-  const WAVE_ROT = 22;      // extra Y bend (sides)
-  const WAVE_X   = -9.0;    // rotateX peak (paper breathing)
-  const WAVE_S   = 1.030;   // breath scale
-  const WAVE_TWIST = 5.0;   // subtle counter-twist for drama (alternates)
+  const WAVE_Z     = 118;    // towards viewer (+) -> BIG bubble
+  const WAVE_ROT   = 24;     // extra Y bend (sides)
+  const WAVE_X     = -10.2;  // rotateX peak (paper breathing)
+  const WAVE_S     = 1.034;  // breath scale
+  const WAVE_TWIST = 5.0;    // subtle alternating drama
+
+  // TRAVEL timing
+  const TRAVEL_SPREAD = 0.20; // bigger = wave travels more clearly across left->right
 
   // --- VIRTUAL active position (fixes wrap) ---
   let activePos = 0;        // ... -1,0,1,2,3 ...
@@ -216,13 +219,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const xStepPct  = num(cssVar('--xStep')) / 100;
     const stepX     = panelW * xStepPct;
 
-    // Tiny depth separation to reduce z-fight shimmer
-    const Z_BIAS = 1.1;
+    // Bigger stable separation to reduce z-fight shimmer / corner poke-through
+    const Z_BIAS = 2.4;
 
     const n = panels.length || works.length;
 
     return panels.map((_, i) => {
-      // choose the nearest “copy” of panel i around targetPos
       const iV = nearestVirtual(i, targetPos, n);
       const d  = iV - targetPos;
       const ad = Math.abs(d);
@@ -230,8 +232,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
 
-      // z tied to DOM order bias to keep stable draw ordering
-      const Z_SHIM = i * 0.22;                 // always unique per DOM panel
+      // z tied to DOM order + tiny constant shim so panels never share exact depth
+      const Z_SHIM = (i + 1) * 0.45; // always unique per panel
       const z = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS) - Z_SHIM;
 
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.70, 1);
@@ -272,10 +274,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveUITransformFromPanel(panels[mod(pos, panels.length)]);
   }
 
-  // Feather wave intensity from virtual distance:
-  // - center (ad=0) is calmer, sides breathe strongly
+  // Feather from VIRTUAL distance:
   function featherFrom(ad){
-    // With 3 panels, ad is typically 0..1..2; clamp to [0..1]
     return clamp(ad / 2, 0, 1);
   }
 
@@ -294,38 +294,53 @@ document.addEventListener("DOMContentLoaded", () => {
     syncActiveUIText(fromPos);
     setActiveUITransformFromPanel(panels[mod(fromPos, panels.length)]);
 
-    // Multi-peak wave = bubble rolls under paper, then settles
-    // offsets tuned for “breath”: rise -> peak -> small after-peak -> settle
-    const O1 = 0.30;
-    const O2 = 0.60;
-    const O3 = 0.80;
+    // Base offsets for the bubble (these get shifted per-panel for travel)
+    const BASE_O1 = 0.26;
+    const BASE_O2 = 0.52;
+    const BASE_O3 = 0.76;
+
+    // Determine range of d currently visible to normalize travel phase
+    const maxD = Math.max(1, ...from.map(p => Math.abs(p.d || 0)));
+    const denom = 2 * maxD; // maps [-maxD..+maxD] -> [0..1]
 
     const anims = panels.map((el, i) => {
       const f = featherFrom(from[i].ad);
 
-      // center calm, sides dramatic
-      const z1 = WAVE_Z * (0.18 + 0.55 * f);
-      const z2 = WAVE_Z * (0.48 + 0.88 * f);     // main bubble
-      const z3 = WAVE_Z * (0.28 + 0.65 * f);     // after-peak ripple
+      // Strength: even center breathes (so middle gets bubble too)
+      const strength = 0.52 + 0.72 * f; // 0.52..1.24
 
-      // extra Y bend only when already rotated (don’t tilt the active flat page too much)
-      const ry1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.12 + 0.55 * f));
-      const ry2 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.35 + 0.95 * f));
-      const ry3 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.18 + 0.70 * f));
+      // Travel phase: left early, right late
+      const phase = clamp(((from[i].d || 0) + maxD) / denom, 0, 1);
+
+      // Shift the peak times so the wave sweeps left -> right
+      const shift = (phase - 0.5) * TRAVEL_SPREAD; // -..+
+      const O1 = clamp(BASE_O1 + shift, 0.10, 0.70);
+      const O2 = clamp(BASE_O2 + shift, 0.20, 0.86);
+      const O3 = clamp(BASE_O3 + shift, 0.30, 0.95);
+
+      // Multi-peak bubble: rise -> peak -> ripple -> settle
+      const z1 = WAVE_Z * (0.20 * strength);
+      const z2 = WAVE_Z * (0.62 * strength);
+      const z3 = WAVE_Z * (0.34 * strength);
+
+      // extra Y bend only when already rotated (keep active flatter)
+      const ry1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.16 * strength));
+      const ry2 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.50 * strength));
+      const ry3 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.26 * strength));
 
       // “paper breath” rotateX
-      const rx1 = WAVE_X * (0.16 + 0.55 * f);
-      const rx2 = WAVE_X * (0.55 + 0.95 * f);
-      const rx3 = WAVE_X * (0.22 + 0.70 * f);
+      const rx1 = WAVE_X * (0.22 * strength);
+      const rx2 = WAVE_X * (0.74 * strength);
+      const rx3 = WAVE_X * (0.34 * strength);
 
       // tiny scale breath
-      const s1 = 1 + ((WAVE_S - 1) * (0.10 + 0.55 * f));
-      const s2 = 1 + ((WAVE_S - 1) * (0.55 + 0.95 * f));
-      const s3 = 1 + ((WAVE_S - 1) * (0.18 + 0.70 * f));
+      const s1 = 1 + ((WAVE_S - 1) * (0.20 * strength));
+      const s2 = 1 + ((WAVE_S - 1) * (0.70 * strength));
+      const s3 = 1 + ((WAVE_S - 1) * (0.35 * strength));
 
-      // optional twist: alternate sign per panel DOM index, subtle theatre feel
+      // subtle twist (alternating)
       const twist = (i % 2 === 0 ? 1 : -1) * WAVE_TWIST * f;
-      const mid1  = buildT(from[i].x, from[i].z, from[i].rot, z1, ry1 + twist * 0.25, rx1, s1);
+      const mid1  = buildT(from[i].x, from[i].z, from[i].rot, z1, ry1 + twist * 0.22, rx1, s1);
       const mid2  = buildT(from[i].x, from[i].z, from[i].rot, z2, ry2 + twist * 0.55, rx2, s2);
       const mid3  = buildT(from[i].x, from[i].z, from[i].rot, z3, ry3 + twist * 0.35, rx3, s3);
 
@@ -341,28 +356,31 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
-    // Active UI follows the active panel (from -> to), with a calmer wave (so buttons don’t feel chaotic)
+    // Active UI follows with calmer wave (buttons feel stable)
     let uiAnim = null;
     if (activeUI){
       const fromPanelIndex = mod(fromPos, panels.length);
       const toPanelIndex   = mod(toPos, panels.length);
 
-      const fUI = 0.55; // keep UI wave moderate even in theatre mode
-
       const uiFrom = from[fromPanelIndex].transform;
       const uiTo   = to[toPanelIndex].transform;
 
-      const z1 = WAVE_Z * (0.14 + 0.28 * fUI);
-      const z2 = WAVE_Z * (0.30 + 0.55 * fUI);
-      const z3 = WAVE_Z * (0.18 + 0.35 * fUI);
+      const fUI = 0.55;
 
-      const rx1 = WAVE_X * (0.12 + 0.22 * fUI);
-      const rx2 = WAVE_X * (0.25 + 0.45 * fUI);
-      const rx3 = WAVE_X * (0.16 + 0.30 * fUI);
+      const z1 = WAVE_Z * (0.12 + 0.22 * fUI);
+      const z2 = WAVE_Z * (0.26 + 0.44 * fUI);
+      const z3 = WAVE_Z * (0.16 + 0.30 * fUI);
 
-      const s1  = 1 + ((WAVE_S - 1) * (0.10 + 0.22 * fUI));
-      const s2  = 1 + ((WAVE_S - 1) * (0.22 + 0.45 * fUI));
-      const s3  = 1 + ((WAVE_S - 1) * (0.14 + 0.30 * fUI));
+      const rx1 = WAVE_X * (0.10 + 0.20 * fUI);
+      const rx2 = WAVE_X * (0.22 + 0.40 * fUI);
+      const rx3 = WAVE_X * (0.14 + 0.26 * fUI);
+
+      const s1  = 1 + ((WAVE_S - 1) * (0.10 + 0.18 * fUI));
+      const s2  = 1 + ((WAVE_S - 1) * (0.22 + 0.40 * fUI));
+      const s3  = 1 + ((WAVE_S - 1) * (0.14 + 0.26 * fUI));
+
+      // keep UI offsets fixed (no left->right travel) so it feels anchored
+      const O1 = BASE_O1, O2 = BASE_O2, O3 = BASE_O3;
 
       const uiMid1 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z1, 0, rx1, s1);
       const uiMid2 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z2, 0, rx2, s2);
@@ -432,9 +450,10 @@ document.addEventListener("DOMContentLoaded", () => {
       el.className = 'panel';
       el.tabIndex = 0;
 
-      // Optional stability hints (won’t break if unsupported)
+      // Stability hints (helps “corner poking” in some GPUs)
       el.style.backfaceVisibility = 'hidden';
       el.style.transformStyle = 'preserve-3d';
+      el.style.transformOrigin = '50% 50%';
 
       el.innerHTML = `
         <div class="print">
@@ -443,8 +462,16 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
+      // Backface on inner elements too (helps on iOS/Safari)
+      const pr = el.querySelector('.print');
+      if (pr){
+        pr.style.backfaceVisibility = 'hidden';
+        pr.style.transformStyle = 'preserve-3d';
+      }
+
       const im = el.querySelector('img');
       if (im){
+        im.style.backfaceVisibility = 'hidden';
         im.addEventListener('dragstart', (e) => e.preventDefault());
         im.addEventListener('mousedown', (e) => e.preventDefault());
         im.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -483,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Optional: if you have a left arrow button later, name it arrowLeft
+  // Optional left arrow button
   const arrowLeft = document.getElementById('arrowLeft');
   if (arrowLeft){
     arrowLeft.addEventListener('click', (e) => {
