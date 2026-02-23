@@ -1,6 +1,4 @@
 // app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width + AIR WAVE)
-// With: stronger wave (Z + rotateX), no side-panel jump on click OR keydown,
-// single-line transform string (less Safari jitter)
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -158,27 +156,22 @@ document.addEventListener("DOMContentLoaded", () => {
     return r.width || parseFloat(getComputedStyle(p).width) || 0;
   }
 
-  // single-line transform string (less jitter in some browsers)
   function buildT(x, z, rotY, extraZ = 0, extraRotY = 0, extraRotX = 0, extraScale = 1){
     return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale})`;
   }
 
-  // Motion feel (calm)
   const DURATION = 1850;
-  const EASING   = 'cubic-bezier(.8,.92,.12,1)';
+  const EASING   = 'cubic-bezier(.08,.92,.12,1)';
 
-  // Air-wave tuning (stronger bend)
   const WAVE_Z   = 46;
   const WAVE_ROT = 12;
-  const WAVE_X   = -2.6;   // try -4.6 for stronger bubble
+  const WAVE_X   = -2.6;
   const WAVE_S   = 1.014;
-  const MID      = 0.56;
 
   let active = 0;
   let animating = false;
   let queuedDir = 0;
 
-  // Active UI
   const activeUI = document.getElementById('activeUI');
   const amTitle = document.getElementById('amTitle');
   const amStatus = document.getElementById('amStatus');
@@ -201,14 +194,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const xStepPct  = num(cssVar('--xStep')) / 100;
     const stepX     = panelW * xStepPct;
 
+    const Z_BIAS = 0.35;
+
     return panels.map((_, i) => {
       const d = i - targetActive;
       const ad = Math.abs(d);
 
       const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
-      const Z_BIAS = 0.35; // tiny: separates panels in GPU depth buffer (prevents flicker)
-      const z = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS);
+      const z   = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS);
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
 
       return { x, z, rot, opacity: String(op), transform: buildT(x, z, rot) };
@@ -249,29 +243,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const from = getTargets(idxFrom);
     const to   = getTargets(idxTo);
 
-    // Force exact "from" state before animating
     panels.forEach((el, i) => {
       el.style.transform = from[i].transform;
       el.style.opacity = from[i].opacity;
     });
 
-    // UI starts attached to FROM panel
     syncActiveUIText(idxFrom);
     setActiveUITransformFromPanel(panels[idxFrom]);
 
     const anims = panels.map((el, i) => {
-      const ad = Math.abs(i - idxFrom);           // distance from current active
-      const feather = clamp(ad / 2, 0, 1);        // 0 for center, 1 for far sides
-      const extraZ   = WAVE_Z * (0.35 + 0.85 * feather);    // sides get more lift + more bend; center stays calmer
-      const extraRot = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.25 + 0.95 * feather));
-      const extraX   = WAVE_X * (0.35 + 0.85 * feather);
-      const extraS   = 1 + ((WAVE_S - 1) * (0.25 + 0.95 * feather));
-
-      const midT = buildT(from[i].x, from[i].z, from[i].rot, extraZ, extraRot, extraX, extraS);
       const ad = Math.abs(i - idxFrom);
       const feather = clamp(ad / 2, 0, 1);
 
-      // gentler, more floaty (lower peak values)
       const extraZ1   = WAVE_Z * (0.18 + 0.55 * feather);
       const extraRot1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.12 + 0.55 * feather));
       const extraX1   = WAVE_X * (0.18 + 0.55 * feather);
@@ -301,7 +284,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const uiFrom = from[idxFrom].transform;
       const uiTo   = to[idxTo].transform;
 
-      const uiExtraRot = (from[idxFrom].rot === 0) ? 0 : WAVE_ROT;
       const uiMid1 = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, WAVE_Z * 0.22, 0, WAVE_X * 0.22, 1 + ((WAVE_S - 1) * 0.22));
       const uiMid2 = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, WAVE_Z * 0.42, 0, WAVE_X * 0.42, 1 + ((WAVE_S - 1) * 0.42));
 
@@ -310,7 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
           { transform: uiFrom, offset: 0 },
           { transform: uiMid1, offset: 0.36 },
           { transform: uiMid2, offset: 0.62 },
-          { transform: uiTo,  offset: 1 }
+          { transform: uiTo,   offset: 1 }
         ],
         { duration: DURATION, easing: EASING, fill: 'forwards' }
       );
@@ -361,7 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function next(){ step(+1); }
   function prev(){ step(-1); }
 
-  // Build panels
+  /* Build panels */
   if (lep){
     works.forEach((w, idx) => {
       const el = document.createElement('div');
@@ -382,7 +364,6 @@ document.addEventListener("DOMContentLoaded", () => {
         im.addEventListener('contextmenu', (e) => e.preventDefault());
       }
 
-      // Only ACTIVE panel reacts to click (no side jump)
       el.addEventListener('click', () => {
         if (animating) return;
         if (idx !== active) return;
@@ -390,7 +371,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (selectButton) selectButton.click();
       });
 
-      // Also prevent side-jump on keyboard
       el.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         e.preventDefault();
@@ -405,7 +385,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Arrow click
   const arrowRight = document.getElementById('arrowRight');
   if (arrowRight){
     arrowRight.addEventListener('click', (e) => {
@@ -581,7 +560,6 @@ document.addEventListener("DOMContentLoaded", () => {
     panY = tPanY = 0;
     applyView();
 
-    // Wait one frame so layout widths are real before first measure
     requestAnimationFrame(() => applyInstant(active));
   }
   init();
