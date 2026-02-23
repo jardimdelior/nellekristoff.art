@@ -1,720 +1,820 @@
- // app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width
-//        + THEATRICAL “FEATHER BUBBLE” + TRAVELING WAVE + VIRTUAL INDEX WRAP FIX
-//        + START AT ZOOM MIN + PAN WHEN ZOOMED OUT + ANTI Z-FIGHT SHIM
-//        + INNER-EDGE TUCK (side panels fold deep behind the active))
+/* styles.css */
+/* ✅ Cleaned + adjusted to match your new WAAPI 3D + bubble wave:
+   - fixes missing closing braces at the end
+   - removes duplicated :root blocks inside the same media query
+   - adds anti-flicker / anti “edge line shimmer” rules
+   - makes 3D stacking more stable (preserve-3d + backface everywhere needed)
+   - avoids “double transform” fighting WAAPI (panel keeps WAAPI transform only)
+*/
 
-// Prevent image drag / context menu
-document.addEventListener('dragstart', (e) => {
-  if (e.target && e.target.tagName === 'IMG') e.preventDefault();
-});
-document.addEventListener('contextmenu', (e) => {
-  if (e.target && e.target.tagName === 'IMG') e.preventDefault();
-});
+:root{
+  --bg:#EFE7DC;
+  --ink:#2F2A26;
+  --card:#FFFFFF;
 
-/* ===== Works ===== */
-const works = [
-  { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-  { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
-];
+  --shadow: 0 14px 50px rgba(0,0,0,.32);
+  --inset: inset 0 0 28px rgba(0,0,0,.14);
+  --radius:2px;
 
-// preload
-works.forEach(w => { const i = new Image(); i.src = w.src; });
+  --a3: 420 / 297;
 
-/* Contact */
-window.contact = function contact(e){
-  if (e) e.preventDefault();
-  window.location.href = "mailto:nellekristoff@gmail.com";
-};
+  --maxFilmH: 78vh;
 
-/* helpers */
-function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
-function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
-function num(v){ return parseFloat(v) || 0; }
+  --panelW: clamp(180px, 42vw, 560px);
+  --panelH: calc(var(--panelW) * (297 / 420));
 
-// --- virtual index helpers (prevents wrap “triple flap”) ---
-function mod(n, m){ return ((n % m) + m) % m; }
-function nearestVirtual(i, targetPos, n){
-  const k = Math.round((targetPos - i) / n);
-  return i + k * n;
+  --persp: 2600px;
+
+  --angleStep: 18deg;
+  --maxAngle: 72deg;
+  --zStep: 70px;
+  --xStep: 78%;
+
+  --zoomMin: .65;
+  --zoomMax: 2.2;
+
+  --brand: #C4A160;
+
+  --filmPad: 6px;
+
+  /* HEADER + BUTTON SYSTEM (unified with arrow) */
+  --btnH: 52px;
+  --headerBarH: var(--btnH);
+
+  /* optical */
+  --burgerScale: 1;
+  --monoScale: 1.06;
+
+  /* header motion tuning */
+  --burgerShift: 10px;
+  --foldShift: 18px;
+
+  --leftLabelSize: clamp(12px, 1.4vw, 16px);
+  --leftLabelTrack: 1.6px;
+  --leftLabelWeight: 500;
+
+  --pillH: 40px;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  document.documentElement.classList.add("ready");
+/* base */
+html, body{ height:100%; }
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  opacity:0;
+  padding:0;
+  box-sizing:border-box;
+}
+html.ready body{ animation:fadein 1.0s ease-in-out forwards; }
+@keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
-  const viewport  = document.getElementById('viewport');
-  const spacePan  = document.getElementById('spacePan');
-  const spaceZoom = document.getElementById('spaceZoom');
+main{
+  width:100%;
+  padding: clamp(14px, 3vw, 34px);
+  box-sizing:border-box;
+  display:flex;
+  justify-content:center;
+}
 
-  /* ===== Menu ===== */
-  const menuBtn = document.getElementById('menuBtn');
-  const menu = document.getElementById('menu');
-  const header = document.querySelector('.film-header');
+/* film */
+.film-main{
+  width:min(96vw, 1400px);
+  margin:0 auto;
+  box-sizing:border-box;
+  padding: 0 var(--filmPad);
+  display:grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+}
 
-  function setMenu(open){
-    if (!menuBtn || !menu) return;
-    menu.classList.toggle('open', open);
-    menuBtn.setAttribute('aria-expanded', String(open));
-    if (header) header.classList.toggle('menu-open', open);
+/* header */
+.film-header{
+  width:100%;
+  box-sizing:border-box;
+  position:relative;
+  z-index:20;
+}
+
+.header-bar{
+  height: var(--headerBarH);
+  display:flex;
+  align-items:center;
+  justify-content: flex-end;  /* IMPORTANT */
+  position:relative;
+}
+
+/* Selected Works (left) */
+.subtitle-inline{
+  position:absolute;
+  left:0;
+  top:50%;
+  transform: translateY(-32%);
+  font-size: var(--leftLabelSize);
+  font-weight: var(--leftLabelWeight);
+  letter-spacing: var(--leftLabelTrack);
+  text-transform: uppercase;
+  opacity:.82;
+  white-space:nowrap;
+  line-height:1;
+  z-index:2;
+  pointer-events:none;
+  transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
+}
+
+/* When menu opens, Selected Works fades + slides out */
+.film-header.menu-open .subtitle-inline{
+  opacity:0;
+  transform: translateY(-32%) translateX(-8px);
+}
+
+/* Menu sits EXACTLY where Selected Works is */
+.menu{
+  position:absolute;
+  left:0;
+  top:50%;
+  transform: translateY(-32%) translateX(-8px);
+  opacity:0;
+  pointer-events:none;
+  transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
+  display:flex;
+  gap:10px;
+  align-items: baseline;
+  white-space:nowrap;
+  z-index:50;
+  font-size: var(--leftLabelSize);
+  font-weight: var(--leftLabelWeight);
+  letter-spacing: var(--leftLabelTrack);
+  text-transform: uppercase;
+  line-height: 1;
+  padding: 0;
+}
+
+/* open: replaces Selected Works */
+.menu.open{
+  opacity:1;
+  pointer-events:auto;
+  transform: translateY(-32%) translateX(0);
+}
+
+.film-header.menu-open .menu{
+  animation: menuSnap .24s cubic-bezier(.18,.9,.2,1);
+}
+
+@keyframes menuSnap{
+  0%{ transform: translateY(-32%) translateX(-8px); }
+  70%{ transform: translateY(-32%) translateX(2px); }
+  100%{ transform: translateY(-32%) translateX(0); }
+}
+
+/* RIGHT cluster */
+.header-right{
+  position: relative;
+  pointer-events: none;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap: 14px;
+  min-width:0;
+  z-index:5;
+  margin-left: auto;
+  flex: 1 1 auto;
+}
+
+/* BRAND swap */
+.brand{
+  position:relative;
+  height: var(--headerBarH);
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow:visible;
+}
+
+.brand-text,
+.brand-mark{
+  position:absolute;
+  right:0;
+  top:50%;
+  transform: translateY(-50%);
+  white-space:nowrap;
+  pointer-events:none;
+  will-change: transform, opacity, filter;
+  transition:
+    opacity .22s ease,
+    transform .32s cubic-bezier(.18,.9,.2,1),
+    filter .22s ease;
+  transform-origin: 100% 50%;
+}
+
+.brand-text{
+  max-width: 100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  opacity:1;
+  font-size: clamp(22px, 2.8vw, 28px);
+  line-height:1;
+  color: var(--ink);
+  font-weight:400;
+  letter-spacing: 0.08em;
+  text-transform:uppercase;
+  transform: translateY(-50%) translateX(0) scaleX(1);
+}
+
+/* monogram folded */
+.brand-mark{
+  width: var(--headerBarH);
+  height: var(--headerBarH);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  color: var(--brand);
+  transform: translateY(-50%) translateX(10px) scaleX(0.25);
+  filter: blur(0.2px);
+}
+.brand-mark svg{
+  height: 100%;
+  width:100%;
+  display:block;
+  transform: scale(var(--monoScale));
+  transform-origin:center;
+}
+
+/* burger */
+.menu-btn{
+  width: var(--headerBarH);
+  height: var(--headerBarH);
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  padding:0;
+  margin:0;
+  pointer-events: auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex: 0 0 auto;
+  color: var(--brand);
+  position:relative;
+  z-index:10;
+  transition: transform .28s cubic-bezier(.18,.9,.2,1);
+}
+.menu-btn svg{
+  width: 100%;
+  height: 100%;
+  display:block;
+  transform: scale(var(--burgerScale));
+  transform-origin:center;
+}
+
+/* OPEN: burger shifts, brand folds/unfolds */
+.film-header.menu-open .menu-btn{
+  transform: translateX(calc(var(--burgerShift) * -1));
+}
+
+.film-header.menu-open .brand-text{
+  opacity:0;
+  transform:
+    translateY(-50%)
+    translateX(var(--foldShift))
+    scaleX(0.05)
+    skewY(6deg);
+  filter: blur(0.6px);
+}
+
+.film-header.menu-open .brand-mark{
+  opacity:1;
+  transform: translateY(-50%) translateX(0) scaleX(1);
+  filter:none;
+}
+
+/* ===== Unified matte glass system (arrow INCLUDED) ===== */
+.menu a,
+.abtn,
+.film-arrow{
+  height: var(--pillH);
+  min-height: var(--pillH);
+  border-radius: 999px;
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.10);
+  box-shadow:
+    inset 0 0 0 1px rgba(47,42,38,.03),
+    0 8px 18px rgba(0,0,0,.08);
+  color: rgba(47,42,38,.92);
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 12px;
+  letter-spacing: .25px;
+  line-height: 1;
+  cursor:pointer;
+  transition: transform .2s ease,
+              background .2s ease,
+              border-color .2s ease,
+              box-shadow .2s ease,
+              opacity .2s ease;
+  opacity:.92;
+  white-space:nowrap;
+  position: relative;
+}
+
+.menu a::before,
+.abtn::before,
+.film-arrow::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius:999px;
+  pointer-events:none;
+  background: radial-gradient(120% 180% at 50% 20%,
+    rgba(255,255,255,.22) 0%,
+    rgba(255,255,255,.10) 35%,
+    rgba(255,255,255,0) 70%);
+  opacity:.9;
+}
+
+.menu a:hover,
+.abtn:hover,
+.film-arrow:hover{
+  background: rgba(255,255,255,.18);
+  border-color: rgba(255,255,255,.30);
+  box-shadow:
+    inset 0 0 0 1px rgba(47,42,38,.08),
+    0 12px 26px rgba(0,0,0,.12);
+  opacity:.98;
+  transform: translateY(-1px);
+}
+
+.menu a:active,
+.abtn:active,
+.film-arrow:active{
+  transform: translateY(0);
+  opacity:.92;
+}
+
+.menu a{ text-transform: none; }
+.menu a,
+.abtn{ padding: 0 8px; white-space:nowrap; }
+
+/* Arrow stays circular */
+.film-arrow{
+  height: var(--btnH);
+  min-height: var(--btnH);
+  width: var(--btnH);
+  padding: 0;
+  display:grid;
+  place-items:center;
+  background: rgba(239,231,220,.70);
+}
+.film-arrow svg{ width:18px; height:18px; }
+
+/* ===== VIEWPORT ===== */
+.space-viewport{
+  width:100%;
+  height: var(--maxFilmH);
+  position:relative;
+  border-radius:14px;
+  border:none;
+  background: rgba(255,255,255,.10);
+  box-shadow: 0 12px 44px rgba(0,0,0,.10);
+  overflow:hidden;
+  margin: 0;
+  touch-action:none;
+  user-select:none;
+
+  perspective: var(--persp);
+  perspective-origin: 50% 55%;
+}
+
+/* ✅ Helps reduce edge shimmer from blending in 3D */
+.space-viewport,
+.space-pan,
+.space-zoom,
+.leporello{
+  transform-style: preserve-3d;
+}
+
+.space-viewport::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:14px;
+  pointer-events:none;
+  z-index:1;
+  background:
+    radial-gradient(120% 55% at 50% 56%,
+      rgba(0,0,0,.12) 0%,
+      rgba(0,0,0,.07) 22%,
+      rgba(0,0,0,0) 62%),
+    radial-gradient(120% 120% at 50% 50%,
+      rgba(0,0,0,0) 58%,
+      rgba(0,0,0,.10) 84%,
+      rgba(0,0,0,.18) 100%);
+  mix-blend-mode: multiply;
+  opacity:.85;
+}
+
+/* moving background */
+.space-bg{
+  position:absolute;
+  inset:-8%;
+  border-radius:14px;
+  pointer-events:none;
+  z-index:0;
+  background:
+    radial-gradient(140% 90% at 50% 55%,
+      rgba(255,255,255,.10) 0%,
+      rgba(0,0,0,.10) 62%,
+      rgba(0,0,0,.22) 100%),
+    linear-gradient(180deg,
+      rgba(255,255,255,.08),
+      rgba(0,0,0,.12));
+  box-shadow:
+    inset 0 10px 30px rgba(255,255,255,.10),
+    inset 0 -18px 44px rgba(0,0,0,.16);
+  transform:
+    perspective(var(--persp))
+    rotateX(calc(7deg + var(--bgTiltX, 0deg)))
+    rotateY(calc(-2deg + var(--bgTiltY, 0deg)))
+    translate3d(var(--bgPanX, 0px), var(--bgPanY, 0px), 0);
+  transition: transform 120ms ease-out;
+  will-change: transform;
+  opacity:.95;
+}
+
+/* pan/zoom layers */
+.space-pan{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  transform: translate3d(var(--panX, 0px), var(--panY, 0px), 0);
+  will-change: transform;
+  z-index:2;
+}
+.space-zoom{
+  position:relative;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  transform:
+    translateZ(var(--zoomZ, 0px))
+    scale(var(--zoom, 1));
+}
+
+/* leporello */
+.leporello{
+  position:relative;
+  width:1px;
+  height:1px;
+  transform-style:preserve-3d;
+}
+
+/* ✅ Core 3D stability + anti-flicker rules */
+.panel,
+.panel .print,
+.panel .print img{
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+
+  /* reduces “hairline border shimmer” when scaled/rotated */
+  -webkit-transform: translateZ(0.01px);
+  transform: translateZ(0.01px);
+}
+
+/* Panel: WAAPI owns transform (keep CSS from interfering) */
+.panel{
+  position:absolute;
+  width: var(--panelW);
+  height: var(--panelH);
+  left: 50%;
+  top: 50%;
+  will-change: transform, opacity;
+  transition: none;
+  cursor:pointer;
+
+  /* extra: helps Safari/iOS avoid corner poke-through */
+  transform-origin: 50% 50%;
+  outline: 0;
+}
+
+.print{
+  width:100%;
+  height:100%;
+  background:var(--card);
+  padding: 16px;
+  box-sizing:border-box;
+  border-radius:var(--radius);
+  box-shadow:var(--inset), var(--shadow);
+  overflow:hidden; /* ✅ hides subpixel edges */
+  position:relative;
+  display:grid;
+  place-items:center;
+
+  /* ✅ important: no borders/outlines that shimmer */
+  border: none;
+  outline: none;
+}
+
+.print img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  margin: auto;
+  display:block;
+  pointer-events:none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Noise */
+.noise{
+  position:absolute;
+  inset:0;
+  background-image:url("images/noise.png");
+  background-repeat:repeat;
+  background-size:520px 520px;
+  opacity:.13;
+  mix-blend-mode:overlay;
+  pointer-events:none;
+  animation:noiseMove .45s steps(2) infinite;
+}
+@keyframes noiseMove{
+  0%{ transform:translate(0,0); }
+  25%{ transform:translate(-40px,25px); }
+  50%{ transform:translate(-10px,-30px); }
+  75%{ transform:translate(30px,10px); }
+  100%{ transform:translate(0,0); }
+}
+
+/* arrow pinned */
+.arrow-slot{
+  position:absolute;
+  right:12px;
+  bottom:12px;
+  z-index:3;
+  pointer-events:auto;
+}
+
+/* footer */
+footer{
+  text-align:center;
+  padding: 18px 20px 22px;
+  font-size:12.5px;
+  opacity:.5;
+}
+
+/* ===== Active UI under the active panel ===== */
+.active-ui{
+  position:absolute;
+  left:0;
+  top:0;
+  z-index: 8;
+  transform: translate3d(0,0,0);
+  pointer-events:none;
+}
+.active-meta{
+  max-width: min(360px, 92%);
+  position:absolute;
+  right:0;
+  top:-27px;
+  display:flex;
+  gap:4px;
+  align-items:baseline;
+  white-space:nowrap;
+  padding:4px 6px;
+  border-radius:14px;
+  background: rgba(255,255,255,.28);
+  backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(255,255,255,.16);
+  pointer-events:none;
+}
+.am-title{
+  font-size:13px;
+  letter-spacing:.2px;
+  opacity:.92;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.am-status{
+  font-size:12px;
+  opacity:.68;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active-actions{
+  position:absolute;
+  left:50%;
+  top: calc(100% + 12px);
+  transform: translateX(-50%);
+  width: min(520px, 92%);
+  margin: 0 auto;
+  justify-content: space-between;
+  display:flex;
+  align-items:center;
+  min-height: 44px;
+  pointer-events:auto;
+}
+.active-left,
+.active-right{ position: static; }
+.abtn-primary{ margin: 0 auto; }
+
+/* ===== Fullscreen overlay ===== */
+.fullscreen{
+  width: min(560px, 92%);
+  margin: 0 auto;
+  position:fixed;
+  inset:0;
+  background: rgba(0,0,0,.92);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index: 2147483647;
+  padding: clamp(14px, 3vw, 34px);
+  box-sizing:border-box;
+  overflow:auto;
+}
+.fullscreen.open{ display:flex; }
+
+.fs-inner{
+  width: min(96vw, 1120px);
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
+}
+
+.fs-meta{
+  max-width: min(360px, 92%);
+  position:absolute;
+  right:0;
+  top:-27px;
+  display:flex;
+  gap:4px;
+  align-items:baseline;
+  white-space:nowrap;
+  padding:4px 6px;
+  border-radius:14px;
+  background: rgba(255,255,255,.14);
+  backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    0 12px 30px rgba(0,0,0,.45);
+  color: rgba(255,255,255,.92);
+}
+
+.fs-title{
+  font-size:13px;
+  letter-spacing:.2px;
+  opacity:.92;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255,255,255,.96);
+}
+.fs-status{
+  font-size:12px;
+  opacity:.68;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255,255,255,.75);
+}
+
+.fullscreen .abtn{
+  background: rgba(255,255,255,.18);
+  backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.08),
+    0 10px 28px rgba(0,0,0,.45);
+  color: rgba(255,255,255,.92);
+  opacity:.95;
+}
+.fullscreen .abtn::before{
+  background: radial-gradient(120% 180% at 50% 20%,
+    rgba(255,255,255,.35) 0%,
+    rgba(255,255,255,.15) 35%,
+    rgba(255,255,255,0) 70%);
+}
+.fullscreen .abtn:hover{
+  background: rgba(255,255,255,.25);
+  border-color: rgba(255,255,255,.45);
+  opacity:1;
+}
+
+.fs-frame{
+  flex: 1 1 auto;
+  min-height: 0;
+  aspect-ratio: var(--a3);
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px) - 60px);
+  margin: 0 auto;
+}
+.fullscreen .fs-frame img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.fs-actions{
+  flex: 0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  width: min(560px, 92%);
+  margin: 0 auto;
+  min-height:44px;
+}
+.fullscreen .fs-left,
+.fullscreen .fs-right{ position: static; }
+
+#closeBtn{
+  width: var(--btnH);
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 520px){
+  :root{
+    --panelW: 86vw;
+    --maxFilmH: 72vh;
+    --persp: 3200px;
+    --angleStep: 16deg;
+    --zStep: 62px;
+    --xStep: 74%;
+    --btnH: 44px;
+    --burgerScale: 1.10;
+    --monoScale: 1.00;
+    --burgerShift: 8px;
+    --foldShift: 14px;
+    --pillH: 36px;
   }
 
-  if (menuBtn && menu){
-    menuBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setMenu(!menu.classList.contains('open'));
-    });
-
-    menu.addEventListener('click', (e) => e.stopPropagation());
-    if (header) header.addEventListener('click', (e) => e.stopPropagation());
-
-    const headerRight = document.querySelector('.header-right');
-    if (headerRight) headerRight.addEventListener('click', (e) => e.stopPropagation());
-
-    document.addEventListener('click', () => setMenu(false));
-    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+  .brand-text{
+    font-size: clamp(16px, 5vw, 20px);
+    letter-spacing: .6px;
   }
 
-  /* ===== Smooth pan/zoom (viewport) ===== */
-  let zoom = 1, panX = 0, panY = 0;
-  let tZoom = 1, tPanX = 0, tPanY = 0;
-  let animRaf = null;
+  .menu{ gap:8px; }
+  .menu a,
+  .abtn{ padding: 0 9px; font-size: 11px; }
+}
 
-  function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
-  function zoomMax(){ return num(cssVar('--zoomMax')) || 2.2; }
+@media (prefers-reduced-motion: reduce){
+  .panel{ transition:none !important; }
+  .noise{ animation:none !important; }
+}
 
-  // ✅ Allow pan when zoomed OUT (<1) by giving “slack” inside viewport
-  function clampPanTarget(){
-    if (!viewport) return;
-    const rect = viewport.getBoundingClientRect();
-
-    // allow a little drag even at min zoom
-    const slackX = rect.width  * 0.08;  // 8% drift
-    const slackY = rect.height * 0.08;
-
-    const extraX = Math.max(0, (tZoom - 1)) * rect.width  / 2;
-    const extraY = Math.max(0, (tZoom - 1)) * rect.height / 2;
-
-    const maxX = extraX + slackX;
-    const maxY = extraY + slackY;
-
-    tPanX = clamp(tPanX, -maxX, maxX);
-    tPanY = clamp(tPanY, -maxY, maxY);
+/* ===== Mobile landscape fullscreen fix (keep buttons visible) ===== */
+@media (max-width: 900px) and (orientation: landscape){
+  .fullscreen{
+    overflow: hidden;
+    padding: 10px;
   }
 
-  function applyView(){
-    if (!spacePan || !spaceZoom) return;
-    const zoomZ = Math.max(0, (zoom - 1)) * 320;
-    spaceZoom.style.setProperty('--zoom', zoom);
-    spaceZoom.style.setProperty('--zoomZ', zoomZ.toFixed(1) + 'px');
-    spacePan.style.setProperty('--panX', panX + 'px');
-    spacePan.style.setProperty('--panY', panY + 'px');
+  :root{
+    --pillH: 34px;
+    --btnH: 40px;
   }
 
-  function ensureAnim(){
-    if (animRaf) return;
-
-    // softer “breathing” follow
-    const ease = 0.14;
-
-    const tick = () => {
-      zoom += (tZoom - zoom) * ease;
-      panX += (tPanX - panX) * ease;
-      panY += (tPanY - panY) * ease;
-
-      applyView();
-
-      const done =
-        Math.abs(tZoom - zoom) < 0.0008 &&
-        Math.abs(tPanX - panX) < 0.10 &&
-        Math.abs(tPanY - panY) < 0.10;
-
-      if (done){
-        zoom = tZoom; panX = tPanX; panY = tPanY;
-        applyView();
-        animRaf = null;
-        return;
-      }
-      animRaf = requestAnimationFrame(tick);
-    };
-
-    animRaf = requestAnimationFrame(tick);
+  .fullscreen .fs-inner{
+    max-height: calc(100dvh - 20px);
   }
 
-  function setZoomAt(newZoom, cx, cy){
-    newZoom = clamp(newZoom, zoomMin(), zoomMax());
-    if (!viewport) return;
-
-    const rect = viewport.getBoundingClientRect();
-    const ccx = cx - rect.width  / 2;
-    const ccy = cy - rect.height / 2;
-
-    const baseZoom = zoom || 1;
-    const k = newZoom / baseZoom;
-
-    tPanX = (panX - ccx) * k + ccx;
-    tPanY = (panY - ccy) * k + ccy;
-
-    tZoom = newZoom;
-    clampPanTarget();
-    ensureAnim();
+  .fullscreen .fs-frame{
+    max-height: calc(100dvh - 20px - 44px - 10px);
+    margin: 0 auto;
   }
 
-  function addPan(dx, dy){
-    tPanX += dx;
-    tPanY += dy;
-    clampPanTarget();
-    ensureAnim();
+  .fullscreen .fs-actions{
+    flex: 0 0 auto;
+    margin-top: 10px;
+    width: min(520px, 96%);
+    margin-left: auto;
+    margin-right: auto;
   }
-
-  /* ===== Leporello + WAAPI ===== */
-  const lep = document.getElementById('leporello');
-  const panels = [];
-
-  // ✅ measure unscaled (CSS) width, not zoomed width
-  function getPanelW(){
-    const p = panels[0];
-    if (!p) return 0;
-    return parseFloat(getComputedStyle(p).width) || 0;
-  }
-
-  // Transform builder with tiny Z shim to reduce z-fight shimmer
-  function buildT(x, z, rotY, extraZ = 0, extraRotY = 0, extraRotX = 0, extraScale = 1){
-    return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale}) translateZ(0.01px)`;
-  }
-
-  // Motion feel
-  const DURATION = 2850;
-  const EASING   = 'cubic-bezier(.10,.88,.16,1)';
-
-  // Theatre bubble tuning
-  const WAVE_Z     = 120;
-  const WAVE_ROT   = 16;
-  const WAVE_X     = -7.2;
-  const WAVE_S     = 1.022;
-  const WAVE_TWIST = 5.0;
-
-  // Traveling wave timing
-  const TRAVEL_SPREAD = 0.22;
-
-  // ✅ Inner-edge tuck (side panels fold deep behind the active)
-  const INNER_TUCK_ROT = 14; // deg (try 10..18)
-  const INNER_TUCK_Z   = 34; // px  (try 20..50)
-
-  // Virtual active position (wrap fix)
-  let activePos = 0;
-  let animating = false;
-  let queuedDir = 0;
-
-  function activeIdx(){ return mod(activePos, works.length); }
-  function activePanelIdx(){ return mod(activePos, (panels.length || works.length)); }
-
-  // Active UI
-  const activeUI = document.getElementById('activeUI');
-  const amTitle = document.getElementById('amTitle');
-  const amStatus = document.getElementById('amStatus');
-  const activeCollect = document.getElementById('activeCollect');
-
-  function cancelAnim(el){
-    if (!el || typeof el.getAnimations !== 'function') return;
-    el.getAnimations().forEach(a => a.cancel());
-  }
-  function cancelAll(){
-    panels.forEach(cancelAnim);
-    cancelAnim(activeUI);
-  }
-
-  function getTargets(targetPos){
-    const panelW = getPanelW();
-    const angleStep = numDeg(cssVar('--angleStep'));
-    const maxAngle  = numDeg(cssVar('--maxAngle'));
-    const zStep     = numPx(cssVar('--zStep'));
-    const xStepPct  = num(cssVar('--xStep')) / 100;
-    const stepX     = panelW * xStepPct;
-
-    // stronger stable separation to reduce corner poke-through
-    const Z_BIAS = 2.6;
-
-    const n = panels.length || works.length;
-
-    return panels.map((_, i) => {
-      const iV = nearestVirtual(i, targetPos, n);
-      const d  = iV - targetPos;
-      const ad = Math.abs(d);
-
-      const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
-      const x   = (d === 0) ? 0 : d * stepX;
-
-      // Unique per-panel depth shim: avoids exact depth ties
-      const Z_SHIM = (i + 1) * 0.55;
-      const z = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS) - Z_SHIM;
-
-      const op = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.70, 1);
-
-      // ✅ Inner tuck: strongest on immediate neighbors (ad≈1), none on center/far
-      const innerAmt = clamp(1 - Math.abs(ad - 1), 0, 1); // 1 at ad=1
-      const tuckRotY = -Math.sign(d || 0) * INNER_TUCK_ROT * innerAmt;
-      const tuckZ    = -INNER_TUCK_Z * innerAmt; // deeper into scene
-
-      return {
-        d, ad, x, z, rot,
-        opacity: String(op),
-        transform: buildT(x, z, rot, tuckZ, tuckRotY, 0, 1)
-      };
-    });
-  }
-
-  function syncActiveUIText(pos){
-    const w = works[mod(pos, works.length)] || works[0];
-    if (!w) return;
-    if (amTitle) amTitle.textContent = w.title || "Untitled";
-    if (amStatus) amStatus.textContent = w.status || "Unveiling soon";
-    if (activeCollect) activeCollect.href = w.collect || "https://collect.nellekristoff.art";
-  }
-
-  function setActiveUITransformFromPanel(panelEl){
-    if (!activeUI || !panelEl) return;
-    activeUI.style.transform = panelEl.style.transform || "";
-    activeUI.style.width  = getComputedStyle(panelEl).width;
-    activeUI.style.height = getComputedStyle(panelEl).height;
-    activeUI.style.left   = getComputedStyle(panelEl).left;
-    activeUI.style.top    = getComputedStyle(panelEl).top;
-  }
-
-  function applyInstant(pos){
-    cancelAll();
-    const t = getTargets(pos);
-    panels.forEach((el, i) => {
-      el.style.transform = t[i].transform;
-      el.style.opacity   = t[i].opacity;
-    });
-    syncActiveUIText(pos);
-    setActiveUITransformFromPanel(panels[mod(pos, panels.length)]);
-  }
-
-  function featherFrom(ad){
-    // center gets bubble too
-    return clamp(ad / 2, 0, 1);
-  }
-
-  function animateBetween(fromPos, toPos){
-    cancelAll();
-
-    const from = getTargets(fromPos);
-    const to   = getTargets(toPos);
-
-    // lock start
-    panels.forEach((el, i) => {
-      el.style.transform = from[i].transform;
-      el.style.opacity   = from[i].opacity;
-    });
-
-    syncActiveUIText(fromPos);
-    setActiveUITransformFromPanel(panels[mod(fromPos, panels.length)]);
-
-    // bubble peaks (base), then per-panel travel shift
-    const BASE_O1 = 0.26;
-    const BASE_O2 = 0.52;
-    const BASE_O3 = 0.76;
-
-    const maxD = Math.max(1, ...from.map(p => Math.abs(p.d || 0)));
-    const denom = 2 * maxD;
-
-    const anims = panels.map((el, i) => {
-      const f = featherFrom(from[i].ad);
-
-      // Even the active gets some breath:
-      const strength = 0.62 + 0.70 * f; // 0.62..1.32
-
-      // Traveling phase left->right based on signed virtual distance d
-      const phase = clamp(((from[i].d || 0) + maxD) / denom, 0, 1);
-      const shift = (phase - 0.5) * TRAVEL_SPREAD;
-
-      const O1 = clamp(BASE_O1 + shift, 0.10, 0.72);
-      const O2 = clamp(BASE_O2 + shift, 0.22, 0.88);
-      const O3 = clamp(BASE_O3 + shift, 0.36, 0.95);
-
-      // Multi-peak bubble:
-      const z1 = WAVE_Z * (0.22 * strength);
-      const z2 = WAVE_Z * (0.70 * strength);
-      const z3 = WAVE_Z * (0.38 * strength);
-
-      // rotateY only when already rotated (keep center calmer)
-      const ry1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.18 * strength));
-      const ry2 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.55 * strength));
-      const ry3 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.28 * strength));
-
-      // rotateX “breath”
-      const rx1 = WAVE_X * (0.22 * strength);
-      const rx2 = WAVE_X * (0.82 * strength);
-      const rx3 = WAVE_X * (0.36 * strength);
-
-      // scale breath
-      const s1 = 1 + ((WAVE_S - 1) * (0.22 * strength));
-      const s2 = 1 + ((WAVE_S - 1) * (0.85 * strength));
-      const s3 = 1 + ((WAVE_S - 1) * (0.38 * strength));
-
-      // subtle alternating twist for theatre feel
-      const twist = (i % 2 === 0 ? 1 : -1) * WAVE_TWIST * f;
-
-      // ✅ carry the same inner tuck during the wave (so it doesn’t “untuck” mid-animation)
-      const innerAmt = clamp(1 - Math.abs(from[i].ad - 1), 0, 1);
-      const tuckRotY = -Math.sign(from[i].d || 0) * INNER_TUCK_ROT * innerAmt;
-      const tuckZ    = -INNER_TUCK_Z * innerAmt;
-
-      const mid1 = buildT(from[i].x, from[i].z, from[i].rot, z1 + tuckZ, (ry1 + twist * 0.20) + tuckRotY, rx1, s1);
-      const mid2 = buildT(from[i].x, from[i].z, from[i].rot, z2 + tuckZ, (ry2 + twist * 0.55) + tuckRotY, rx2, s2);
-      const mid3 = buildT(from[i].x, from[i].z, from[i].rot, z3 + tuckZ, (ry3 + twist * 0.32) + tuckRotY, rx3, s3);
-
-      return el.animate(
-        [
-          { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
-          { transform: mid1,              opacity: from[i].opacity, offset: O1 },
-          { transform: mid2,              opacity: from[i].opacity, offset: O2 },
-          { transform: mid3,              opacity: from[i].opacity, offset: O3 },
-          { transform: to[i].transform,   opacity: to[i].opacity,   offset: 1 }
-        ],
-        { duration: DURATION, easing: EASING, fill: 'forwards' }
-      );
-    });
-
-    // Active UI: calmer wave, no travel shift (anchored)
-    let uiAnim = null;
-    if (activeUI){
-      const fromPanelIndex = mod(fromPos, panels.length);
-      const toPanelIndex   = mod(toPos, panels.length);
-
-      const uiFrom = from[fromPanelIndex].transform;
-      const uiTo   = to[toPanelIndex].transform;
-
-      const fUI = 0.55;
-
-      const z1 = WAVE_Z * (0.14 + 0.26 * fUI);
-      const z2 = WAVE_Z * (0.30 + 0.52 * fUI);
-      const z3 = WAVE_Z * (0.18 + 0.34 * fUI);
-
-      const rx1 = WAVE_X * (0.12 + 0.22 * fUI);
-      const rx2 = WAVE_X * (0.26 + 0.46 * fUI);
-      const rx3 = WAVE_X * (0.16 + 0.30 * fUI);
-
-      const s1  = 1 + ((WAVE_S - 1) * (0.12 + 0.22 * fUI));
-      const s2  = 1 + ((WAVE_S - 1) * (0.26 + 0.46 * fUI));
-      const s3  = 1 + ((WAVE_S - 1) * (0.16 + 0.30 * fUI));
-
-      const uiMid1 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z1, 0, rx1, s1);
-      const uiMid2 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z2, 0, rx2, s2);
-      const uiMid3 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z3, 0, rx3, s3);
-
-      uiAnim = activeUI.animate(
-        [
-          { transform: uiFrom, offset: 0 },
-          { transform: uiMid1, offset: BASE_O1 },
-          { transform: uiMid2, offset: BASE_O2 },
-          { transform: uiMid3, offset: BASE_O3 },
-          { transform: uiTo,  offset: 1 }
-        ],
-        { duration: DURATION, easing: EASING, fill: 'forwards' }
-      );
-    }
-
-    return Promise.allSettled([
-      ...anims.map(a => a.finished),
-      uiAnim ? uiAnim.finished : Promise.resolve()
-    ]).then(() => {
-      cancelAll();
-      panels.forEach((el, i) => {
-        el.style.transform = to[i].transform;
-        el.style.opacity   = to[i].opacity;
-      });
-
-      syncActiveUIText(toPos);
-      setActiveUITransformFromPanel(panels[mod(toPos, panels.length)]);
-    });
-  }
-
-  function runQueued(){
-    if (queuedDir === 0) return;
-    const dir = Math.sign(queuedDir);
-    queuedDir -= dir;
-    step(dir);
-  }
-
-  function step(dir){
-    if (works.length < 2) return;
-
-    if (animating){
-      queuedDir += dir;
-      return;
-    }
-
-    animating = true;
-
-    const fromPos = activePos;
-    const toPos   = activePos + dir; // ALWAYS one step (no modulo jump)
-
-    animateBetween(fromPos, toPos).then(() => {
-      activePos = toPos;
-      animating = false;
-      runQueued();
-    });
-  }
-
-  function next(){ step(+1); }
-  function prev(){ step(-1); }
-
-  /* Build panels */
-  if (lep){
-    works.forEach((w, idx) => {
-      const el = document.createElement('div');
-      el.className = 'panel';
-      el.tabIndex = 0;
-
-      // GPU stability hints (safe if ignored)
-      el.style.backfaceVisibility = 'hidden';
-      el.style.transformStyle = 'preserve-3d';
-      el.style.transformOrigin = '50% 50%';
-
-      el.innerHTML = `
-        <div class="print">
-          <img src="${w.src}" alt="${w.title}" draggable="false">
-          <div class="noise"></div>
-        </div>
-      `;
-
-      const pr = el.querySelector('.print');
-      if (pr){
-        pr.style.backfaceVisibility = 'hidden';
-        pr.style.transformStyle = 'preserve-3d';
-      }
-
-      const im = el.querySelector('img');
-      if (im){
-        im.style.backfaceVisibility = 'hidden';
-        im.addEventListener('dragstart', (e) => e.preventDefault());
-        im.addEventListener('mousedown', (e) => e.preventDefault());
-        im.addEventListener('contextmenu', (e) => e.preventDefault());
-      }
-
-      // Only ACTIVE panel reacts to click (no side jump)
-      el.addEventListener('click', () => {
-        if (animating) return;
-        if (idx !== activePanelIdx()) return;
-        const selectButton = document.getElementById('selectBtn');
-        if (selectButton) selectButton.click();
-      });
-
-      // Only ACTIVE panel reacts to key
-      el.addEventListener('keydown', (e) => {
-        if (e.key !== 'Enter' && e.key !== ' ') return;
-        e.preventDefault();
-        if (animating) return;
-        if (idx !== activePanelIdx()) return;
-        const selectButton = document.getElementById('selectBtn');
-        if (selectButton) selectButton.click();
-      });
-
-      lep.appendChild(el);
-      panels.push(el);
-    });
-  }
-
-  // Arrow click (right)
-  const arrowRight = document.getElementById('arrowRight');
-  if (arrowRight){
-    arrowRight.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      next();
-    });
-  }
-
-  // Optional left arrow button
-  const arrowLeft = document.getElementById('arrowLeft');
-  if (arrowLeft){
-    arrowLeft.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      prev();
-    });
-  }
-
-  /* ===== Fullscreen overlay ===== */
-  const selectBtn = document.getElementById('selectBtn');
-  const fullscreen = document.getElementById('fullscreen');
-  const fsImg = document.getElementById('fsImg');
-  const fsTitle = document.getElementById('fsTitle');
-  const fsStatus = document.getElementById('fsStatus');
-  const fsCollect = document.getElementById('fsCollect');
-  const closeBtn = document.getElementById('closeBtn');
-
-  function isFullscreenOpen(){
-    return fullscreen && fullscreen.classList.contains('open');
-  }
-
-  function openFullscreen(){
-    const w = works[activeIdx()] || works[0];
-    if (!w || !fullscreen || !fsImg) return;
-
-    fsImg.src = w.src;
-    fsImg.alt = w.title || "";
-    if (fsTitle) fsTitle.textContent = w.title || "Untitled";
-    if (fsStatus) fsStatus.textContent = w.status || "Unveiling soon";
-    if (fsCollect) fsCollect.href = w.collect || "https://collect.nellekristoff.art";
-
-    fullscreen.classList.add('open');
-    fullscreen.setAttribute('aria-hidden', 'false');
-  }
-
-  function closeFullscreen(){
-    if (!fullscreen) return;
-    fullscreen.classList.remove('open');
-    fullscreen.setAttribute('aria-hidden', 'true');
-  }
-
-  if (selectBtn){
-    selectBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      openFullscreen();
-    });
-  }
-  if (closeBtn){
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      closeFullscreen();
-    });
-  }
-  if (fullscreen){
-    fullscreen.addEventListener('click', (e) => {
-      if (e.target === fullscreen) closeFullscreen();
-    });
-  }
-
-  /* ===== Viewport pointer pan/zoom ===== */
-  let pointers = new Map();
-  let lastPan = null;
-  let pinchStart = null;
-
-  function setPointer(e){ pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); }
-  function updatePointer(e){
-    if (!pointers.has(e.pointerId)) return;
-    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  }
-  function getTwoPointers(){
-    const arr = Array.from(pointers.values());
-    if (arr.length < 2) return null;
-    return [arr[0], arr[1]];
-  }
-  function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
-  function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
-
-  if (viewport){
-    viewport.addEventListener('pointerdown', (e) => {
-      if (isFullscreenOpen()) return;
-
-      const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
-      if (interactive) return;
-
-      viewport.setPointerCapture(e.pointerId);
-      setPointer(e);
-
-      if (pointers.size === 1){
-        lastPan = { x: e.clientX, y: e.clientY };
-        pinchStart = null;
-      } else if (pointers.size === 2){
-        const [p1, p2] = getTwoPointers();
-        pinchStart = { d: dist(p1,p2), z: tZoom, m: mid(p1,p2) };
-        lastPan = null;
-      }
-    });
-
-    viewport.addEventListener('pointermove', (e) => {
-      if (isFullscreenOpen()) return;
-      if (!pointers.has(e.pointerId)) return;
-      updatePointer(e);
-
-      if (pointers.size === 1 && lastPan){
-        addPan(e.clientX - lastPan.x, e.clientY - lastPan.y);
-        lastPan = { x: e.clientX, y: e.clientY };
-      }
-
-      if (pointers.size >= 2){
-        const two = getTwoPointers();
-        if (!two) return;
-        const [p1, p2] = two;
-
-        const dNow = dist(p1,p2);
-        const mNow = mid(p1,p2);
-
-        if (!pinchStart){
-          pinchStart = { d: dNow, z: tZoom, m: mNow };
-          return;
-        }
-
-        const rect = viewport.getBoundingClientRect();
-        const cx = mNow.x - rect.left;
-        const cy = mNow.y - rect.top;
-
-        setZoomAt(pinchStart.z * (dNow / pinchStart.d), cx, cy);
-        addPan(mNow.x - pinchStart.m.x, mNow.y - pinchStart.m.y);
-        pinchStart.m = mNow;
-      }
-    });
-
-    function endPointer(e){
-      pointers.delete(e.pointerId);
-      if (pointers.size === 0){ lastPan = null; pinchStart = null; }
-      if (pointers.size === 1){
-        const remaining = Array.from(pointers.values())[0];
-        lastPan = remaining ? { x: remaining.x, y: remaining.y } : null;
-        pinchStart = null;
-      }
-    }
-
-    viewport.addEventListener('pointerup', endPointer);
-    viewport.addEventListener('pointercancel', endPointer);
-
-    viewport.addEventListener('wheel', (e) => {
-      if (isFullscreenOpen()) return;
-      e.preventDefault();
-
-      const rect = viewport.getBoundingClientRect();
-      const cx = e.clientX - rect.left;
-      const cy = e.clientY - rect.top;
-
-      const factor = Math.exp(-e.deltaY * 0.0018);
-      setZoomAt(tZoom * factor, cx, cy);
-    }, { passive:false });
-  }
-
-  /* keyboard */
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isFullscreenOpen()){
-      closeFullscreen();
-      return;
-    }
-    if (isFullscreenOpen()) return;
-
-    if (e.key === 'ArrowRight') next();
-    if (e.key === 'ArrowLeft') prev();
-  });
-
-  function init(){
-    zoom = tZoom = zoomMin();   // start at min zoom
-    panX = tPanX = 0;
-    panY = tPanY = 0;
-
-    clampPanTarget();
-    applyView();
-
-    requestAnimationFrame(() => applyInstant(activePos));
-  }
-  init();
-
-  window.addEventListener('resize', () => {
-    clampPanTarget();
-    ensureAnim();
-    requestAnimationFrame(() => applyInstant(activePos));
-  });
-});
+}
