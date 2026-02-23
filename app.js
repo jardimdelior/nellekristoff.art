@@ -175,14 +175,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Motion feel (theatre / float)
-  const DURATION = 2350;
-  const EASING   = 'cubic-bezier(.06,.93,.12,1)';
+  const DURATION = 2700;
+  const EASING   = 'cubic-bezier(.12,.86,.18,1)';
 
   // THEATRICAL air-wave tuning (more visible)
-  const WAVE_Z     = 118;    // towards viewer (+) -> BIG bubble
-  const WAVE_ROT   = 24;     // extra Y bend (sides)
-  const WAVE_X     = -10.2;  // rotateX peak (paper breathing)
-  const WAVE_S     = 1.034;  // breath scale
+  const WAVE_Z     = 110;    // towards viewer (+) -> BIG bubble
+  const WAVE_ROT   = 16;     // extra Y bend (sides)
+  const WAVE_X     = -6.5;  // rotateX peak (paper breathing)
+  const WAVE_S     = 1.022;  // breath scale
   const WAVE_TWIST = 5.0;    // subtle alternating drama
 
   // TRAVEL timing
