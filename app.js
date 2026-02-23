@@ -694,7 +694,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activeCollect: document.getElementById('activeCollectTop'),
     selectBtn: document.getElementById('selectBtnTop'),
     arrowBtn: document.getElementById('arrowTopLeft'),
-    direction: -1,
+    direction: +1,
     works: worksTop,
 
     isFocusedFn: () => focused === "top",
