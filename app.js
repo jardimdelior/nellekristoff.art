@@ -1,10 +1,10 @@
-// app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width
-//        + THEATRICAL “FEATHER BUBBLE” + TRAVELING WAVE + VIRTUAL INDEX WRAP FIX
-//        + START AT ZOOM MIN + PAN WHEN ZOOMED OUT + ANTI Z-FIGHT SHIM
-//        + EXTRA SIDE DEPTH (prevents overlap) ✅
-//
-// You already set CSS: --zStep: 95px;
-// This JS adds: SIDE_BACK_Z + tuck during wave mids so left/right stay deeper than center.
+// app.js — TWO STACKED DECKS (top + bottom) inside same viewport
+// - Each deck has its own panels + activePos + wave animation.
+// - Clicking a deck makes it the "current deck".
+// - Zoom IN = full freedom.
+// - Zoom OUT to zoomMin snaps panY to that deck's rest position (top half / bottom half).
+// - ArrowLeft/ArrowRight navigate the current deck only.
+// - Uses unscaled panel width (computedStyle) so no post-zoom jump.
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -13,15 +13,20 @@ document.addEventListener('contextmenu', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
 });
 
-/* ===== Works ===== */
-const works = [
+/* ===== Works (6 total) ===== */
+const worksBottom = [
   { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
+const worksTop = [
+  { src:"images/Untitled4.png", title:"Untitled 4", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled5.png", title:"Untitled 5", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled6.png", title:"Untitled 6", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+];
 
 // preload
-works.forEach(w => { const i = new Image(); i.src = w.src; });
+[...worksBottom, ...worksTop].forEach(w => { const i = new Image(); i.src = w.src; });
 
 /* Contact */
 window.contact = function contact(e){
@@ -35,8 +40,6 @@ function cssVar(name){ return getComputedStyle(document.documentElement).getProp
 function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
 function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
 function num(v){ return parseFloat(v) || 0; }
-
-// --- virtual index helpers (prevents wrap “triple flap”) ---
 function mod(n, m){ return ((n % m) + m) % m; }
 function nearestVirtual(i, targetPos, n){
   const k = Math.round((targetPos - i) / n);
@@ -50,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const spacePan  = document.getElementById('spacePan');
   const spaceZoom = document.getElementById('spaceZoom');
 
-  /* ===== Menu ===== */
+  /* ===== Menu (unchanged) ===== */
   const menuBtn = document.getElementById('menuBtn');
   const menu = document.getElementById('menu');
   const header = document.querySelector('.film-header');
@@ -68,13 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
       e.stopPropagation();
       setMenu(!menu.classList.contains('open'));
     });
-
     menu.addEventListener('click', (e) => e.stopPropagation());
     if (header) header.addEventListener('click', (e) => e.stopPropagation());
-
     const headerRight = document.querySelector('.header-right');
     if (headerRight) headerRight.addEventListener('click', (e) => e.stopPropagation());
-
     document.addEventListener('click', () => setMenu(false));
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
   }
@@ -87,12 +87,12 @@ document.addEventListener("DOMContentLoaded", () => {
   function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
   function zoomMax(){ return num(cssVar('--zoomMax')) || 2.2; }
 
-  // ✅ Allow pan even when zoomed OUT (<1) by giving “slack”
+  // allow a little pan even at min zoom
   function clampPanTarget(){
     if (!viewport) return;
     const rect = viewport.getBoundingClientRect();
 
-    const slackX = rect.width  * 0.08; // 8% drift at min zoom
+    const slackX = rect.width  * 0.08;
     const slackY = rect.height * 0.08;
 
     const extraX = Math.max(0, (tZoom - 1)) * rect.width  / 2;
@@ -114,10 +114,31 @@ document.addEventListener("DOMContentLoaded", () => {
     spacePan.style.setProperty('--panY', panY + 'px');
   }
 
+  // ===== Snap-to-deck when zoomed out =====
+  let currentDeck = 'bottom'; // 'top' | 'bottom'
+  function deckRestPanY(deck){
+    if (!viewport) return 0;
+    const rect = viewport.getBoundingClientRect();
+    // viewport center -> half split => +/- quarter height feels perfect
+    const amt = rect.height * 0.25;
+    return deck === 'top' ? -amt : +amt;
+  }
+  function snapToDeckIfZoomedOut(){
+    const zMin = zoomMin();
+    // near-min counts as "zoomed out"
+    if (tZoom <= zMin + 0.0005){
+      tZoom = zMin;
+      tPanX = 0;
+      tPanY = deckRestPanY(currentDeck);
+      clampPanTarget();
+      ensureAnim();
+    }
+  }
+
   function ensureAnim(){
     if (animRaf) return;
 
-    // softer “breathing” follow
+    // breathing follow
     const ease = 0.14;
 
     const tick = () => {
@@ -136,6 +157,9 @@ document.addEventListener("DOMContentLoaded", () => {
         zoom = tZoom; panX = tPanX; panY = tPanY;
         applyView();
         animRaf = null;
+
+        // once we truly settle at min zoom, enforce deck rest
+        snapToDeckIfZoomedOut();
         return;
       }
       animRaf = requestAnimationFrame(tick);
@@ -170,52 +194,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ensureAnim();
   }
 
-  /* ===== Leporello + WAAPI ===== */
+  /* ===== WAAPI / 3D ===== */
   const lep = document.getElementById('leporello');
-  const panels = [];
+  if (!lep) return;
 
-  // ✅ FIX: measure CSS layout width (unscaled), not getBoundingClientRect() (scaled by zoom)
-  function getPanelW(){
-    const p = panels[0];
-    if (!p) return 0;
-    return parseFloat(getComputedStyle(p).width) || 0;
-  }
-
-  // tiny translateZ shim reduces z-fight shimmer lines
-  function buildT(x, z, rotY, extraZ = 0, extraRotY = 0, extraRotX = 0, extraScale = 1){
-    return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale}) translateZ(0.01px)`;
-  }
-
-  /* ===== THEATRE MOTION ===== */
-  const DURATION = 2850;
-  const EASING   = 'cubic-bezier(.10,.88,.16,1)';
-
-  // Bubble tuning
-  const WAVE_Z     = 120;   // forward
-  const WAVE_ROT   = 16;    // extra rotateY on side pages
-  const WAVE_X     = -7.2;  // rotateX “breath”
-  const WAVE_S     = 1.022; // tiny scale breath
-  const WAVE_TWIST = 5.0;   // subtle alternating twist
-
-  // Traveling timing
-  const TRAVEL_SPREAD = 0.22;
-
-  // ✅ NEW: push side panels deeper so they never cut over the active panel
-  const SIDE_BACK_Z   = 95;    // px (try 80–140)
-  const SIDE_BACK_POW = 1.25;  // deeper faster with distance
-
-  // ✅ NEW: during bubble peaks, keep side pages tucked a bit (prevents peak overlap)
-  const SIDE_TUCK = 0.28;      // 0..0.45 (how much of sideBack is re-applied during mids)
-
-  // Virtual active position
-  let activePos = 0;
-  let animating = false;
-  let queuedDir = 0;
-
-  function activeIdx(){ return mod(activePos, works.length); }
-  function activePanelIdx(){ return mod(activePos, (panels.length || works.length)); }
-
-  // Active UI
+  // Active UI (single overlay; follows active panel of current deck)
   const activeUI = document.getElementById('activeUI');
   const amTitle = document.getElementById('amTitle');
   const amStatus = document.getElementById('amStatus');
@@ -224,60 +207,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function cancelAnim(el){
     if (!el || typeof el.getAnimations !== 'function') return;
     el.getAnimations().forEach(a => a.cancel());
-  }
-  function cancelAll(){
-    panels.forEach(cancelAnim);
-    cancelAnim(activeUI);
-  }
-
-  function sideBackFromAd(ad){
-    return (ad === 0) ? 0 : (SIDE_BACK_Z * Math.pow(ad, SIDE_BACK_POW));
-  }
-
-  function getTargets(targetPos){
-    const panelW = getPanelW();
-    const angleStep = numDeg(cssVar('--angleStep'));
-    const maxAngle  = numDeg(cssVar('--maxAngle'));
-    const zStep     = numPx(cssVar('--zStep'));     // you set this to 95px in CSS
-    const xStepPct  = num(cssVar('--xStep')) / 100;
-    const stepX     = panelW * xStepPct;
-
-    // stable separation so GPUs don’t “tie”
-    const Z_BIAS = 2.6;
-    const n = panels.length || works.length;
-
-    return panels.map((_, i) => {
-      const iV = nearestVirtual(i, targetPos, n);
-      const d  = iV - targetPos;
-      const ad = Math.abs(d);
-
-      const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
-      const x   = (d === 0) ? 0 : d * stepX;
-
-      // Unique per-panel shim (never equal depth)
-      const Z_SHIM = (i + 1) * 0.55;
-
-      // ✅ Extra push-back for non-active panels
-      const sideBack = sideBackFromAd(ad);
-
-      // Base depth + stable bias + shim + extra side-back
-      const z =
-        (d === 0)
-          ? 0
-          : (-ad * zStep) - (i * Z_BIAS) - Z_SHIM - sideBack;
-
-      const op = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.70, 1);
-
-      return { d, ad, x, z, rot, opacity: String(op), transform: buildT(x, z, rot) };
-    });
-  }
-
-  function syncActiveUIText(pos){
-    const w = works[mod(pos, works.length)] || works[0];
-    if (!w) return;
-    if (amTitle) amTitle.textContent = w.title || "Untitled";
-    if (amStatus) amStatus.textContent = w.status || "Unveiling soon";
-    if (activeCollect) activeCollect.href = w.collect || "https://collect.nellekristoff.art";
   }
 
   function setActiveUITransformFromPanel(panelEl){
@@ -289,194 +218,232 @@ document.addEventListener("DOMContentLoaded", () => {
     activeUI.style.top    = getComputedStyle(panelEl).top;
   }
 
-  function applyInstant(pos){
-    cancelAll();
-    const t = getTargets(pos);
-    panels.forEach((el, i) => {
-      el.style.transform = t[i].transform;
-      el.style.opacity   = t[i].opacity;
-    });
-    syncActiveUIText(pos);
-    setActiveUITransformFromPanel(panels[mod(pos, panels.length)]);
+  function syncActiveUIText(w){
+    if (!w) return;
+    if (amTitle) amTitle.textContent = w.title || "Untitled";
+    if (amStatus) amStatus.textContent = w.status || "Unveiling soon";
+    if (activeCollect) activeCollect.href = w.collect || "https://collect.nellekristoff.art";
   }
 
-  function featherFrom(ad){
-    // center still gets breath; sides get stronger
-    return clamp(ad / 2, 0, 1);
+  // Unscaled panel width (no zoom jump)
+  function getPanelWFromAny(panelEl){
+    if (!panelEl) return 0;
+    return parseFloat(getComputedStyle(panelEl).width) || 0;
   }
 
-  function animateBetween(fromPos, toPos){
-    cancelAll();
+  function buildT(x, z, rotY, extraZ=0, extraRotY=0, extraRotX=0, extraScale=1){
+    return `translate3d(-50%, -50%, 0) translate3d(${x}px, ${0}px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale}) translateZ(0.01px)`;
+  }
 
-    const from = getTargets(fromPos);
-    const to   = getTargets(toPos);
+  // Theatre feel
+  const DURATION = 2850;
+  const EASING   = 'cubic-bezier(.10,.88,.16,1)';
 
-    // lock start
-    panels.forEach((el, i) => {
-      el.style.transform = from[i].transform;
-      el.style.opacity   = from[i].opacity;
-    });
+  const WAVE_Z     = 120;
+  const WAVE_ROT   = 16;
+  const WAVE_X     = -7.2;
+  const WAVE_S     = 1.022;
+  const WAVE_TWIST = 5.0;
 
-    syncActiveUIText(fromPos);
-    setActiveUITransformFromPanel(panels[mod(fromPos, panels.length)]);
+  const TRAVEL_SPREAD = 0.22;
 
-    // bubble peaks (base), then per-panel travel shift
-    const BASE_O1 = 0.26;
-    const BASE_O2 = 0.52;
-    const BASE_O3 = 0.76;
+  // Extra side depth (helps overlap)
+  const SIDE_BACK_Z   = 95;
+  const SIDE_BACK_POW = 1.25;
+  const SIDE_TUCK     = 0.28;
 
-    const maxD  = Math.max(1, ...from.map(p => Math.abs(p.d || 0)));
-    const denom = 2 * maxD;
+  function featherFrom(ad){ return clamp(ad / 2, 0, 1); }
+  function sideBackFromAd(ad){ return (ad === 0) ? 0 : (SIDE_BACK_Z * Math.pow(ad, SIDE_BACK_POW)); }
 
-    const anims = panels.map((el, i) => {
-      const f = featherFrom(from[i].ad);
+  // ===== Create two deck containers inside leporello =====
+  const deckTopEl = document.createElement('div');
+  deckTopEl.className = 'deck deck-top';
+  const deckBottomEl = document.createElement('div');
+  deckBottomEl.className = 'deck deck-bottom';
+  lep.appendChild(deckTopEl);
+  lep.appendChild(deckBottomEl);
 
-      // Even the active gets some breath:
-      const strength = 0.62 + 0.70 * f; // 0.62..1.32
+  // ===== Deck factory =====
+  function createDeck(deckName, hostEl, works){
+    const deck = {
+      name: deckName,
+      hostEl,
+      works,
+      panels: [],
+      activePos: 0,
+      animating: false,
+      queuedDir: 0,
+    };
 
-      // Traveling phase left->right based on signed virtual distance d
-      const phase = clamp(((from[i].d || 0) + maxD) / denom, 0, 1);
-      const shift = (phase - 0.5) * TRAVEL_SPREAD;
+    function activeIdx(){ return mod(deck.activePos, deck.works.length); }
+    function activePanelIdx(){ return mod(deck.activePos, deck.panels.length || deck.works.length); }
 
-      const O1 = clamp(BASE_O1 + shift, 0.10, 0.72);
-      const O2 = clamp(BASE_O2 + shift, 0.22, 0.88);
-      const O3 = clamp(BASE_O3 + shift, 0.36, 0.95);
-
-      // ✅ tuck: keep non-active panels further back during the wave peaks
-      const sideBack = sideBackFromAd(from[i].ad);
-      const tuckZ = (from[i].ad === 0) ? 0 : (-sideBack * SIDE_TUCK);
-
-      // Multi-peak bubble:
-      const z1 = WAVE_Z * (0.22 * strength);
-      const z2 = WAVE_Z * (0.70 * strength);
-      const z3 = WAVE_Z * (0.38 * strength);
-
-      // rotateY only when already rotated (keep center calmer)
-      const ry1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.18 * strength));
-      const ry2 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.55 * strength));
-      const ry3 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.28 * strength));
-
-      // rotateX “breath”
-      const rx1 = WAVE_X * (0.22 * strength);
-      const rx2 = WAVE_X * (0.82 * strength);
-      const rx3 = WAVE_X * (0.36 * strength);
-
-      // scale breath
-      const s1 = 1 + ((WAVE_S - 1) * (0.22 * strength));
-      const s2 = 1 + ((WAVE_S - 1) * (0.85 * strength));
-      const s3 = 1 + ((WAVE_S - 1) * (0.38 * strength));
-
-      // alternating twist (mainly on sides)
-      const twist = (i % 2 === 0 ? 1 : -1) * WAVE_TWIST * f;
-
-      const mid1 = buildT(from[i].x, from[i].z, from[i].rot, z1 + tuckZ, ry1 + twist * 0.20, rx1, s1);
-      const mid2 = buildT(from[i].x, from[i].z, from[i].rot, z2 + tuckZ, ry2 + twist * 0.55, rx2, s2);
-      const mid3 = buildT(from[i].x, from[i].z, from[i].rot, z3 + tuckZ, ry3 + twist * 0.32, rx3, s3);
-
-      return el.animate(
-        [
-          { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
-          { transform: mid1,              opacity: from[i].opacity, offset: O1 },
-          { transform: mid2,              opacity: from[i].opacity, offset: O2 },
-          { transform: mid3,              opacity: from[i].opacity, offset: O3 },
-          { transform: to[i].transform,   opacity: to[i].opacity,   offset: 1 }
-        ],
-        { duration: DURATION, easing: EASING, fill: 'forwards' }
-      );
-    });
-
-    // Active UI: calmer wave, no travel shift (feels anchored)
-    let uiAnim = null;
-    if (activeUI){
-      const fromPanelIndex = mod(fromPos, panels.length);
-      const toPanelIndex   = mod(toPos, panels.length);
-
-      const uiFrom = from[fromPanelIndex].transform;
-      const uiTo   = to[toPanelIndex].transform;
-
-      const fUI = 0.55;
-
-      const z1 = WAVE_Z * (0.14 + 0.26 * fUI);
-      const z2 = WAVE_Z * (0.30 + 0.52 * fUI);
-      const z3 = WAVE_Z * (0.18 + 0.34 * fUI);
-
-      const rx1 = WAVE_X * (0.12 + 0.22 * fUI);
-      const rx2 = WAVE_X * (0.26 + 0.46 * fUI);
-      const rx3 = WAVE_X * (0.16 + 0.30 * fUI);
-
-      const s1  = 1 + ((WAVE_S - 1) * (0.12 + 0.22 * fUI));
-      const s2  = 1 + ((WAVE_S - 1) * (0.26 + 0.46 * fUI));
-      const s3  = 1 + ((WAVE_S - 1) * (0.16 + 0.30 * fUI));
-
-      const uiMid1 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z1, 0, rx1, s1);
-      const uiMid2 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z2, 0, rx2, s2);
-      const uiMid3 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z3, 0, rx3, s3);
-
-      uiAnim = activeUI.animate(
-        [
-          { transform: uiFrom, offset: 0 },
-          { transform: uiMid1, offset: BASE_O1 },
-          { transform: uiMid2, offset: BASE_O2 },
-          { transform: uiMid3, offset: BASE_O3 },
-          { transform: uiTo,  offset: 1 }
-        ],
-        { duration: DURATION, easing: EASING, fill: 'forwards' }
-      );
+    function cancelAll(){
+      deck.panels.forEach(cancelAnim);
+      cancelAnim(activeUI);
     }
 
-    return Promise.allSettled([
-      ...anims.map(a => a.finished),
-      uiAnim ? uiAnim.finished : Promise.resolve()
-    ]).then(() => {
+    function getTargets(targetPos){
+      const panelW = getPanelWFromAny(deck.panels[0]);
+      const angleStep = numDeg(cssVar('--angleStep'));
+      const maxAngle  = numDeg(cssVar('--maxAngle'));
+      const zStep     = numPx(cssVar('--zStep'));
+      const xStepPct  = num(cssVar('--xStep')) / 100;
+      const stepX     = panelW * xStepPct;
+
+      const Z_BIAS = 2.6;
+      const n = deck.panels.length || deck.works.length;
+
+      return deck.panels.map((_, i) => {
+        const iV = nearestVirtual(i, targetPos, n);
+        const d  = iV - targetPos;
+        const ad = Math.abs(d);
+
+        const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
+        const x   = (d === 0) ? 0 : d * stepX;
+
+        const Z_SHIM = (i + 1) * 0.55;
+        const sideBack = sideBackFromAd(ad);
+
+        const z = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS) - Z_SHIM - sideBack;
+        const op = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.70, 1);
+
+        return { d, ad, x, z, rot, opacity: String(op), transform: buildT(x, z, rot) };
+      });
+    }
+
+    function applyInstant(pos){
       cancelAll();
-      panels.forEach((el, i) => {
-        el.style.transform = to[i].transform;
-        el.style.opacity   = to[i].opacity;
+      const t = getTargets(pos);
+      deck.panels.forEach((el, i) => {
+        el.style.transform = t[i].transform;
+        el.style.opacity   = t[i].opacity;
       });
 
-      syncActiveUIText(toPos);
-      setActiveUITransformFromPanel(panels[mod(toPos, panels.length)]);
-    });
-  }
-
-  function runQueued(){
-    if (queuedDir === 0) return;
-    const dir = Math.sign(queuedDir);
-    queuedDir -= dir;
-    step(dir);
-  }
-
-  function step(dir){
-    if (works.length < 2) return;
-
-    if (animating){
-      queuedDir += dir;
-      return;
+      // Update global UI to this deck’s active
+      const w = deck.works[mod(pos, deck.works.length)] || deck.works[0];
+      syncActiveUIText(w);
+      setActiveUITransformFromPanel(deck.panels[mod(pos, deck.panels.length)]);
     }
 
-    animating = true;
+    function animateBetween(fromPos, toPos){
+      cancelAll();
 
-    const fromPos = activePos;
-    const toPos   = activePos + dir; // ALWAYS one step (no modulo jump)
+      const from = getTargets(fromPos);
+      const to   = getTargets(toPos);
 
-    animateBetween(fromPos, toPos).then(() => {
-      activePos = toPos;
-      animating = false;
-      runQueued();
-    });
-  }
+      deck.panels.forEach((el, i) => {
+        el.style.transform = from[i].transform;
+        el.style.opacity   = from[i].opacity;
+      });
 
-  function next(){ step(+1); }
-  function prev(){ step(-1); }
+      const wFrom = deck.works[mod(fromPos, deck.works.length)] || deck.works[0];
+      syncActiveUIText(wFrom);
+      setActiveUITransformFromPanel(deck.panels[mod(fromPos, deck.panels.length)]);
 
-  /* Build panels */
-  if (lep){
+      const BASE_O1 = 0.26, BASE_O2 = 0.52, BASE_O3 = 0.76;
+      const maxD  = Math.max(1, ...from.map(p => Math.abs(p.d || 0)));
+      const denom = 2 * maxD;
+
+      const anims = deck.panels.map((el, i) => {
+        const f = featherFrom(from[i].ad);
+        const strength = 0.62 + 0.70 * f;
+
+        const phase = clamp(((from[i].d || 0) + maxD) / denom, 0, 1);
+        const shift = (phase - 0.5) * TRAVEL_SPREAD;
+
+        const O1 = clamp(BASE_O1 + shift, 0.10, 0.72);
+        const O2 = clamp(BASE_O2 + shift, 0.22, 0.88);
+        const O3 = clamp(BASE_O3 + shift, 0.36, 0.95);
+
+        const sideBack = sideBackFromAd(from[i].ad);
+        const tuckZ = (from[i].ad === 0) ? 0 : (-sideBack * SIDE_TUCK);
+
+        const z1 = WAVE_Z * (0.22 * strength);
+        const z2 = WAVE_Z * (0.70 * strength);
+        const z3 = WAVE_Z * (0.38 * strength);
+
+        const ry1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.18 * strength));
+        const ry2 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.55 * strength));
+        const ry3 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.28 * strength));
+
+        const rx1 = WAVE_X * (0.22 * strength);
+        const rx2 = WAVE_X * (0.82 * strength);
+        const rx3 = WAVE_X * (0.36 * strength);
+
+        const s1 = 1 + ((WAVE_S - 1) * (0.22 * strength));
+        const s2 = 1 + ((WAVE_S - 1) * (0.85 * strength));
+        const s3 = 1 + ((WAVE_S - 1) * (0.38 * strength));
+
+        const twist = (i % 2 === 0 ? 1 : -1) * WAVE_TWIST * f;
+
+        const mid1 = buildT(from[i].x, from[i].z, from[i].rot, z1 + tuckZ, ry1 + twist * 0.20, rx1, s1);
+        const mid2 = buildT(from[i].x, from[i].z, from[i].rot, z2 + tuckZ, ry2 + twist * 0.55, rx2, s2);
+        const mid3 = buildT(from[i].x, from[i].z, from[i].rot, z3 + tuckZ, ry3 + twist * 0.32, rx3, s3);
+
+        return el.animate(
+          [
+            { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
+            { transform: mid1,              opacity: from[i].opacity, offset: O1 },
+            { transform: mid2,              opacity: from[i].opacity, offset: O2 },
+            { transform: mid3,              opacity: from[i].opacity, offset: O3 },
+            { transform: to[i].transform,   opacity: to[i].opacity,   offset: 1 }
+          ],
+          { duration: DURATION, easing: EASING, fill: 'forwards' }
+        );
+      });
+
+      return Promise.allSettled(anims.map(a => a.finished)).then(() => {
+        cancelAll();
+        deck.panels.forEach((el, i) => {
+          el.style.transform = to[i].transform;
+          el.style.opacity   = to[i].opacity;
+        });
+
+        const wTo = deck.works[mod(toPos, deck.works.length)] || deck.works[0];
+        syncActiveUIText(wTo);
+        setActiveUITransformFromPanel(deck.panels[mod(toPos, deck.panels.length)]);
+      });
+    }
+
+    function runQueued(){
+      if (deck.queuedDir === 0) return;
+      const dir = Math.sign(deck.queuedDir);
+      deck.queuedDir -= dir;
+      step(dir);
+    }
+
+    function step(dir){
+      if (deck.works.length < 2) return;
+
+      if (deck.animating){
+        deck.queuedDir += dir;
+        return;
+      }
+
+      deck.animating = true;
+
+      const fromPos = deck.activePos;
+      const toPos   = deck.activePos + dir;
+
+      animateBetween(fromPos, toPos).then(() => {
+        deck.activePos = toPos;
+        deck.animating = false;
+        runQueued();
+      });
+    }
+
+    deck.next = () => step(+1);
+    deck.prev = () => step(-1);
+    deck.applyInstant = applyInstant;
+    deck.activePanelIdx = activePanelIdx;
+
+    // Build panels into hostEl
     works.forEach((w, idx) => {
       const el = document.createElement('div');
       el.className = 'panel';
       el.tabIndex = 0;
 
-      // GPU stability hints (safe if ignored)
       el.style.backfaceVisibility = 'hidden';
       el.style.transformStyle = 'preserve-3d';
       el.style.transformOrigin = '50% 50%';
@@ -502,27 +469,50 @@ document.addEventListener("DOMContentLoaded", () => {
         im.addEventListener('contextmenu', (e) => e.preventDefault());
       }
 
-      // Only ACTIVE panel reacts to click (no side jump)
+      // Clicking any panel selects that deck.
+      // Only ACTIVE panel opens fullscreen.
       el.addEventListener('click', () => {
-        if (animating) return;
-        if (idx !== activePanelIdx()) return;
+        if (deck.animating) return;
+
+        // choose deck
+        currentDeck = deck.name;
+        // if currently zoomed out, snap to this deck’s rest immediately
+        snapToDeckIfZoomedOut();
+
+        // open fullscreen only if active in THIS deck
+        if (idx !== deck.activePanelIdx()) return;
         const selectButton = document.getElementById('selectBtn');
         if (selectButton) selectButton.click();
       });
 
-      // Only ACTIVE panel reacts to key
       el.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         e.preventDefault();
-        if (animating) return;
-        if (idx !== activePanelIdx()) return;
+        if (deck.animating) return;
+
+        currentDeck = deck.name;
+        snapToDeckIfZoomedOut();
+
+        if (idx !== deck.activePanelIdx()) return;
         const selectButton = document.getElementById('selectBtn');
         if (selectButton) selectButton.click();
       });
 
-      lep.appendChild(el);
-      panels.push(el);
+      hostEl.appendChild(el);
+      deck.panels.push(el);
     });
+
+    return deck;
+  }
+
+  const deckTop = createDeck('top', deckTopEl, worksTop);
+  const deckBottom = createDeck('bottom', deckBottomEl, worksBottom);
+
+  function getCurrentDeck(){
+    return currentDeck === 'top' ? deckTop : deckBottom;
+  }
+  function anyAnimating(){
+    return deckTop.animating || deckBottom.animating;
   }
 
   // Arrow click (right)
@@ -531,7 +521,8 @@ document.addEventListener("DOMContentLoaded", () => {
     arrowRight.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      next();
+      if (anyAnimating()) return;
+      getCurrentDeck().next();
     });
   }
 
@@ -541,7 +532,8 @@ document.addEventListener("DOMContentLoaded", () => {
     arrowLeft.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      prev();
+      if (anyAnimating()) return;
+      getCurrentDeck().prev();
     });
   }
 
@@ -559,7 +551,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function openFullscreen(){
-    const w = works[activeIdx()] || works[0];
+    const deck = getCurrentDeck();
+    const w = deck.works[mod(deck.activePos, deck.works.length)] || deck.works[0];
     if (!w || !fullscreen || !fsImg) return;
 
     fsImg.src = w.src;
@@ -675,6 +668,9 @@ document.addEventListener("DOMContentLoaded", () => {
         lastPan = remaining ? { x: remaining.x, y: remaining.y } : null;
         pinchStart = null;
       }
+
+      // when gesture ends, if user ended at min zoom -> snap to deck
+      snapToDeckIfZoomedOut();
     }
 
     viewport.addEventListener('pointerup', endPointer);
@@ -690,6 +686,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const factor = Math.exp(-e.deltaY * 0.0018);
       setZoomAt(tZoom * factor, cx, cy);
+
+      // if wheel is zooming out hard, snap once near min
+      snapToDeckIfZoomedOut();
     }, { passive:false });
   }
 
@@ -701,26 +700,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (isFullscreenOpen()) return;
 
-    if (e.key === 'ArrowRight') next();
-    if (e.key === 'ArrowLeft') prev();
+    if (e.key === 'ArrowRight'){
+      if (anyAnimating()) return;
+      getCurrentDeck().next();
+    }
+    if (e.key === 'ArrowLeft'){
+      if (anyAnimating()) return;
+      getCurrentDeck().prev();
+    }
   });
 
   function init(){
-    // ✅ start at min zoom
+    // start at min zoom, snapped to bottom deck
+    currentDeck = 'bottom';
+
     zoom = tZoom = zoomMin();
     panX = tPanX = 0;
-    panY = tPanY = 0;
+    panY = tPanY = deckRestPanY(currentDeck);
 
     clampPanTarget();
     applyView();
 
-    requestAnimationFrame(() => applyInstant(activePos));
+    // apply both decks instantly
+    requestAnimationFrame(() => {
+      deckTop.applyInstant(deckTop.activePos);
+      deckBottom.applyInstant(deckBottom.activePos);
+
+      // UI should follow bottom deck initially
+      const w = worksBottom[0];
+      syncActiveUIText(w);
+      setActiveUITransformFromPanel(deckBottom.panels[0]);
+    });
   }
   init();
 
   window.addEventListener('resize', () => {
     clampPanTarget();
     ensureAnim();
-    requestAnimationFrame(() => applyInstant(activePos));
+    requestAnimationFrame(() => {
+      deckTop.applyInstant(deckTop.activePos);
+      deckBottom.applyInstant(deckBottom.activePos);
+      snapToDeckIfZoomedOut();
+    });
   });
 });
