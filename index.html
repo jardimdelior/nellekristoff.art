@@ -1,4 +1,3 @@
-<!-- index.html (UPDATED for TWO DECKS: top + bottom, independent controls + independent UI) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,29 +13,22 @@
 <main>
   <section class="film-main" aria-label="Leporello space gallery">
 
-    <!-- HEADER (single fixed bar) -->
+    <!-- HEADER -->
     <header class="film-header" id="siteHeader">
-
       <div class="header-bar">
-        <!-- LEFT: Selected Works (replaced by menu when burger opens) -->
         <div class="subtitle-inline" aria-hidden="false">Selected Works</div>
 
-        <!-- LEFT: Menu (sits in EXACT same spot as Selected Works) -->
         <nav class="menu" id="menu" aria-label="Site menu">
           <a href="about.html">About</a>
           <a href="#" onclick="contact(event)">Contact</a>
           <a href="posts.html">Posts</a>
         </nav>
 
-        <!-- RIGHT: Brand + Burger -->
         <div class="header-right">
-
-          <!-- Brand (TEXT folds ↔ MONOGRAM unfolds, driven by .film-header.menu-open) -->
           <div class="brand" aria-label="Site title">
             <span class="brand-text">Nelle Kristoff</span>
 
             <span class="brand-mark" aria-hidden="true">
-              <!-- MONOGRAM SVG -->
               <svg class="icon-monogram"
                    viewBox="516.693 329.310 496.951 359.707"
                    xmlns="http://www.w3.org/2000/svg"
@@ -48,12 +40,10 @@
             </span>
           </div>
 
-          <!-- Burger -->
           <button class="menu-btn" id="menuBtn"
                   aria-label="Open menu"
                   aria-expanded="false"
                   type="button">
-
             <svg class="icon-burger"
                  viewBox="571.766 351.497 359.988 296.918"
                  xmlns="http://www.w3.org/2000/svg"
@@ -64,91 +54,79 @@
                    m 0,126.67383 v 43.52929 h 359.98828 v -43.52929 z
                    m 0,126.71679 v 43.52735 h 359.98828 v -43.52735 z"/>
             </svg>
+          </button>
+        </div>
+      </div>
+    </header>
 
+    <!-- VIEWPORT -->
+    <div class="space-viewport" id="viewport" aria-label="Artwork space">
+      <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
+
+      <!-- TOP DECK -->
+      <div class="deck-viewport deck-top" id="deckTop" aria-label="Top deck area">
+        <div class="space-pan" id="spacePanTop">
+          <div class="space-zoom" id="spaceZoomTop">
+            <div class="leporello" id="leporelloTop" aria-label="Top deck panels"></div>
+
+            <div class="active-ui" id="activeUITop">
+              <div class="active-meta">
+                <span class="am-title" id="amTitleTop">Untitled</span>
+                <span class="am-status" id="amStatusTop">Unveiling soon</span>
+              </div>
+
+              <div class="active-actions">
+                <a href="#" class="abtn active-left" onclick="contact(event)">Inquire</a>
+                <button class="abtn abtn-primary" id="selectBtnTop" type="button">Select</button>
+                <a href="#" class="abtn active-right" id="activeCollectTop" target="_blank" rel="noopener">Collect</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow-slot arrow-slot--top-left">
+          <button class="film-arrow" id="arrowTopLeft" aria-label="Top deck next (left)" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M15 6l-6 6 6 6"/>
+            </svg>
           </button>
         </div>
       </div>
 
-    </header>
+      <!-- BOTTOM DECK -->
+      <div class="deck-viewport deck-bottom" id="deckBottom" aria-label="Bottom deck area">
+        <div class="space-pan" id="spacePanBottom">
+          <div class="space-zoom" id="spaceZoomBottom">
+            <div class="leporello" id="leporelloBottom" aria-label="Bottom deck panels"></div>
 
-    <!-- VIEWPORT -->
-<div class="space-viewport" id="viewport" aria-label="Artwork space">
-  <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
+            <div class="active-ui" id="activeUIBottom">
+              <div class="active-meta">
+                <span class="am-title" id="amTitleBottom">Untitled</span>
+                <span class="am-status" id="amStatusBottom">Unveiling soon</span>
+              </div>
 
-  <!-- TOP DECK (independent) -->
-  <div class="deck-viewport deck-top" id="deckTop">
-    <div class="space-pan" id="spacePanTop">
-      <div class="space-zoom" id="spaceZoomTop">
-
-        <div class="leporello" id="leporelloTop" aria-label="Top deck panels"></div>
-
-        <!-- Active UI (TOP) -->
-        <div class="active-ui" id="activeUITop" aria-hidden="false">
-          <div class="active-meta">
-            <span class="am-title" id="amTitleTop">Untitled</span>
-            <span class="am-status" id="amStatusTop">Unveiling soon</span>
-          </div>
-
-          <div class="active-actions">
-            <a href="#" class="abtn active-left" onclick="contact(event)">Inquire</a>
-            <button class="abtn abtn-primary" id="selectBtnTop" type="button">Select</button>
-            <a href="#" class="abtn active-right" id="activeCollectTop" target="_blank" rel="noopener">Collect</a>
+              <div class="active-actions">
+                <a href="#" class="abtn active-left" onclick="contact(event)">Inquire</a>
+                <button class="abtn abtn-primary" id="selectBtnBottom" type="button">Select</button>
+                <a href="#" class="abtn active-right" id="activeCollectBottom" target="_blank" rel="noopener">Collect</a>
+              </div>
+            </div>
           </div>
         </div>
 
-      </div>
-    </div>
-
-    <!-- Top-left arrow -->
-    <div class="arrow-slot arrow-slot--top-left">
-      <button class="film-arrow" id="arrowTopLeft" aria-label="Top deck next (left direction)" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M15 6l-6 6 6 6"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- BOTTOM DECK (independent) -->
-  <div class="deck-viewport deck-bottom" id="deckBottom">
-    <div class="space-pan" id="spacePanBottom">
-      <div class="space-zoom" id="spaceZoomBottom">
-
-        <div class="leporello" id="leporelloBottom" aria-label="Bottom deck panels"></div>
-
-        <!-- Active UI (BOTTOM) -->
-        <div class="active-ui" id="activeUIBottom" aria-hidden="false">
-          <div class="active-meta">
-            <span class="am-title" id="amTitleBottom">Untitled</span>
-            <span class="am-status" id="amStatusBottom">Unveiling soon</span>
-          </div>
-
-          <div class="active-actions">
-            <a href="#" class="abtn active-left" onclick="contact(event)">Inquire</a>
-            <button class="abtn abtn-primary" id="selectBtnBottom" type="button">Select</button>
-            <a href="#" class="abtn active-right" id="activeCollectBottom" target="_blank" rel="noopener">Collect</a>
-          </div>
+        <div class="arrow-slot">
+          <button class="film-arrow" id="arrowBottomRight" aria-label="Bottom deck next (right)" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M9 6l6 6-6 6"/>
+            </svg>
+          </button>
         </div>
-
       </div>
     </div>
 
-    <!-- Bottom-right arrow -->
-    <div class="arrow-slot">
-      <button class="film-arrow" id="arrowBottomRight" aria-label="Bottom deck next (right direction)" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M9 6l6 6-6 6"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-</div>
-
-    <!-- FULLSCREEN OVERLAY (shared) -->
+    <!-- FULLSCREEN (shared) -->
     <div class="fullscreen" id="fullscreen" aria-hidden="true">
       <div class="fs-inner">
-
         <div class="fs-meta">
           <span class="fs-title" id="fsTitle">Untitled</span>
           <span class="fs-status" id="fsStatus">Unveiling soon</span>
@@ -164,12 +142,10 @@
           <button class="abtn" id="closeBtn" type="button" aria-label="Close fullscreen">✕</button>
           <a href="#" class="abtn fs-right" id="fsCollect" target="_blank" rel="noopener">Collect</a>
         </div>
-
       </div>
     </div>
 
     <footer>© 2026 Nelle Kristoff — All rights reserved</footer>
-
   </section>
 </main>
 
