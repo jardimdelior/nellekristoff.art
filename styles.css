@@ -613,7 +613,6 @@ html.ready .space-viewport{
   width: 40vw;
   height: 100dvh;
   height: 100vh;
-  inset:0;
   background: rgba(0,0,0,.92);
   display:none;
   align-items:center;
