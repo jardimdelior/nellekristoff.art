@@ -84,6 +84,8 @@ main{
   display:grid;
   grid-template-rows: auto 1fr;
   gap: 10px;
+  position:relative;
+  min-height:100vh;
 }
 
 /* header */
@@ -605,7 +607,7 @@ html.ready .space-viewport{
 
 /* fullscreen */
 .fullscreen{
-  position:fixed;
+  position:absolute;
   inset:0;
   background: rgba(0,0,0,.92);
   display:none;
