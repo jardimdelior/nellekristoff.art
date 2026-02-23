@@ -86,27 +86,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ Allow pan when zoomed OUT (<1) by giving “slack” inside viewport
   function clampPanTarget(){
-    if (!viewport) return;
-    const rect = viewport.getBoundingClientRect();
+  if (!viewport) return;
+  const rect = viewport.getBoundingClientRect();
 
-    const scale = tZoom;
+  // allow a little drag even at min zoom
+  const slackX = rect.width  * 0.08;  // 8% feel-good drift
+  const slackY = rect.height * 0.08;
 
-    // classic overflow bounds when zoomed IN
-    const maxX_in  = (rect.width  * (scale - 1)) / 2;
-    const maxY_in  = (rect.height * (scale - 1)) / 2;
+  const extraX = Math.max(0, (tZoom - 1)) * rect.width  / 2;
+  const extraY = Math.max(0, (tZoom - 1)) * rect.height / 2;
 
-    // slack when zoomed OUT
-    const slack = Math.max(0, (1 - scale)) * 0.55;
-    const grace = Math.min(rect.width, rect.height) * 0.08;
+  const maxX = extraX + slackX;
+  const maxY = extraY + slackY;
 
-    const maxX_out = rect.width  * slack + grace;
-    const maxY_out = rect.height * slack + grace;
-
-    const maxX = (scale >= 1) ? maxX_in : maxX_out;
-    const maxY = (scale >= 1) ? maxY_in : maxY_out;
-
-    tPanX = clamp(tPanX, -maxX, maxX);
-    tPanY = clamp(tPanY, -maxY, maxY);
+  tPanX = clamp(tPanX, -maxX, maxX);
+  tPanY = clamp(tPanY, -maxY, maxY);
   }
 
   function applyView(){
@@ -691,19 +685,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function init(){
-    // ✅ Start at zoom minimum
-    const z0 = zoomMin();
-    zoom = tZoom = z0;
+  zoom = tZoom = zoomMin();   // start at min zoom like you want
+  panX = tPanX = 0;
+  panY = tPanY = 0;
 
-    // start centered
-    panX = tPanX = 0;
-    panY = tPanY = 0;
+  clampPanTarget();
+  applyView();
 
-    clampPanTarget();
-    applyView();
-
-    // wait for layout
-    requestAnimationFrame(() => applyInstant(activePos));
+  requestAnimationFrame(() => applyInstant(activePos));
   }
   init();
 
