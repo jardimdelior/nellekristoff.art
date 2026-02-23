@@ -91,12 +91,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (fsCollect) fsCollect.href = w.collect || "https://collect.nellekristoff.art";
     fullscreen.classList.add('open');
     fullscreen.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('noscroll');   // ✅ add
   }
 
   function closeFullscreen(){
     if (!fullscreen) return;
     fullscreen.classList.remove('open');
     fullscreen.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('noscroll'); // ✅ add
   }
 
   if (closeBtn){
