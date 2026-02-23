@@ -439,11 +439,15 @@ html.ready .space-viewport{
   place-items:center;
   z-index:2;
 
-  /* pan + hover tilt combined */
+  /* pan + hover tilt + shared overview drift */
   transform:
-    translate3d(var(--panX), var(--panY), 0)
-    rotateX(var(--tiltX))
-    rotateY(var(--tiltY));
+    translate3d(
+      calc(var(--panX) + var(--ovPanX, 0px)),
+      calc(var(--panY) + var(--ovPanY, 0px)),
+      0
+    )
+    rotateX(calc(var(--tiltX) + var(--ovTiltX, 0deg)))
+    rotateY(calc(var(--tiltY) + var(--ovTiltY, 0deg)));
 
   will-change: transform;
 }
