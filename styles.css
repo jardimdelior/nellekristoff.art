@@ -1,4 +1,12 @@
-/* styles.css */
+ /* styles.css */
+/* ✅ Cleaned + adjusted to match new WAAPI 3D + bubble wave:
+   - fixes missing closing braces at the end
+   - removes duplicated :root blocks inside the same media query
+   - adds anti-flicker / anti “edge line shimmer” rules
+   - makes 3D stacking more stable (preserve-3d + backface everywhere needed)
+   - avoids “double transform” fighting WAAPI (panel keeps WAAPI transform only)
+*/
+
 :root{
   --bg:#EFE7DC;
   --ink:#2F2A26;
@@ -103,17 +111,14 @@ main{
   position:absolute;
   left:0;
   top:50%;
-  transform: translateY(-32%); /* was -50% */
-
+  transform: translateY(-32%);
   font-size: var(--leftLabelSize);
   font-weight: var(--leftLabelWeight);
   letter-spacing: var(--leftLabelTrack);
   text-transform: uppercase;
-
   opacity:.82;
   white-space:nowrap;
   line-height:1;
-
   z-index:2;
   pointer-events:none;
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
@@ -130,24 +135,20 @@ main{
   position:absolute;
   left:0;
   top:50%;
-  transform: translateY(-32%) translateX(-8px); /* MATCHES Selected Works baseline */
+  transform: translateY(-32%) translateX(-8px);
   opacity:0;
   pointer-events:none;
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
-
   display:flex;
   gap:10px;
   align-items: baseline;
   white-space:nowrap;
-  z-index:50;    /* needs to be above header-right */
-
+  z-index:50;
   font-size: var(--leftLabelSize);
   font-weight: var(--leftLabelWeight);
   letter-spacing: var(--leftLabelTrack);
   text-transform: uppercase;
   line-height: 1;
-
-  /* this makes baseline feel identical */
   padding: 0;
 }
 
@@ -171,15 +172,15 @@ main{
 /* RIGHT cluster */
 .header-right{
   position: relative;
-  pointer-events: none; /* let clicks pass through */
+  pointer-events: none;
   display:flex;
   align-items:center;
   justify-content:flex-end;
   gap: 14px;
   min-width:0;
   z-index:5;
-  margin-left: auto;          /* IMPORTANT */
-  flex: 1 1 auto;      /* take remaining width */
+  margin-left: auto;
+  flex: 1 1 auto;
 }
 
 /* BRAND swap */
@@ -189,9 +190,8 @@ main{
   display:flex;
   align-items:center;
   justify-content:flex-end;
-
   flex: 1 1 auto;
-  min-width: 0;        /* prevents forced ellipsis */
+  min-width: 0;
   overflow:visible;
 }
 
@@ -204,12 +204,10 @@ main{
   white-space:nowrap;
   pointer-events:none;
   will-change: transform, opacity, filter;
-
   transition:
     opacity .22s ease,
     transform .32s cubic-bezier(.18,.9,.2,1),
     filter .22s ease;
-
   transform-origin: 100% 50%;
 }
 
@@ -218,14 +216,12 @@ main{
   overflow:hidden;
   text-overflow:ellipsis;
   opacity:1;
-
   font-size: clamp(22px, 2.8vw, 28px);
   line-height:1;
   color: var(--ink);
   font-weight:400;
   letter-spacing: 0.08em;
   text-transform:uppercase;
-
   transform: translateY(-50%) translateX(0) scaleX(1);
 }
 
@@ -258,15 +254,12 @@ main{
   cursor:pointer;
   padding:0;
   margin:0;
-  pointer-events: auto; /* but burger must stay clickable */
-
+  pointer-events: auto;
   display:flex;
   align-items:center;
   justify-content:center;
   flex: 0 0 auto;
-
   color: var(--brand);
-
   position:relative;
   z-index:10;
   transition: transform .28s cubic-bezier(.18,.9,.2,1);
@@ -304,47 +297,31 @@ main{
 .menu a,
 .abtn,
 .film-arrow{
-
   height: var(--pillH);
   min-height: var(--pillH);
-
   border-radius: 999px;
-
-  background: rgba(255,255,255,.12);
   backdrop-filter: blur(14px) saturate(140%);
-
-  /* softer / more faded outline */
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.10);
   box-shadow:
     inset 0 0 0 1px rgba(47,42,38,.03),
     0 8px 18px rgba(0,0,0,.08);
-
   color: rgba(47,42,38,.92);
   text-decoration:none;
-
   display:inline-flex;
   align-items:center;
   justify-content:center;
-
   font-size: 12px;
   letter-spacing: .25px;
   line-height: 1;
-
   cursor:pointer;
   transition: transform .2s ease,
               background .2s ease,
               border-color .2s ease,
               box-shadow .2s ease,
               opacity .2s ease;
-
   opacity:.92;
   white-space:nowrap;
-}
-
-.menu a,
-.abtn,
-.film-arrow{
   position: relative;
 }
 
@@ -356,8 +333,6 @@ main{
   inset:-1px;
   border-radius:999px;
   pointer-events:none;
-
-  /* edge fade glow */
   background: radial-gradient(120% 180% at 50% 20%,
     rgba(255,255,255,.22) 0%,
     rgba(255,255,255,.10) 35%,
@@ -384,46 +359,11 @@ main{
   opacity:.92;
 }
 
-/* ===== Fullscreen button override (bright glass on dark bg) ===== */
-.fullscreen .abtn{
-
-  background: rgba(255,255,255,.18);
-  backdrop-filter: blur(14px) saturate(160%);
-
-  border: 1px solid rgba(255,255,255,.35);
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.08),
-    0 10px 28px rgba(0,0,0,.45);
-
-  color: rgba(255,255,255,.92);
-  opacity:.95;
-}
-
-.fullscreen .abtn::before{
-  background: radial-gradient(120% 180% at 50% 20%,
-    rgba(255,255,255,.35) 0%,
-    rgba(255,255,255,.15) 35%,
-    rgba(255,255,255,0) 70%);
-}
-
-.fullscreen .abtn:hover{
-  background: rgba(255,255,255,.25);
-  border-color: rgba(255,255,255,.45);
-  opacity:1;
-}
-
-.menu a{
-  text-transform: none;  /* or uppercase */
-}
-
+.menu a{ text-transform: none; }
 .menu a,
-.abtn{
-  padding: 0 8px; /* less wide than before */
-  white-space:nowrap;
-}
+.abtn{ padding: 0 8px; white-space:nowrap; }
 
-/* Arrow stays circular + not wide (single clean block) */
+/* Arrow stays circular */
 .film-arrow{
   height: var(--btnH);
   min-height: var(--btnH);
@@ -433,10 +373,7 @@ main{
   place-items:center;
   background: rgba(239,231,220,.70);
 }
-.film-arrow svg{
-  width:18px;
-  height:18px;
-}
+.film-arrow svg{ width:18px; height:18px; }
 
 /* ===== VIEWPORT ===== */
 .space-viewport{
@@ -449,13 +386,21 @@ main{
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   overflow:hidden;
   margin: 0;
-
   touch-action:none;
   user-select:none;
 
   perspective: var(--persp);
   perspective-origin: 50% 55%;
 }
+
+/* ✅ Helps reduce edge shimmer from blending in 3D */
+.space-viewport,
+.space-pan,
+.space-zoom,
+.leporello{
+  transform-style: preserve-3d;
+}
+
 .space-viewport::after{
   content:"";
   position:absolute;
@@ -483,7 +428,6 @@ main{
   border-radius:14px;
   pointer-events:none;
   z-index:0;
-
   background:
     radial-gradient(140% 90% at 50% 55%,
       rgba(255,255,255,.10) 0%,
@@ -492,17 +436,14 @@ main{
     linear-gradient(180deg,
       rgba(255,255,255,.08),
       rgba(0,0,0,.12));
-
   box-shadow:
     inset 0 10px 30px rgba(255,255,255,.10),
     inset 0 -18px 44px rgba(0,0,0,.16);
-
   transform:
     perspective(var(--persp))
     rotateX(calc(7deg + var(--bgTiltX, 0deg)))
     rotateY(calc(-2deg + var(--bgTiltY, 0deg)))
     translate3d(var(--bgPanX, 0px), var(--bgPanY, 0px), 0);
-
   transition: transform 120ms ease-out;
   will-change: transform;
   opacity:.95;
@@ -535,36 +476,52 @@ main{
   transform-style:preserve-3d;
 }
 
+/* ✅ Core 3D stability + anti-flicker rules */
+.panel,
+.panel .print,
+.panel .print img{
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+
+  /* reduces “hairline border shimmer” when scaled/rotated */
+  -webkit-transform: translateZ(0.01px);
+  transform: translateZ(0.01px);
+}
+
+/* Panel: WAAPI owns transform (keep CSS from interfering) */
 .panel{
   position:absolute;
   width: var(--panelW);
   height: var(--panelH);
   left: 50%;
   top: 50%;
-  transform-style: preserve-3d;    /* IMPORTANT: WAAPI controls transform */
   will-change: transform, opacity;
-  transition: none;    /* IMPORTANT: WAAPI controls animation timing, so no CSS transition */
+  transition: none;
   cursor:pointer;
-  backface-visibility: hidden;
+
+  /* extra: helps Safari/iOS avoid corner poke-through */
+  transform-origin: 50% 50%;
+  outline: 0;
 }
 
 .print{
   width:100%;
   height:100%;
   background:var(--card);
-  padding: 16px;   /* fixed, stable margin */
+  padding: 16px;
   box-sizing:border-box;
   border-radius:var(--radius);
   box-shadow:var(--inset), var(--shadow);
-  overflow:hidden;
+  overflow:hidden; /* ✅ hides subpixel edges */
   position:relative;
   display:grid;
   place-items:center;
-  transform-style: preserve-3d;    /* IMPORTANT: WAAPI controls transform */
-  backface-visibility: hidden;
-  transform: translateZ(0.1px);    /* keeps it on its own layer */
+
+  /* ✅ important: no borders/outlines that shimmer */
+  border: none;
+  outline: none;
 }
-/* Image always centered, slightly smaller than the paper area */
+
 .print img{
   width:100%;
   height:100%;
@@ -572,7 +529,6 @@ main{
   margin: auto;
   display:block;
   pointer-events:none;
-  backface-visibility: hidden;
   -webkit-user-drag: none;
   user-drag: none;
   -webkit-touch-callout: none;
@@ -581,6 +537,7 @@ main{
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Noise */
 .noise{
   position:absolute;
   inset:0;
@@ -627,36 +584,32 @@ footer{
   pointer-events:none;
 }
 .active-meta{
-  max-width: min(360px, 92%);    /* ===== Meta bubble: keep it compact ===== */
+  max-width: min(360px, 92%);
   position:absolute;
   right:0;
-  top:-27px;    /* slightly closer */
+  top:-27px;
   display:flex;
   gap:4px;
   align-items:baseline;
   white-space:nowrap;
-
-  padding:4px 6px;    /* smaller bubble */
+  padding:4px 6px;
   border-radius:14px;
-
-  /* viewport-like base but brighter */
   background: rgba(255,255,255,.28);
   backdrop-filter: blur(10px) saturate(120%);
-
   border: 1px solid rgba(255,255,255,.16);
   pointer-events:none;
 }
-.am-title{ 
-  font-size:13px; 
-  letter-spacing:.2px; 
+.am-title{
+  font-size:13px;
+  letter-spacing:.2px;
   opacity:.92;
   max-width: 18ch;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.am-status{ 
-  font-size:12px; 
+.am-status{
+  font-size:12px;
   opacity:.68;
   max-width: 18ch;
   overflow: hidden;
@@ -677,11 +630,8 @@ footer{
   min-height: 44px;
   pointer-events:auto;
 }
-/* Stop absolute edge-pinning for the cluster layout */
 .active-left,
-.active-right{
-  position: static;
-}
+.active-right{ position: static; }
 .abtn-primary{ margin: 0 auto; }
 
 /* ===== Fullscreen overlay ===== */
@@ -697,12 +647,21 @@ footer{
   z-index: 2147483647;
   padding: clamp(14px, 3vw, 34px);
   box-sizing:border-box;
+  overflow:auto;
 }
 .fullscreen.open{ display:flex; }
 
-.fs-inner{ width: min(96vw, 1120px); position:relative; }
+.fs-inner{
+  width: min(96vw, 1120px);
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
+}
+
 .fs-meta{
-  max-width: min(360px, 92%);    /* ===== Meta bubble: keep it compact ===== */
+  max-width: min(360px, 92%);
   position:absolute;
   right:0;
   top:-27px;
@@ -710,133 +669,89 @@ footer{
   gap:4px;
   align-items:baseline;
   white-space:nowrap;
-
-  padding:4px 6px;    /* smaller bubble */
+  padding:4px 6px;
   border-radius:14px;
-
-  background: rgba(255,255,255,.28);
-  backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(255,255,255,.16);
-
-  box-shadow:
-    inset 0 0 0 1px rgba(47,42,38,.04),
-    0 8px 20px rgba(0,0,0,.08);
-}
-
-/* ===== Fullscreen meta override (bright on dark overlay) ===== */
-.fullscreen .fs-meta{
   background: rgba(255,255,255,.14);
   backdrop-filter: blur(16px) saturate(150%);
-
   border: 1px solid rgba(255,255,255,.35);
-
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,.06),
     0 12px 30px rgba(0,0,0,.45);
-
   color: rgba(255,255,255,.92);
 }
 
-/* Make text bright */
-.fullscreen .fs-title{
-  color: rgba(255,255,255,.96);
-}
-.fullscreen .fs-status{
-  color: rgba(255,255,255,.75);
-}
-
-.fs-title{ 
-  font-size:13px; 
-  letter-spacing:.2px; 
+.fs-title{
+  font-size:13px;
+  letter-spacing:.2px;
   opacity:.92;
   max-width: 18ch;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: rgba(255,255,255,.96);
 }
-.fs-status{ 
-  font-size:12px; 
+.fs-status{
+  font-size:12px;
   opacity:.68;
   max-width: 18ch;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: rgba(255,255,255,.75);
+}
+
+.fullscreen .abtn{
+  background: rgba(255,255,255,.18);
+  backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.08),
+    0 10px 28px rgba(0,0,0,.45);
+  color: rgba(255,255,255,.92);
+  opacity:.95;
+}
+.fullscreen .abtn::before{
+  background: radial-gradient(120% 180% at 50% 20%,
+    rgba(255,255,255,.35) 0%,
+    rgba(255,255,255,.15) 35%,
+    rgba(255,255,255,0) 70%);
+}
+.fullscreen .abtn:hover{
+  background: rgba(255,255,255,.25);
+  border-color: rgba(255,255,255,.45);
+  opacity:1;
 }
 
 .fs-frame{
-  width:100%;
-  aspect-ratio: var(--a3);
-  height:auto;
-}
-
-.fs-actions{
-  width: min(560px, 92%);
-  margin: 0 auto;
-  min-height:44px;
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.fs-left{ position:absolute; left:0; top:0; }
-.fs-right{ position:absolute; right:0; top:0; }
-#closeBtn{ padding:0; width: var(--btnH); }
-
-/* ===== FULLSCREEN: single clean layout (A3 locked, buttons always visible) ===== */
-.fullscreen{
-  overflow:auto;
-}
-
-/* column layout */
-.fullscreen .fs-inner{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  width: min(96vw, 1120px);
-  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
-}
-
-/* A3 paper frame that fits BOTH width and height */
-.fullscreen .fs-frame{
   flex: 1 1 auto;
   min-height: 0;
-
   aspect-ratio: var(--a3);
-
-  /* key: let HEIGHT drive, so A3 never gets too tall */
   height: 100%;
   width: auto;
-
   max-width: 100%;
-  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px) - 60px); /* reserves actions */
-
+  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px) - 60px);
   margin: 0 auto;
 }
-
-/* keep the artwork perfectly centered inside the paper */
 .fullscreen .fs-frame img{
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-/* actions row: never runs away */
-.fullscreen .fs-actions{
+.fs-actions{
   flex: 0 0 auto;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
+  width: min(560px, 92%);
+  margin: 0 auto;
+  min-height:44px;
 }
-
-/* cancel abs positioning in fullscreen */
 .fullscreen .fs-left,
-.fullscreen .fs-right{
-  position: static;
-}
+.fullscreen .fs-right{ position: static; }
 
-/* keep close perfectly circular */
-.fullscreen #closeBtn{
+#closeBtn{
   width: var(--btnH);
   padding: 0;
   flex: 0 0 auto;
@@ -851,15 +766,11 @@ footer{
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
-
     --btnH: 44px;
-
     --burgerScale: 1.10;
     --monoScale: 1.00;
-
     --burgerShift: 8px;
     --foldShift: 14px;
-
     --pillH: 36px;
   }
 
@@ -872,6 +783,7 @@ footer{
   .menu a,
   .abtn{ padding: 0 9px; font-size: 11px; }
 }
+
 @media (prefers-reduced-motion: reduce){
   .panel{ transition:none !important; }
   .noise{ animation:none !important; }
@@ -880,61 +792,29 @@ footer{
 /* ===== Mobile landscape fullscreen fix (keep buttons visible) ===== */
 @media (max-width: 900px) and (orientation: landscape){
   .fullscreen{
-    overflow: hidden;              /* CHANGED: fit instead of scroll */
-    padding: 10px;                 /* CHANGED: slightly tighter */
+    overflow: hidden;
+    padding: 10px;
   }
 
-  /* NEW: slightly smaller controls in landscape */
   :root{
-    --pillH: 34px;                 /* keep your idea */
-    --btnH: 40px;                  /* NEW: close button + circles */
+    --pillH: 34px;
+    --btnH: 40px;
   }
 
-  .fs-inner{
-    display:flex;
-    flex-direction: column;
-    width: min(96vw, 1120px);
-
-    /* CHANGED: use dynamic viewport height for mobile browsers */
-    max-height: calc(100dvh - 20px);   /* was 100vh - 24px */
+  .fullscreen .fs-inner{
+    max-height: calc(100dvh - 20px);
   }
 
-  /* image area must shrink */
-  .fs-frame{
-    flex: 1 1 auto;
-    min-height: 0;
-
-    /* NEW: keep A3 and cap by height budget (so buttons always fit) */
-    aspect-ratio: var(--a3);
-    width: auto;
-    height: auto;
-    max-width: 100%;
-
-    /* CHANGED: height budget uses dvh + reserves actions row */
+  .fullscreen .fs-frame{
     max-height: calc(100dvh - 20px - 44px - 10px);
-    /* 20px padding total, ~44px controls row, ~10px gap */
     margin: 0 auto;
   }
 
-  .fs-frame img{
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-
-  .fs-actions{
+  .fullscreen .fs-actions{
     flex: 0 0 auto;
     margin-top: 10px;
-
-    /* NEW: keep the three buttons together, not stretching wide */
     width: min(520px, 96%);
     margin-left: auto;
     margin-right: auto;
   }
-  /* slightly smaller controls in landscape */
-  :root{
-    --pillH: 34px;
-    --btnH: 40px;   /* keep circles balanced */
-  }
-} /* <-- closes the */ 
+}
