@@ -708,6 +708,84 @@ document.addEventListener("DOMContentLoaded", () => {
     // bottom right arrow: “next to the right”
     direction: +1,
   });
+  
+  // ===== Shared “horizon drift” (overview only) =====
+if (viewport){
+  let ovRAF = null;
+  let ovTX = 0, ovTY = 0, ovPX = 0, ovPY = 0;
+  let ovX = 0, ovY = 0, ovPanX = 0, ovPanY = 0;
+
+  function setOverviewVars(){
+    viewport.style.setProperty('--ovTiltY', ovX.toFixed(2) + 'deg');
+    viewport.style.setProperty('--ovTiltX', ovY.toFixed(2) + 'deg');
+    viewport.style.setProperty('--ovPanX',  ovPanX.toFixed(1) + 'px');
+    viewport.style.setProperty('--ovPanY',  ovPanY.toFixed(1) + 'px');
+  }
+
+  function tickOverview(){
+    // smooth follow
+    const ease = 0.10;
+    ovX += (ovTX - ovX) * ease;
+    ovY += (ovTY - ovY) * ease;
+    ovPanX += (ovPX - ovPanX) * ease;
+    ovPanY += (ovPY - ovPanY) * ease;
+
+    setOverviewVars();
+
+    const done =
+      Math.abs(ovTX - ovX) < 0.02 &&
+      Math.abs(ovTY - ovY) < 0.02 &&
+      Math.abs(ovPX - ovPanX) < 0.2 &&
+      Math.abs(ovPY - ovPanY) < 0.2;
+
+    if (done){
+      ovRAF = null;
+      return;
+    }
+    ovRAF = requestAnimationFrame(tickOverview);
+  }
+
+  function ensureOverviewRAF(){
+    if (ovRAF) return;
+    ovRAF = requestAnimationFrame(tickOverview);
+  }
+
+  function isOverview(){
+    return !viewport.classList.contains('focus-top') && !viewport.classList.contains('focus-bottom');
+  }
+
+  viewport.addEventListener('mousemove', (e) => {
+    if (!isOverview()) return;
+
+    const r = viewport.getBoundingClientRect();
+    const nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
+    const ny = clamp(((e.clientY - r.top)  / r.height) * 2 - 1, -1, 1);
+
+    // ✅ tiny, dreamy drift (shared horizon)
+    ovTX = nx * 2.8;     // deg
+    ovTY = -ny * 2.2;    // deg
+    ovPX = nx * 10;      // px
+    ovPY = ny * 8;       // px
+
+    ensureOverviewRAF();
+  });
+
+  viewport.addEventListener('mouseleave', () => {
+    // reset gently back to center
+    ovTX = 0; ovTY = 0; ovPX = 0; ovPY = 0;
+    ensureOverviewRAF();
+  });
+
+  // When entering focus mode, clear overview drift immediately (so focus feels crisp)
+  const observer = new MutationObserver(() => {
+    if (!isOverview()){
+      ovTX = 0; ovTY = 0; ovPX = 0; ovPY = 0;
+      ovX = 0; ovY = 0; ovPanX = 0; ovPanY = 0;
+      setOverviewVars();
+    }
+  });
+  observer.observe(viewport, { attributes:true, attributeFilter:['class'] });
+}
 
   // Optional: background “breath” shift (very subtle)
   if (spaceBg){
