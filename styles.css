@@ -1,14 +1,4 @@
-/* styles.css
-   ✅ Double-checked + corrected for TWO DECKS + WAAPI 3D stability
-   Fixes / adds:
-   - top-left arrow slot (.arrow-slot--top-left)
-   - proper 3D layer hygiene (preserve-3d only where needed, no “double transform”)
-   - removes the harmful translateZ on .panel/.print/img that can cause jitter with WAAPI
-   - anti-flicker: isolation, contain, outline/clip, image-rendering tweaks
-   - proper deck anchors: #leporelloTop / #leporelloBottom are positioned as two “anchors”
-   - avoids duplicated :root blocks inside the SAME media query
-   - closes all braces + normalizes fullscreen sections
-*/
+/* styles.css — TWO DECKS (top + bottom) + WAAPI 3D stable + shared fullscreen */
 
 :root{
   --bg:#EFE7DC;
@@ -40,15 +30,12 @@
 
   --filmPad: 6px;
 
-  /* HEADER + BUTTON SYSTEM */
   --btnH: 52px;
   --headerBarH: var(--btnH);
 
-  /* optical */
   --burgerScale: 1;
   --monoScale: 1.06;
 
-  /* header motion tuning */
   --burgerShift: 10px;
   --foldShift: 18px;
 
@@ -58,9 +45,8 @@
 
   --pillH: 40px;
 
-  /* distance between decks (visual split) */
-  --deckOffset: 25vh;
-  --deckGap: clamp(24px, 4vh, 60px);
+  /* ✅ smaller + safer gap so decks never drift out */
+  --deckGap: clamp(8px, 1.8vh, 14px);
 }
 
 /* base */
@@ -76,7 +62,6 @@ body{
   opacity:0;
   padding:0;
 }
-
 html.ready body{ animation:fadein 1.0s ease-in-out forwards; }
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
@@ -108,7 +93,7 @@ main{
   height: var(--headerBarH);
   display:flex;
   align-items:center;
-  justify-content: flex-end;
+  justify-content:flex-end;
   position:relative;
 }
 
@@ -174,15 +159,15 @@ main{
 /* RIGHT cluster */
 .header-right{
   position: relative;
-  pointer-events: none;
+  pointer-events:none;
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  gap: 14px;
+  gap:14px;
   min-width:0;
   z-index:5;
-  margin-left: auto;
-  flex: 1 1 auto;
+  margin-left:auto;
+  flex:1 1 auto;
 }
 
 /* BRAND swap */
@@ -192,11 +177,10 @@ main{
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  flex: 1 1 auto;
-  min-width: 0;
+  flex:1 1 auto;
+  min-width:0;
   overflow:visible;
 }
-
 .brand-text,
 .brand-mark{
   position:absolute;
@@ -212,7 +196,6 @@ main{
     filter .22s ease;
   transform-origin: 100% 50%;
 }
-
 .brand-text{
   max-width: 100%;
   overflow:hidden;
@@ -226,7 +209,6 @@ main{
   text-transform:uppercase;
   transform: translateY(-50%) translateX(0) scaleX(1);
 }
-
 .brand-mark{
   width: var(--headerBarH);
   height: var(--headerBarH);
@@ -239,7 +221,7 @@ main{
   filter: blur(0.2px);
 }
 .brand-mark svg{
-  height: 100%;
+  height:100%;
   width:100%;
   display:block;
   transform: scale(var(--monoScale));
@@ -255,12 +237,12 @@ main{
   cursor:pointer;
   padding:0;
   margin:0;
-  pointer-events: auto;
+  pointer-events:auto;
 
   display:flex;
   align-items:center;
   justify-content:center;
-  flex: 0 0 auto;
+  flex:0 0 auto;
   color: var(--brand);
 
   position:relative;
@@ -268,13 +250,12 @@ main{
   transition: transform .28s cubic-bezier(.18,.9,.2,1);
 }
 .menu-btn svg{
-  width: 100%;
-  height: 100%;
+  width:100%;
+  height:100%;
   display:block;
   transform: scale(var(--burgerScale));
   transform-origin:center;
 }
-
 .film-header.menu-open .menu-btn{
   transform: translateX(calc(var(--burgerShift) * -1));
 }
@@ -293,7 +274,7 @@ main{
   filter:none;
 }
 
-/* ===== Unified matte glass system (arrow INCLUDED) ===== */
+/* ===== Matte glass system (arrow included) ===== */
 .menu a,
 .abtn,
 .film-arrow{
@@ -329,9 +310,8 @@ main{
 
   opacity:.92;
   white-space:nowrap;
-  position: relative;
+  position:relative;
 }
-
 .menu a::before,
 .abtn::before,
 .film-arrow::before{
@@ -346,7 +326,6 @@ main{
     rgba(255,255,255,0) 70%);
   opacity:.9;
 }
-
 .menu a:hover,
 .abtn:hover,
 .film-arrow:hover{
@@ -364,8 +343,7 @@ main{
   transform: translateY(0);
   opacity:.92;
 }
-
-.menu a{ text-transform: none; }
+.menu a{ text-transform:none; }
 .menu a,
 .abtn{ padding: 0 8px; white-space:nowrap; }
 
@@ -399,113 +377,31 @@ main{
   perspective: var(--persp);
   perspective-origin: 50% 55%;
 
-  /* ✅ reduces blend artifacts */
-  isolation: isolate;
+  isolation:isolate;
 }
 
-/* ===== TWO INDEPENDENT DECK VIEWPORTS ===== */
-/* two half-areas by default */
-.deck-viewport{
+/* background */
+.space-bg{
   position:absolute;
-  left:0;
-  width:100%;
-  height:50%;
-  overflow:hidden;
-
-  /* important: independent pointer area */
-  pointer-events:auto;
-
-  /* keep their own 3D contexts stable */
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-
-  /* smooth focus transition */
-  transition: top .35s cubic-bezier(.18,.9,.2,1),
-              height .35s cubic-bezier(.18,.9,.2,1),
-              opacity .25s ease;
-}
-
-.deck-top{ top:0; }
-.deck-bottom{ top:50%; }
-
-/* give a safe gap between decks visually (prevents overlap on all sizes/orientations) */
-:root{ --deckGap: clamp(14px, 3vh, 28px); }
-
-.deck-top{ height: calc(50% - (var(--deckGap) / 2)); }
-.deck-bottom{
-  top: calc(50% + (var(--deckGap) / 2));
-  height: calc(50% - (var(--deckGap) / 2));
-}
-
-/* subtle separator (optional but helps perception) */
-.deck-viewport::after{
-  content:"";
-  position:absolute;
-  inset:0;
+  inset:-8%;
+  border-radius:14px;
   pointer-events:none;
-  background: radial-gradient(120% 70% at 50% 55%,
-    rgba(0,0,0,.06) 0%,
-    rgba(0,0,0,0) 55%);
-  opacity:.65;
+  z-index:0;
+  background:
+    radial-gradient(140% 90% at 50% 55%,
+      rgba(255,255,255,.10) 0%,
+      rgba(0,0,0,.10) 62%,
+      rgba(0,0,0,.22) 100%),
+    linear-gradient(180deg,
+      rgba(255,255,255,.08),
+      rgba(0,0,0,.12));
+  box-shadow:
+    inset 0 10px 30px rgba(255,255,255,.10),
+    inset 0 -18px 44px rgba(0,0,0,.16);
+  opacity:.95;
 }
 
-/* IMPORTANT: these are now INSIDE each deck viewport */
-.deck-viewport .space-pan{
-  position:absolute;
-  inset:0;
-  display:grid;
-  place-items:center;
-  transform: translate3d(var(--panX, 0px), var(--panY, 0px), 0);
-  will-change: transform;
-  z-index:2;
-}
-.deck-viewport .space-zoom{
-  position:relative;
-  transform-origin: 50% 50%;
-  will-change: transform;
-  transform: translateZ(var(--zoomZ, 0px)) scale(var(--zoom, 1));
-}
-
-/* ===== FOCUS MODE =====
-   When a deck is focused it expands to full viewport.
-   The other deck fades + becomes non-interactive.
-*/
-.space-viewport.focus-top #deckTop,
-.space-viewport.focus-bottom #deckBottom{
-  top:0 !important;
-  height:100% !important;
-  z-index:6;
-}
-
-.space-viewport.focus-top #deckBottom,
-.space-viewport.focus-bottom #deckTop{
-  opacity:0;
-  pointer-events:none;
-}
-
-/* Arrows: top-left + bottom-right */
-.arrow-slot{
-  position:absolute;
-  right:12px;
-  bottom:12px;
-  z-index:10;
-  pointer-events:auto;
-}
-.arrow-slot--top-left{
-  position:absolute;
-  left:12px;
-  top:12px;
-  z-index:10;
-  pointer-events:auto;
-}
-
-/* Keep 3D propagation, but do NOT add extra transforms that fight WAAPI */
-.space-pan,
-.space-zoom{
-  transform-style: preserve-3d;
-}
-
-/* overlay vignette */
+/* vignette overlay */
 .space-viewport::after{
   content:"";
   position:absolute;
@@ -522,44 +418,36 @@ main{
       rgba(0,0,0,0) 58%,
       rgba(0,0,0,.10) 84%,
       rgba(0,0,0,.18) 100%);
-  mix-blend-mode: multiply;
+  mix-blend-mode:multiply;
   opacity:.85;
 }
 
-/* moving background */
-.space-bg{
+/* ===== DECK VIEWPORTS (top & bottom) ===== */
+.deck-viewport{
   position:absolute;
-  inset:-8%;
-  border-radius:14px;
-  pointer-events:none;
-  z-index:0;
+  left:0;
+  width:100%;
+  overflow:hidden;
+  pointer-events:auto;
+  z-index:2;
 
-  background:
-    radial-gradient(140% 90% at 50% 55%,
-      rgba(255,255,255,.10) 0%,
-      rgba(0,0,0,.10) 62%,
-      rgba(0,0,0,.22) 100%),
-    linear-gradient(180deg,
-      rgba(255,255,255,.08),
-      rgba(0,0,0,.12));
-
-  box-shadow:
-    inset 0 10px 30px rgba(255,255,255,.10),
-    inset 0 -18px 44px rgba(0,0,0,.16);
-
-  transform:
-    perspective(var(--persp))
-    rotateX(calc(7deg + var(--bgTiltX, 0deg)))
-    rotateY(calc(-2deg + var(--bgTiltY, 0deg)))
-    translate3d(var(--bgPanX, 0px), var(--bgPanY, 0px), 0);
-
-  transition: transform 120ms ease-out;
-  will-change: transform;
-  opacity:.95;
+  transition: top .35s cubic-bezier(.18,.9,.2,1),
+              height .35s cubic-bezier(.18,.9,.2,1),
+              opacity .25s ease;
 }
 
-/* pan/zoom layers */
-.space-pan{
+/* split centered with a small gap */
+.deck-top{
+  top:0;
+  height: calc(50% - (var(--deckGap) / 2));
+}
+.deck-bottom{
+  top: calc(50% + (var(--deckGap) / 2));
+  height: calc(50% - (var(--deckGap) / 2));
+}
+
+/* each deck has its own pan/zoom layers (independent vars) */
+.deck-viewport .space-pan{
   position:absolute;
   inset:0;
   display:grid;
@@ -568,38 +456,43 @@ main{
   will-change: transform;
   z-index:2;
 }
-.space-zoom{
+.deck-viewport .space-zoom{
   position:relative;
   transform-origin: 50% 50%;
   will-change: transform;
-  transform:
-    translateZ(var(--zoomZ, 0px))
-    scale(var(--zoom, 1));
+  transform: translateZ(var(--zoomZ, 0px)) scale(var(--zoom, 1));
 }
 
-/* ===== DECK ANCHORS (TOP + BOTTOM) =====
-   Your HTML uses #leporelloTop and #leporelloBottom directly.
-   We position them as two anchors in the same 3D space.
-*/
-#leporelloTop,
-#leporelloBottom{
+/* focus mode: one deck expands to full viewport */
+.space-viewport.focus-top #deckTop,
+.space-viewport.focus-bottom #deckBottom{
+  top:0 !important;
+  height:100% !important;
+  z-index:6;
+}
+.space-viewport.focus-top #deckBottom,
+.space-viewport.focus-bottom #deckTop{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* arrows */
+.arrow-slot{
   position:absolute;
-  left:50%;
-  top:50%;
-  width:1px;
-  height:1px;
-  transform-style: preserve-3d;
-  z-index:3;
-  pointer-events:none; /* panels inside still get pointer events */
+  right:12px;
+  bottom:12px;
+  z-index:10;
+  pointer-events:auto;
 }
-#leporelloTop{
-  transform: translate3d(0, calc(var(--deckOffset) * -1), 0);
-}
-#leporelloBottom{
-  transform: translate3d(0, var(--deckOffset), 0);
+.arrow-slot--top-left{
+  position:absolute;
+  left:12px;
+  top:12px;
+  z-index:10;
+  pointer-events:auto;
 }
 
-/* leporello base */
+/* leporello anchors are centered in their deck */
 .leporello{
   position:relative;
   width:1px;
@@ -607,7 +500,7 @@ main{
   transform-style:preserve-3d;
 }
 
-/* Panel: WAAPI owns transform (keep CSS from interfering) */
+/* panel + print */
 .panel{
   position:absolute;
   width: var(--panelW);
@@ -623,14 +516,10 @@ main{
   cursor:pointer;
 
   transform-origin: 50% 50%;
-
   outline: 0;
-
-  /* ✅ reduces Safari “edge line” glitches during 3D rotation */
   contain: layout paint style;
 }
 
-/* Print card */
 .print{
   width:100%;
   height:100%;
@@ -644,17 +533,15 @@ main{
   display:grid;
   place-items:center;
 
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
+  backface-visibility:hidden;
+  transform-style:preserve-3d;
 
-  border: none;
-  outline: none;
+  border:none;
+  outline:none;
 
-  /* ✅ helps avoid subpixel seams */
   clip-path: inset(0 round var(--radius));
 }
 
-/* Image */
 .print img{
   width:100%;
   height:100%;
@@ -663,21 +550,18 @@ main{
   display:block;
 
   pointer-events:none;
-  backface-visibility: hidden;
+  backface-visibility:hidden;
   transform-style:preserve-3d;
 
-  -webkit-user-drag: none;
-  user-drag: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-
-  /* ✅ reduces shimmer on some GPUs */
-  image-rendering: auto;
+  -webkit-user-drag:none;
+  user-drag:none;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
 }
 
-/* Noise */
+/* noise */
 .noise{
   position:absolute;
   inset:0;
@@ -698,22 +582,6 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* ===== ARROWS ===== */
-.arrow-slot{
-  position:absolute;
-  right:12px;
-  bottom:12px;
-  z-index:4;
-  pointer-events:auto;
-}
-.arrow-slot--top-left{
-  position:absolute;
-  left:12px;
-  top:12px;
-  z-index:4;
-  pointer-events:auto;
-}
-
 /* footer */
 footer{
   text-align:center;
@@ -722,90 +590,76 @@ footer{
   opacity:.5;
 }
 
-/* ===== Active UI (two instances) ===== */
+/* ===== Active UI (per deck) ===== */
 .active-ui{
   position:absolute;
   left:0;
   top:0;
-  z-index: 8;
+  z-index:8;
   transform: translate3d(0,0,0);
   pointer-events:none;
-  transform-style: preserve-3d;
-  backface-visibility:hidden;
 }
-
 .active-meta{
   max-width: min(360px, 92%);
   position:absolute;
   right:0;
   top:-27px;
-
   display:flex;
   gap:4px;
   align-items:baseline;
   white-space:nowrap;
-
   padding:4px 6px;
   border-radius:14px;
-
   background: rgba(255,255,255,.28);
   backdrop-filter: blur(10px) saturate(120%);
   border: 1px solid rgba(255,255,255,.16);
-
   pointer-events:none;
 }
-
 .am-title{
   font-size:13px;
   letter-spacing:.2px;
   opacity:.92;
-  max-width: 18ch;
-  overflow: hidden;
+  max-width:18ch;
+  overflow:hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space:nowrap;
 }
 .am-status{
   font-size:12px;
   opacity:.68;
-  max-width: 18ch;
-  overflow: hidden;
+  max-width:18ch;
+  overflow:hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space:nowrap;
 }
-
 .active-actions{
   position:absolute;
   left:50%;
   top: calc(100% + 12px);
   transform: translateX(-50%);
   width: min(520px, 92%);
-
   display:flex;
   align-items:center;
   justify-content: space-between;
-  min-height: 44px;
-
+  min-height:44px;
   pointer-events:auto;
 }
 .active-left,
 .active-right{ position: static; }
 .abtn-primary{ margin: 0 auto; }
 
-/* ===== Fullscreen overlay ===== */
+/* ===== Fullscreen overlay (shared) ===== */
 .fullscreen{
   width: min(560px, 92%);
   margin: 0 auto;
   position:fixed;
   inset:0;
   background: rgba(0,0,0,.92);
-
   display:none;
   align-items:center;
   justify-content:center;
-
   z-index: 2147483647;
   padding: clamp(14px, 3vw, 34px);
-
   overflow:auto;
 }
 .fullscreen.open{ display:flex; }
@@ -813,60 +667,49 @@ footer{
 .fs-inner{
   width: min(96vw, 1120px);
   position:relative;
-
   display:flex;
   flex-direction:column;
   gap:12px;
-
   max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
 }
-
 .fs-meta{
   max-width: min(360px, 92%);
   position:absolute;
   right:0;
   top:-27px;
-
   display:flex;
   gap:4px;
   align-items:baseline;
   white-space:nowrap;
-
   padding:4px 6px;
   border-radius:14px;
-
   background: rgba(255,255,255,.14);
   backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid rgba(255,255,255,.35);
-
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,.06),
     0 12px 30px rgba(0,0,0,.45);
-
   color: rgba(255,255,255,.92);
 }
-
 .fs-title{
   font-size:13px;
   letter-spacing:.2px;
   opacity:.92;
-  max-width: 18ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-width:18ch;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
   color: rgba(255,255,255,.96);
 }
 .fs-status{
   font-size:12px;
   opacity:.68;
-  max-width: 18ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-width:18ch;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
   color: rgba(255,255,255,.75);
 }
-
-/* Fullscreen buttons override (bright glass on dark bg) */
 .fullscreen .abtn{
   background: rgba(255,255,255,.18);
   backdrop-filter: blur(14px) saturate(160%);
@@ -889,18 +732,14 @@ footer{
   opacity:1;
 }
 
-/* Fullscreen image frame */
 .fs-frame{
   flex: 1 1 auto;
   min-height: 0;
-
   aspect-ratio: var(--a3);
   height: 100%;
   width: auto;
-
   max-width: 100%;
   max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px) - 60px);
-
   margin: 0 auto;
 }
 .fullscreen .fs-frame img{
@@ -908,23 +747,16 @@ footer{
   height: 100%;
   object-fit: contain;
 }
-
 .fs-actions{
   flex: 0 0 auto;
-
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
-
   width: min(560px, 92%);
   margin: 0 auto;
-
   min-height:44px;
 }
-.fullscreen .fs-left,
-.fullscreen .fs-right{ position: static; }
-
 #closeBtn{
   width: var(--btnH);
   padding: 0;
@@ -943,17 +775,14 @@ footer{
     --xStep: 74%;
 
     --btnH: 44px;
-
     --burgerScale: 1.10;
     --monoScale: 1.00;
-
     --burgerShift: 8px;
     --foldShift: 14px;
-
     --pillH: 36px;
 
-    /* slightly smaller deck split on tiny screens */
-    --deckOffset: 21vh;
+    /* ✅ keep gap even smaller on tiny screens */
+    --deckGap: clamp(6px, 1.4vh, 10px);
   }
 
   .brand-text{
@@ -970,32 +799,17 @@ footer{
   .noise{ animation:none !important; }
 }
 
-/* Mobile landscape fullscreen fix (keep buttons visible) */
+/* Mobile landscape fullscreen fix */
 @media (max-width: 900px) and (orientation: landscape){
-  .fullscreen{
-    overflow: hidden;
-    padding: 10px;
-  }
-
-  :root{
-    --pillH: 34px;
-    --btnH: 40px;
-  }
-
-  .fullscreen .fs-inner{
-    max-height: calc(100dvh - 20px);
-  }
-
-  .fullscreen .fs-frame{
-    max-height: calc(100dvh - 20px - 44px - 10px);
-    margin: 0 auto;
-  }
-
+  .fullscreen{ overflow:hidden; padding:10px; }
+  :root{ --pillH:34px; --btnH:40px; }
+  .fullscreen .fs-inner{ max-height: calc(100dvh - 20px); }
+  .fullscreen .fs-frame{ max-height: calc(100dvh - 20px - 44px - 10px); margin: 0 auto; }
   .fullscreen .fs-actions{
     flex: 0 0 auto;
     margin-top: 10px;
     width: min(520px, 96%);
-    margin-left: auto;
-    margin-right: auto;
+    margin-left:auto;
+    margin-right:auto;
   }
 }
