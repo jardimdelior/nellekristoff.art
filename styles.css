@@ -1,4 +1,4 @@
-/* styles.css — TWO DECKS (top + bottom) + WAAPI 3D stable + shared fullscreen */
+/* styles.css — TWO DECKS + fixed focus/unfocus + no overlap + horizon bend */
 
 :root{
   --bg:#EFE7DC;
@@ -10,7 +10,6 @@
   --radius:2px;
 
   --a3: 420 / 297;
-
   --maxFilmH: 78vh;
 
   --panelW: clamp(180px, 42vw, 560px);
@@ -27,7 +26,6 @@
   --zoomMax: 1.35;
 
   --brand: #C4A160;
-
   --filmPad: 6px;
 
   --btnH: 52px;
@@ -45,11 +43,17 @@
 
   --pillH: 40px;
 
-  /* ✅ smaller + safer gap so decks never drift out */
-  --deckGap: clamp(8px, 1.8vh, 14px);
+  /* gap between decks */
+  --deckGap: clamp(6px, 1.6vh, 12px);
+
+  /* split-view “horizon bend” */
+  --deckTilt: 6deg;
+
+  /* spacing so UI never overlaps panel */
+  --metaGap: 36px;   /* how far above panel the title/status floats */
+  --btnGap: 10px;    /* how far below panel the buttons float */
 }
 
-/* base */
 html, body{ height:100%; }
 *{ box-sizing:border-box; }
 
@@ -72,7 +76,6 @@ main{
   justify-content:center;
 }
 
-/* film */
 .film-main{
   width:min(96vw, 1400px);
   margin:0 auto;
@@ -83,12 +86,7 @@ main{
 }
 
 /* header */
-.film-header{
-  width:100%;
-  position:relative;
-  z-index:20;
-}
-
+.film-header{ width:100%; position:relative; z-index:20; }
 .header-bar{
   height: var(--headerBarH);
   display:flex;
@@ -97,7 +95,6 @@ main{
   position:relative;
 }
 
-/* Selected Works (left) */
 .subtitle-inline{
   position:absolute;
   left:0;
@@ -119,7 +116,6 @@ main{
   transform: translateY(-32%) translateX(-8px);
 }
 
-/* Menu sits EXACTLY where Selected Works is */
 .menu{
   position:absolute;
   left:0;
@@ -128,13 +124,11 @@ main{
   opacity:0;
   pointer-events:none;
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
-
   display:flex;
   gap:10px;
   align-items: baseline;
   white-space:nowrap;
   z-index:50;
-
   font-size: var(--leftLabelSize);
   font-weight: var(--leftLabelWeight);
   letter-spacing: var(--leftLabelTrack);
@@ -156,7 +150,6 @@ main{
   100%{ transform: translateY(-32%) translateX(0); }
 }
 
-/* RIGHT cluster */
 .header-right{
   position: relative;
   pointer-events:none;
@@ -170,7 +163,6 @@ main{
   flex:1 1 auto;
 }
 
-/* BRAND swap */
 .brand{
   position:relative;
   height: var(--headerBarH);
@@ -228,7 +220,6 @@ main{
   transform-origin:center;
 }
 
-/* burger */
 .menu-btn{
   width: var(--headerBarH);
   height: var(--headerBarH);
@@ -238,34 +229,21 @@ main{
   padding:0;
   margin:0;
   pointer-events:auto;
-
   display:flex;
   align-items:center;
   justify-content:center;
   flex:0 0 auto;
   color: var(--brand);
-
   position:relative;
   z-index:10;
   transition: transform .28s cubic-bezier(.18,.9,.2,1);
 }
-.menu-btn svg{
-  width:100%;
-  height:100%;
-  display:block;
-  transform: scale(var(--burgerScale));
-  transform-origin:center;
-}
-.film-header.menu-open .menu-btn{
-  transform: translateX(calc(var(--burgerShift) * -1));
-}
+.menu-btn svg{ width:100%; height:100%; display:block; transform: scale(var(--burgerScale)); transform-origin:center; }
+
+.film-header.menu-open .menu-btn{ transform: translateX(calc(var(--burgerShift) * -1)); }
 .film-header.menu-open .brand-text{
   opacity:0;
-  transform:
-    translateY(-50%)
-    translateX(var(--foldShift))
-    scaleX(0.05)
-    skewY(6deg);
+  transform: translateY(-50%) translateX(var(--foldShift)) scaleX(0.05) skewY(6deg);
   filter: blur(0.6px);
 }
 .film-header.menu-open .brand-mark{
@@ -274,40 +252,29 @@ main{
   filter:none;
 }
 
-/* ===== Matte glass system (arrow included) ===== */
+/* matte glass */
 .menu a,
 .abtn,
 .film-arrow{
   height: var(--pillH);
   min-height: var(--pillH);
   border-radius: 999px;
-
   backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.10);
-
   box-shadow:
     inset 0 0 0 1px rgba(47,42,38,.03),
     0 8px 18px rgba(0,0,0,.08);
-
   color: rgba(47,42,38,.92);
   text-decoration:none;
-
   display:inline-flex;
   align-items:center;
   justify-content:center;
-
   font-size: 12px;
   letter-spacing: .25px;
   line-height: 1;
-
   cursor:pointer;
-  transition: transform .2s ease,
-              background .2s ease,
-              border-color .2s ease,
-              box-shadow .2s ease,
-              opacity .2s ease;
-
+  transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease, opacity .2s ease;
   opacity:.92;
   white-space:nowrap;
   position:relative;
@@ -339,15 +306,11 @@ main{
 }
 .menu a:active,
 .abtn:active,
-.film-arrow:active{
-  transform: translateY(0);
-  opacity:.92;
-}
-.menu a{ text-transform:none; }
-.menu a,
-.abtn{ padding: 0 8px; white-space:nowrap; }
+.film-arrow:active{ transform: translateY(0); opacity:.92; }
 
-/* Arrow stays circular */
+.menu a{ text-transform:none; }
+.menu a, .abtn{ padding: 0 8px; }
+
 .film-arrow{
   height: var(--btnH);
   min-height: var(--btnH);
@@ -359,7 +322,7 @@ main{
 }
 .film-arrow svg{ width:18px; height:18px; }
 
-/* ===== VIEWPORT ===== */
+/* viewport */
 .space-viewport{
   width:100%;
   height: var(--maxFilmH);
@@ -370,17 +333,14 @@ main{
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   overflow:hidden;
   margin: 0;
-
   touch-action:none;
   user-select:none;
-
   perspective: var(--persp);
   perspective-origin: 50% 55%;
-
   isolation:isolate;
 }
 
-/* background */
+/* bg + vignette */
 .space-bg{
   position:absolute;
   inset:-8%;
@@ -400,8 +360,6 @@ main{
     inset 0 -18px 44px rgba(0,0,0,.16);
   opacity:.95;
 }
-
-/* vignette overlay */
 .space-viewport::after{
   content:"";
   position:absolute;
@@ -422,7 +380,7 @@ main{
   opacity:.85;
 }
 
-/* ===== DECK VIEWPORTS (top & bottom) ===== */
+/* decks */
 .deck-viewport{
   position:absolute;
   left:0;
@@ -431,12 +389,10 @@ main{
   pointer-events:auto;
   z-index:2;
 
-  transition: top .35s cubic-bezier(.18,.9,.2,1),
-              height .35s cubic-bezier(.18,.9,.2,1),
-              opacity .25s ease;
+  /* ✅ critical for iOS + trackpad drag */
+  touch-action:none;
 }
 
-/* split centered with a small gap */
 .deck-top{
   top:0;
   height: calc(50% - (var(--deckGap) / 2));
@@ -446,7 +402,7 @@ main{
   height: calc(50% - (var(--deckGap) / 2));
 }
 
-/* each deck has its own pan/zoom layers (independent vars) */
+/* pan/zoom layers (per deck, CSS vars set by JS on the elements) */
 .deck-viewport .space-pan{
   position:absolute;
   inset:0;
@@ -460,10 +416,23 @@ main{
   position:relative;
   transform-origin: 50% 50%;
   will-change: transform;
-  transform: translateZ(var(--zoomZ, 0px)) scale(var(--zoom, 1));
 }
 
-/* focus mode: one deck expands to full viewport */
+/* ✅ split-view horizon bend */
+.space-viewport:not(.focus-top):not(.focus-bottom) #deckTop .space-zoom{
+  transform: rotateX(var(--deckTilt)) translateZ(var(--zoomZ,0px)) scale(var(--zoom,1));
+}
+.space-viewport:not(.focus-top):not(.focus-bottom) #deckBottom .space-zoom{
+  transform: rotateX(calc(var(--deckTilt) * -1)) translateZ(var(--zoomZ,0px)) scale(var(--zoom,1));
+}
+
+/* ✅ focus view: no tilt */
+.space-viewport.focus-top #deckTop .space-zoom,
+.space-viewport.focus-bottom #deckBottom .space-zoom{
+  transform: translateZ(var(--zoomZ,0px)) scale(var(--zoom,1));
+}
+
+/* focus mode expand */
 .space-viewport.focus-top #deckTop,
 .space-viewport.focus-bottom #deckBottom{
   top:0 !important;
@@ -492,7 +461,7 @@ main{
   pointer-events:auto;
 }
 
-/* leporello anchors are centered in their deck */
+/* leporello anchor */
 .leporello{
   position:relative;
   width:1px;
@@ -500,21 +469,18 @@ main{
   transform-style:preserve-3d;
 }
 
-/* panel + print */
+/* cards */
 .panel{
   position:absolute;
   width: var(--panelW);
   height: var(--panelH);
   left: 50%;
   top: 50%;
-
   transform-style: preserve-3d;
   backface-visibility: hidden;
-
   will-change: transform, opacity;
   transition: none;
   cursor:pointer;
-
   transform-origin: 50% 50%;
   outline: 0;
   contain: layout paint style;
@@ -527,18 +493,14 @@ main{
   padding: 16px;
   border-radius:var(--radius);
   box-shadow:var(--inset), var(--shadow);
-
   overflow:hidden;
   position:relative;
   display:grid;
   place-items:center;
-
   backface-visibility:hidden;
   transform-style:preserve-3d;
-
   border:none;
   outline:none;
-
   clip-path: inset(0 round var(--radius));
 }
 
@@ -548,11 +510,9 @@ main{
   object-fit:contain;
   margin:auto;
   display:block;
-
   pointer-events:none;
   backface-visibility:hidden;
   transform-style:preserve-3d;
-
   -webkit-user-drag:none;
   user-drag:none;
   -webkit-touch-callout:none;
@@ -561,7 +521,6 @@ main{
   -webkit-tap-highlight-color:transparent;
 }
 
-/* noise */
 .noise{
   position:absolute;
   inset:0;
@@ -582,7 +541,6 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* footer */
 footer{
   text-align:center;
   padding: 18px 20px 22px;
@@ -590,7 +548,7 @@ footer{
   opacity:.5;
 }
 
-/* ===== Active UI (per deck) ===== */
+/* Active UI */
 .active-ui{
   position:absolute;
   left:0;
@@ -599,11 +557,12 @@ footer{
   transform: translate3d(0,0,0);
   pointer-events:none;
 }
+
 .active-meta{
   max-width: min(360px, 92%);
   position:absolute;
   right:0;
-  top:-27px;
+  top: calc(var(--metaGap) * -1); /* ✅ prevents overlap */
   display:flex;
   gap:4px;
   align-items:baseline;
@@ -632,10 +591,11 @@ footer{
   text-overflow: ellipsis;
   white-space:nowrap;
 }
+
 .active-actions{
   position:absolute;
   left:50%;
-  top: calc(100% + 12px);
+  top: calc(100% + var(--btnGap)); /* ✅ closer, but never overlaps */
   transform: translateX(-50%);
   width: min(520px, 92%);
   display:flex;
@@ -644,11 +604,9 @@ footer{
   min-height:44px;
   pointer-events:auto;
 }
-.active-left,
-.active-right{ position: static; }
 .abtn-primary{ margin: 0 auto; }
 
-/* ===== Fullscreen overlay (shared) ===== */
+/* fullscreen */
 .fullscreen{
   width: min(560px, 92%);
   margin: 0 auto;
@@ -669,14 +627,14 @@ footer{
   position:relative;
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:10px;
   max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
 }
 .fs-meta{
   max-width: min(360px, 92%);
   position:absolute;
   right:0;
-  top:-27px;
+  top: -36px; /* ✅ lift it so it never overlaps */
   display:flex;
   gap:4px;
   align-items:baseline;
@@ -710,6 +668,7 @@ footer{
   white-space:nowrap;
   color: rgba(255,255,255,.75);
 }
+
 .fullscreen .abtn{
   background: rgba(255,255,255,.18);
   backdrop-filter: blur(14px) saturate(160%);
@@ -719,12 +678,6 @@ footer{
     0 10px 28px rgba(0,0,0,.45);
   color: rgba(255,255,255,.92);
   opacity:.95;
-}
-.fullscreen .abtn::before{
-  background: radial-gradient(120% 180% at 50% 20%,
-    rgba(255,255,255,.35) 0%,
-    rgba(255,255,255,.15) 35%,
-    rgba(255,255,255,0) 70%);
 }
 .fullscreen .abtn:hover{
   background: rgba(255,255,255,.25);
@@ -739,14 +692,11 @@ footer{
   height: 100%;
   width: auto;
   max-width: 100%;
-  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px) - 60px);
+  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px) - 54px);
   margin: 0 auto;
 }
-.fullscreen .fs-frame img{
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
+.fullscreen .fs-frame img{ width:100%; height:100%; object-fit:contain; }
+
 .fs-actions{
   flex: 0 0 auto;
   display:flex;
@@ -763,17 +713,15 @@ footer{
   flex: 0 0 auto;
 }
 
-/* Responsive */
+/* responsive */
 @media (max-width: 520px){
   :root{
     --panelW: 86vw;
     --maxFilmH: 72vh;
     --persp: 3200px;
-
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
-
     --btnH: 44px;
     --burgerScale: 1.10;
     --monoScale: 1.00;
@@ -781,35 +729,20 @@ footer{
     --foldShift: 14px;
     --pillH: 36px;
 
-    /* ✅ keep gap even smaller on tiny screens */
-    --deckGap: clamp(6px, 1.4vh, 10px);
-  }
+    --deckGap: clamp(6px, 1.2vh, 9px);
+    --deckTilt: 5deg;
 
+    --metaGap: 34px;
+    --btnGap: 9px;
+  }
   .brand-text{
     font-size: clamp(16px, 5vw, 20px);
     letter-spacing: .6px;
   }
-
   .menu{ gap:8px; }
-  .menu a,
-  .abtn{ padding: 0 9px; font-size: 11px; }
+  .menu a, .abtn{ padding: 0 9px; font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce){
   .noise{ animation:none !important; }
-}
-
-/* Mobile landscape fullscreen fix */
-@media (max-width: 900px) and (orientation: landscape){
-  .fullscreen{ overflow:hidden; padding:10px; }
-  :root{ --pillH:34px; --btnH:40px; }
-  .fullscreen .fs-inner{ max-height: calc(100dvh - 20px); }
-  .fullscreen .fs-frame{ max-height: calc(100dvh - 20px - 44px - 10px); margin: 0 auto; }
-  .fullscreen .fs-actions{
-    flex: 0 0 auto;
-    margin-top: 10px;
-    width: min(520px, 96%);
-    margin-left:auto;
-    margin-right:auto;
-  }
 }
