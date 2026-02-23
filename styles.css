@@ -1,10 +1,13 @@
-/* styles.css */
-/* ✅ Cleaned + adjusted to match your new WAAPI 3D + bubble wave:
-   - fixes missing closing braces at the end
-   - removes duplicated :root blocks inside the same media query
-   - adds anti-flicker / anti “edge line shimmer” rules
-   - makes 3D stacking more stable (preserve-3d + backface everywhere needed)
-   - avoids “double transform” fighting WAAPI (panel keeps WAAPI transform only)
+/* styles.css
+   ✅ Double-checked + corrected for TWO DECKS + WAAPI 3D stability
+   Fixes / adds:
+   - top-left arrow slot (.arrow-slot--top-left)
+   - proper 3D layer hygiene (preserve-3d only where needed, no “double transform”)
+   - removes the harmful translateZ on .panel/.print/img that can cause jitter with WAAPI
+   - anti-flicker: isolation, contain, outline/clip, image-rendering tweaks
+   - proper deck anchors: #leporelloTop / #leporelloBottom are positioned as two “anchors”
+   - avoids duplicated :root blocks inside the SAME media query
+   - closes all braces + normalizes fullscreen sections
 */
 
 :root{
@@ -37,7 +40,7 @@
 
   --filmPad: 6px;
 
-  /* HEADER + BUTTON SYSTEM (unified with arrow) */
+  /* HEADER + BUTTON SYSTEM */
   --btnH: 52px;
   --headerBarH: var(--btnH);
 
@@ -54,11 +57,15 @@
   --leftLabelWeight: 500;
 
   --pillH: 40px;
-  --deckSplit: 25vh;
+
+  /* distance between decks (visual split) */
+  --deckOffset: 25vh;
 }
 
 /* base */
 html, body{ height:100%; }
+*{ box-sizing:border-box; }
+
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
@@ -67,15 +74,14 @@ body{
   line-height:1.6;
   opacity:0;
   padding:0;
-  box-sizing:border-box;
 }
+
 html.ready body{ animation:fadein 1.0s ease-in-out forwards; }
 @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
 
 main{
   width:100%;
   padding: clamp(14px, 3vw, 34px);
-  box-sizing:border-box;
   display:flex;
   justify-content:center;
 }
@@ -84,7 +90,6 @@ main{
 .film-main{
   width:min(96vw, 1400px);
   margin:0 auto;
-  box-sizing:border-box;
   padding: 0 var(--filmPad);
   display:grid;
   grid-template-rows: auto 1fr;
@@ -94,7 +99,6 @@ main{
 /* header */
 .film-header{
   width:100%;
-  box-sizing:border-box;
   position:relative;
   z-index:20;
 }
@@ -103,7 +107,7 @@ main{
   height: var(--headerBarH);
   display:flex;
   align-items:center;
-  justify-content: flex-end;  /* IMPORTANT */
+  justify-content: flex-end;
   position:relative;
 }
 
@@ -124,8 +128,6 @@ main{
   pointer-events:none;
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
 }
-
-/* When menu opens, Selected Works fades + slides out */
 .film-header.menu-open .subtitle-inline{
   opacity:0;
   transform: translateY(-32%) translateX(-8px);
@@ -140,11 +142,13 @@ main{
   opacity:0;
   pointer-events:none;
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
+
   display:flex;
   gap:10px;
   align-items: baseline;
   white-space:nowrap;
   z-index:50;
+
   font-size: var(--leftLabelSize);
   font-weight: var(--leftLabelWeight);
   letter-spacing: var(--leftLabelTrack);
@@ -152,18 +156,14 @@ main{
   line-height: 1;
   padding: 0;
 }
-
-/* open: replaces Selected Works */
 .menu.open{
   opacity:1;
   pointer-events:auto;
   transform: translateY(-32%) translateX(0);
 }
-
 .film-header.menu-open .menu{
   animation: menuSnap .24s cubic-bezier(.18,.9,.2,1);
 }
-
 @keyframes menuSnap{
   0%{ transform: translateY(-32%) translateX(-8px); }
   70%{ transform: translateY(-32%) translateX(2px); }
@@ -226,7 +226,6 @@ main{
   transform: translateY(-50%) translateX(0) scaleX(1);
 }
 
-/* monogram folded */
 .brand-mark{
   width: var(--headerBarH);
   height: var(--headerBarH);
@@ -256,11 +255,13 @@ main{
   padding:0;
   margin:0;
   pointer-events: auto;
+
   display:flex;
   align-items:center;
   justify-content:center;
   flex: 0 0 auto;
   color: var(--brand);
+
   position:relative;
   z-index:10;
   transition: transform .28s cubic-bezier(.18,.9,.2,1);
@@ -273,11 +274,9 @@ main{
   transform-origin:center;
 }
 
-/* OPEN: burger shifts, brand folds/unfolds */
 .film-header.menu-open .menu-btn{
   transform: translateX(calc(var(--burgerShift) * -1));
 }
-
 .film-header.menu-open .brand-text{
   opacity:0;
   transform:
@@ -287,7 +286,6 @@ main{
     skewY(6deg);
   filter: blur(0.6px);
 }
-
 .film-header.menu-open .brand-mark{
   opacity:1;
   transform: translateY(-50%) translateX(0) scaleX(1);
@@ -301,26 +299,33 @@ main{
   height: var(--pillH);
   min-height: var(--pillH);
   border-radius: 999px;
+
   backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.10);
+
   box-shadow:
     inset 0 0 0 1px rgba(47,42,38,.03),
     0 8px 18px rgba(0,0,0,.08);
+
   color: rgba(47,42,38,.92);
   text-decoration:none;
+
   display:inline-flex;
   align-items:center;
   justify-content:center;
+
   font-size: 12px;
   letter-spacing: .25px;
   line-height: 1;
+
   cursor:pointer;
   transition: transform .2s ease,
               background .2s ease,
               border-color .2s ease,
               box-shadow .2s ease,
               opacity .2s ease;
+
   opacity:.92;
   white-space:nowrap;
   position: relative;
@@ -352,7 +357,6 @@ main{
   opacity:.98;
   transform: translateY(-1px);
 }
-
 .menu a:active,
 .abtn:active,
 .film-arrow:active{
@@ -387,21 +391,24 @@ main{
   box-shadow: 0 12px 44px rgba(0,0,0,.10);
   overflow:hidden;
   margin: 0;
+
   touch-action:none;
   user-select:none;
 
   perspective: var(--persp);
   perspective-origin: 50% 55%;
+
+  /* ✅ reduces blend artifacts */
+  isolation: isolate;
 }
 
-/* ✅ Helps reduce edge shimmer from blending in 3D */
-.space-viewport,
+/* Keep 3D propagation, but do NOT add extra transforms that fight WAAPI */
 .space-pan,
-.space-zoom,
-.leporello{
+.space-zoom{
   transform-style: preserve-3d;
 }
 
+/* overlay vignette */
 .space-viewport::after{
   content:"";
   position:absolute;
@@ -429,6 +436,7 @@ main{
   border-radius:14px;
   pointer-events:none;
   z-index:0;
+
   background:
     radial-gradient(140% 90% at 50% 55%,
       rgba(255,255,255,.10) 0%,
@@ -437,14 +445,17 @@ main{
     linear-gradient(180deg,
       rgba(255,255,255,.08),
       rgba(0,0,0,.12));
+
   box-shadow:
     inset 0 10px 30px rgba(255,255,255,.10),
     inset 0 -18px 44px rgba(0,0,0,.16);
+
   transform:
     perspective(var(--persp))
     rotateX(calc(7deg + var(--bgTiltX, 0deg)))
     rotateY(calc(-2deg + var(--bgTiltY, 0deg)))
     translate3d(var(--bgPanX, 0px), var(--bgPanY, 0px), 0);
+
   transition: transform 120ms ease-out;
   will-change: transform;
   opacity:.95;
@@ -469,42 +480,34 @@ main{
     scale(var(--zoom, 1));
 }
 
-/* two stacked deck anchors inside the same leporello */
-.deck{
+/* ===== DECK ANCHORS (TOP + BOTTOM) =====
+   Your HTML uses #leporelloTop and #leporelloBottom directly.
+   We position them as two anchors in the same 3D space.
+*/
+#leporelloTop,
+#leporelloBottom{
   position:absolute;
   left:50%;
   top:50%;
   width:1px;
   height:1px;
-  transform-style:preserve-3d;
+  transform-style: preserve-3d;
+  z-index:3;
+  pointer-events:none; /* panels inside still get pointer events */
+}
+#leporelloTop{
+  transform: translate3d(0, calc(var(--deckOffset) * -1), 0);
+}
+#leporelloBottom{
+  transform: translate3d(0, var(--deckOffset), 0);
 }
 
-/* deck split: top and bottom halves */
-.deck-top{
-  transform: translate3d(0, -25vh, 0);
-}
-.deck-bottom{
-  transform: translate3d(0, 25vh, 0);
-}
-
-/* leporello */
+/* leporello base */
 .leporello{
   position:relative;
   width:1px;
   height:1px;
   transform-style:preserve-3d;
-}
-
-/* ✅ Core 3D stability + anti-flicker rules */
-.panel,
-.panel .print,
-.panel .print img{
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-
-  /* reduces “hairline border shimmer” when scaled/rotated */
-  -webkit-transform: translateZ(0.01px);
-  transform: translateZ(0.01px);
 }
 
 /* Panel: WAAPI owns transform (keep CSS from interfering) */
@@ -514,46 +517,66 @@ main{
   height: var(--panelH);
   left: 50%;
   top: 50%;
+
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+
   will-change: transform, opacity;
   transition: none;
   cursor:pointer;
 
-  /* extra: helps Safari/iOS avoid corner poke-through */
   transform-origin: 50% 50%;
+
   outline: 0;
+
+  /* ✅ reduces Safari “edge line” glitches during 3D rotation */
+  contain: layout paint style;
 }
 
+/* Print card */
 .print{
   width:100%;
   height:100%;
   background:var(--card);
   padding: 16px;
-  box-sizing:border-box;
   border-radius:var(--radius);
   box-shadow:var(--inset), var(--shadow);
-  overflow:hidden; /* ✅ hides subpixel edges */
+
+  overflow:hidden;
   position:relative;
   display:grid;
   place-items:center;
 
-  /* ✅ important: no borders/outlines that shimmer */
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+
   border: none;
   outline: none;
+
+  /* ✅ helps avoid subpixel seams */
+  clip-path: inset(0 round var(--radius));
 }
 
+/* Image */
 .print img{
   width:100%;
   height:100%;
   object-fit:contain;
-  margin: auto;
+  margin:auto;
   display:block;
+
   pointer-events:none;
+  backface-visibility: hidden;
+
   -webkit-user-drag: none;
   user-drag: none;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+
+  /* ✅ reduces shimmer on some GPUs */
+  image-rendering: auto;
 }
 
 /* Noise */
@@ -567,6 +590,7 @@ main{
   mix-blend-mode:overlay;
   pointer-events:none;
   animation:noiseMove .45s steps(2) infinite;
+  backface-visibility:hidden;
 }
 @keyframes noiseMove{
   0%{ transform:translate(0,0); }
@@ -576,12 +600,19 @@ main{
   100%{ transform:translate(0,0); }
 }
 
-/* arrow pinned */
+/* ===== ARROWS ===== */
 .arrow-slot{
   position:absolute;
   right:12px;
   bottom:12px;
-  z-index:3;
+  z-index:4;
+  pointer-events:auto;
+}
+.arrow-slot--top-left{
+  position:absolute;
+  left:12px;
+  top:12px;
+  z-index:4;
   pointer-events:auto;
 }
 
@@ -593,7 +624,7 @@ footer{
   opacity:.5;
 }
 
-/* ===== Active UI under the active panel ===== */
+/* ===== Active UI (two instances) ===== */
 .active-ui{
   position:absolute;
   left:0;
@@ -601,23 +632,31 @@ footer{
   z-index: 8;
   transform: translate3d(0,0,0);
   pointer-events:none;
+  transform-style: preserve-3d;
+  backface-visibility:hidden;
 }
+
 .active-meta{
   max-width: min(360px, 92%);
   position:absolute;
   right:0;
   top:-27px;
+
   display:flex;
   gap:4px;
   align-items:baseline;
   white-space:nowrap;
+
   padding:4px 6px;
   border-radius:14px;
+
   background: rgba(255,255,255,.28);
   backdrop-filter: blur(10px) saturate(120%);
   border: 1px solid rgba(255,255,255,.16);
+
   pointer-events:none;
 }
+
 .am-title{
   font-size:13px;
   letter-spacing:.2px;
@@ -642,11 +681,12 @@ footer{
   top: calc(100% + 12px);
   transform: translateX(-50%);
   width: min(520px, 92%);
-  margin: 0 auto;
-  justify-content: space-between;
+
   display:flex;
   align-items:center;
+  justify-content: space-between;
   min-height: 44px;
+
   pointer-events:auto;
 }
 .active-left,
@@ -660,12 +700,14 @@ footer{
   position:fixed;
   inset:0;
   background: rgba(0,0,0,.92);
+
   display:none;
   align-items:center;
   justify-content:center;
+
   z-index: 2147483647;
   padding: clamp(14px, 3vw, 34px);
-  box-sizing:border-box;
+
   overflow:auto;
 }
 .fullscreen.open{ display:flex; }
@@ -673,9 +715,11 @@ footer{
 .fs-inner{
   width: min(96vw, 1120px);
   position:relative;
+
   display:flex;
   flex-direction:column;
   gap:12px;
+
   max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
 }
 
@@ -684,18 +728,23 @@ footer{
   position:absolute;
   right:0;
   top:-27px;
+
   display:flex;
   gap:4px;
   align-items:baseline;
   white-space:nowrap;
+
   padding:4px 6px;
   border-radius:14px;
+
   background: rgba(255,255,255,.14);
   backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid rgba(255,255,255,.35);
+
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,.06),
     0 12px 30px rgba(0,0,0,.45);
+
   color: rgba(255,255,255,.92);
 }
 
@@ -719,6 +768,7 @@ footer{
   color: rgba(255,255,255,.75);
 }
 
+/* Fullscreen buttons override (bright glass on dark bg) */
 .fullscreen .abtn{
   background: rgba(255,255,255,.18);
   backdrop-filter: blur(14px) saturate(160%);
@@ -741,14 +791,18 @@ footer{
   opacity:1;
 }
 
+/* Fullscreen image frame */
 .fs-frame{
   flex: 1 1 auto;
   min-height: 0;
+
   aspect-ratio: var(--a3);
   height: 100%;
   width: auto;
+
   max-width: 100%;
   max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px) - 60px);
+
   margin: 0 auto;
 }
 .fullscreen .fs-frame img{
@@ -759,12 +813,15 @@ footer{
 
 .fs-actions{
   flex: 0 0 auto;
+
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
+
   width: min(560px, 92%);
   margin: 0 auto;
+
   min-height:44px;
 }
 .fullscreen .fs-left,
@@ -782,15 +839,23 @@ footer{
     --panelW: 86vw;
     --maxFilmH: 72vh;
     --persp: 3200px;
+
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
+
     --btnH: 44px;
+
     --burgerScale: 1.10;
     --monoScale: 1.00;
+
     --burgerShift: 8px;
     --foldShift: 14px;
+
     --pillH: 36px;
+
+    /* slightly smaller deck split on tiny screens */
+    --deckOffset: 21vh;
   }
 
   .brand-text{
@@ -804,11 +869,10 @@ footer{
 }
 
 @media (prefers-reduced-motion: reduce){
-  .panel{ transition:none !important; }
   .noise{ animation:none !important; }
 }
 
-/* ===== Mobile landscape fullscreen fix (keep buttons visible) ===== */
+/* Mobile landscape fullscreen fix (keep buttons visible) */
 @media (max-width: 900px) and (orientation: landscape){
   .fullscreen{
     overflow: hidden;
