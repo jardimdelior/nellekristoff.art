@@ -608,6 +608,15 @@ html.ready .space-viewport{
 /* fullscreen */
 .fullscreen{
   position:absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40vw;
+  max-width: 720px;
+  min-width: 320px;
+
+  height: 100dvh;
+  height: 100vh;
   inset:0;
   background: rgba(0,0,0,.92);
   display:none;
@@ -620,7 +629,7 @@ html.ready .space-viewport{
 .fullscreen.open{ display:flex; }
 
 .fs-inner{
-  width: min(96vw, 1120px);
+  width: 100%;
   position:relative;
   display:flex;
   flex-direction:column;
