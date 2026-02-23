@@ -164,14 +164,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Motion feel (calm)
-  const DURATION = 1550;
-  const EASING   = 'cubic-bezier(.10,.86,.16,1)';
+  const DURATION = 1850;
+  const EASING   = 'cubic-bezier(.8,.92,.12,1)';
 
   // Air-wave tuning (stronger bend)
-  const WAVE_Z   = 56;
-  const WAVE_ROT = 14;
-  const WAVE_X   = -3.2;   // try -4.6 for stronger bubble
-  const WAVE_S   = 1.018;
+  const WAVE_Z   = 46;
+  const WAVE_ROT = 12;
+  const WAVE_X   = -2.6;   // try -4.6 for stronger bubble
+  const WAVE_S   = 1.014;
   const MID      = 0.56;
 
   let active = 0;
@@ -268,11 +268,28 @@ document.addEventListener("DOMContentLoaded", () => {
       const extraS   = 1 + ((WAVE_S - 1) * (0.25 + 0.95 * feather));
 
       const midT = buildT(from[i].x, from[i].z, from[i].rot, extraZ, extraRot, extraX, extraS);
+      const ad = Math.abs(i - idxFrom);
+      const feather = clamp(ad / 2, 0, 1);
+
+      // gentler, more floaty (lower peak values)
+      const extraZ1   = WAVE_Z * (0.18 + 0.55 * feather);
+      const extraRot1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.12 + 0.55 * feather));
+      const extraX1   = WAVE_X * (0.18 + 0.55 * feather);
+      const extraS1   = 1 + ((WAVE_S - 1) * (0.10 + 0.55 * feather));
+
+      const extraZ2   = WAVE_Z * (0.35 + 0.80 * feather);
+      const extraRot2 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.18 + 0.80 * feather));
+      const extraX2   = WAVE_X * (0.35 + 0.80 * feather);
+      const extraS2   = 1 + ((WAVE_S - 1) * (0.16 + 0.80 * feather));
+
+      const mid1 = buildT(from[i].x, from[i].z, from[i].rot, extraZ1, extraRot1, extraX1, extraS1);
+      const mid2 = buildT(from[i].x, from[i].z, from[i].rot, extraZ2, extraRot2, extraX2, extraS2);
 
       return el.animate(
         [
           { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
-          { transform: midT,              opacity: from[i].opacity, offset: MID },
+          { transform: mid1,              opacity: from[i].opacity, offset: 0.36 },
+          { transform: mid2,              opacity: from[i].opacity, offset: 0.62 },
           { transform: to[i].transform,   opacity: to[i].opacity,   offset: 1 }
         ],
         { duration: DURATION, easing: EASING, fill: 'forwards' }
@@ -285,13 +302,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const uiTo   = to[idxTo].transform;
 
       const uiExtraRot = (from[idxFrom].rot === 0) ? 0 : WAVE_ROT;
-      const uiMid = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, WAVE_Z, uiExtraRot, WAVE_X, WAVE_S);
+      const uiMid1 = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, WAVE_Z * 0.22, 0, WAVE_X * 0.22, 1 + ((WAVE_S - 1) * 0.22));
+      const uiMid2 = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, WAVE_Z * 0.42, 0, WAVE_X * 0.42, 1 + ((WAVE_S - 1) * 0.42));
 
       uiAnim = activeUI.animate(
         [
           { transform: uiFrom, offset: 0 },
-          { transform: uiMid,  offset: MID },
-          { transform: uiTo,   offset: 1 }
+          { transform: uiMid1, offset: 0.36 },
+          { transform: uiMid2, offset: 0.62 },
+          { transform: uiTo,  offset: 1 }
         ],
         { duration: DURATION, easing: EASING, fill: 'forwards' }
       );
