@@ -1,4 +1,4 @@
-// app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width + AIR WAVE)
+// app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width + AIR WAVE + VIRTUAL INDEX WRAP FIX)
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -28,6 +28,14 @@ function cssVar(name){ return getComputedStyle(document.documentElement).getProp
 function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
 function numDeg(v){ return parseFloat(String(v).replace('deg','')) || 0; }
 function num(v){ return parseFloat(v) || 0; }
+
+// --- virtual index helpers (prevents wrap “triple flap”) ---
+function mod(n, m){ return ((n % m) + m) % m; }
+function nearestVirtual(i, targetPos, n){
+  // choose i + k*n that is closest to targetPos
+  const k = Math.round((targetPos - i) / n);
+  return i + k * n;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.classList.add("ready");
@@ -168,9 +176,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const WAVE_X   = -2.6;
   const WAVE_S   = 1.014;
 
-  let active = 0;
+  // --- VIRTUAL active position (fixes wrap) ---
+  let activePos = 0;        // ... -1,0,1,2,3 ...
   let animating = false;
   let queuedDir = 0;
+
+  function activeIdx(){
+    return mod(activePos, works.length);
+  }
+  function activePanelIdx(){
+    return mod(activePos, panels.length || works.length);
+  }
 
   const activeUI = document.getElementById('activeUI');
   const amTitle = document.getElementById('amTitle');
@@ -186,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cancelAnim(activeUI);
   }
 
-  function getTargets(targetActive){
+  function getTargets(targetPos){
     const panelW = getPanelW();
     const angleStep = numDeg(cssVar('--angleStep'));
     const maxAngle  = numDeg(cssVar('--maxAngle'));
@@ -195,22 +211,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const stepX     = panelW * xStepPct;
 
     const Z_BIAS = 0.35;
+    const n = panels.length || works.length;
 
     return panels.map((_, i) => {
-      const d = i - targetActive;
+      // KEY: choose the nearest “copy” of panel i around targetPos
+      const iV = nearestVirtual(i, targetPos, n);
+      const d = iV - targetPos;
       const ad = Math.abs(d);
 
       const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
+
+      // Keep z-bias tied to DOM order to avoid z-fighting flicker
       const z   = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS);
+
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
 
       return { x, z, rot, opacity: String(op), transform: buildT(x, z, rot) };
     });
   }
 
-  function syncActiveUIText(idx){
-    const w = works[idx] || works[0];
+  function syncActiveUIText(pos){
+    const w = works[mod(pos, works.length)] || works[0];
     if (!w) return;
     if (amTitle) amTitle.textContent = w.title || "Untitled";
     if (amStatus) amStatus.textContent = w.status || "Unveiling soon";
@@ -226,33 +248,34 @@ document.addEventListener("DOMContentLoaded", () => {
     activeUI.style.top  = getComputedStyle(panelEl).top;
   }
 
-  function applyInstant(idx){
+  function applyInstant(pos){
     cancelAll();
-    const t = getTargets(idx);
+    const t = getTargets(pos);
     panels.forEach((el, i) => {
       el.style.transform = t[i].transform;
       el.style.opacity = t[i].opacity;
     });
-    syncActiveUIText(idx);
-    setActiveUITransformFromPanel(panels[idx]);
+    syncActiveUIText(pos);
+    setActiveUITransformFromPanel(panels[mod(pos, panels.length)]);
   }
 
-  function animateBetween(idxFrom, idxTo){
+  function animateBetween(fromPos, toPos){
     cancelAll();
 
-    const from = getTargets(idxFrom);
-    const to   = getTargets(idxTo);
+    const from = getTargets(fromPos);
+    const to   = getTargets(toPos);
 
     panels.forEach((el, i) => {
       el.style.transform = from[i].transform;
       el.style.opacity = from[i].opacity;
     });
 
-    syncActiveUIText(idxFrom);
-    setActiveUITransformFromPanel(panels[idxFrom]);
+    syncActiveUIText(fromPos);
+    setActiveUITransformFromPanel(panels[mod(fromPos, panels.length)]);
 
     const anims = panels.map((el, i) => {
-      const ad = Math.abs(i - idxFrom);
+      // feather based on distance from CURRENT active panel
+      const ad = Math.abs(i - mod(fromPos, panels.length));
       const feather = clamp(ad / 2, 0, 1);
 
       const extraZ1   = WAVE_Z * (0.18 + 0.55 * feather);
@@ -281,11 +304,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let uiAnim = null;
     if (activeUI){
-      const uiFrom = from[idxFrom].transform;
-      const uiTo   = to[idxTo].transform;
+      const fromPanelIndex = mod(fromPos, panels.length);
+      const toPanelIndex   = mod(toPos, panels.length);
 
-      const uiMid1 = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, WAVE_Z * 0.22, 0, WAVE_X * 0.22, 1 + ((WAVE_S - 1) * 0.22));
-      const uiMid2 = buildT(from[idxFrom].x, from[idxFrom].z, from[idxFrom].rot, WAVE_Z * 0.42, 0, WAVE_X * 0.42, 1 + ((WAVE_S - 1) * 0.42));
+      const uiFrom = from[fromPanelIndex].transform;
+      const uiTo   = to[toPanelIndex].transform;
+
+      const uiMid1 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, WAVE_Z * 0.22, 0, WAVE_X * 0.22, 1 + ((WAVE_S - 1) * 0.22));
+      const uiMid2 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, WAVE_Z * 0.42, 0, WAVE_X * 0.42, 1 + ((WAVE_S - 1) * 0.42));
 
       uiAnim = activeUI.animate(
         [
@@ -308,8 +334,8 @@ document.addEventListener("DOMContentLoaded", () => {
         el.style.opacity = to[i].opacity;
       });
 
-      syncActiveUIText(idxTo);
-      setActiveUITransformFromPanel(panels[idxTo]);
+      syncActiveUIText(toPos);
+      setActiveUITransformFromPanel(panels[mod(toPos, panels.length)]);
     });
   }
 
@@ -330,11 +356,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     animating = true;
 
-    const fromIdx = active;
-    const toIdx = (active + dir + works.length) % works.length;
+    const fromPos = activePos;
+    const toPos   = activePos + dir;   // ALWAYS one step (no modulo jump)
 
-    animateBetween(fromIdx, toIdx).then(() => {
-      active = toIdx;
+    animateBetween(fromPos, toPos).then(() => {
+      activePos = toPos;
       animating = false;
       runQueued();
     });
@@ -364,18 +390,20 @@ document.addEventListener("DOMContentLoaded", () => {
         im.addEventListener('contextmenu', (e) => e.preventDefault());
       }
 
+      // Only ACTIVE panel reacts to click (no side jump)
       el.addEventListener('click', () => {
         if (animating) return;
-        if (idx !== active) return;
+        if (idx !== activePanelIdx()) return;
         const selectButton = document.getElementById('selectBtn');
         if (selectButton) selectButton.click();
       });
 
+      // Also prevent side-jump on keyboard
       el.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         e.preventDefault();
         if (animating) return;
-        if (idx !== active) return;
+        if (idx !== activePanelIdx()) return;
         const selectButton = document.getElementById('selectBtn');
         if (selectButton) selectButton.click();
       });
@@ -394,6 +422,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Optional: left arrow key already works; if you add a left button later, call prev()
+
   /* ===== Fullscreen overlay ===== */
   const selectBtn = document.getElementById('selectBtn');
   const fullscreen = document.getElementById('fullscreen');
@@ -408,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function openFullscreen(){
-    const w = works[active] || works[0];
+    const w = works[activeIdx()] || works[0];
     if (!w || !fullscreen || !fsImg) return;
 
     fsImg.src = w.src;
@@ -560,13 +590,13 @@ document.addEventListener("DOMContentLoaded", () => {
     panY = tPanY = 0;
     applyView();
 
-    requestAnimationFrame(() => applyInstant(active));
+    requestAnimationFrame(() => applyInstant(activePos));
   }
   init();
 
   window.addEventListener('resize', () => {
     clampPanTarget();
     ensureAnim();
-    requestAnimationFrame(() => applyInstant(active));
+    requestAnimationFrame(() => applyInstant(activePos));
   });
 });
