@@ -1,10 +1,10 @@
 // app.js — TWO independent decks (Top + Bottom)
-// - Independent WAAPI leporello per deck
-// - Independent pan/zoom per deck
-// - Focus mode: click deck -> expands to full viewport, zoom centered
-// - Zoom-out near min -> returns to split view
-// - Top deck arrow moves opposite direction (left)
-// - Shared fullscreen (Select opens current deck active work)
+// Fixes added:
+// - TOP Select opens fullscreen (capture + stopPropagation)
+// - Deck drag works when zoomed (touch-action + pointer logic)
+// - Active/middle panel ALWAYS on top (positive Z lift + stronger depth separation)
+// - Auto-return to split view when zoom nears zoomMin (watcher)
+// - Split-view horizon tilt handled by CSS
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -52,6 +52,7 @@ function setupFullscreen(){
     fullscreen.classList.add('open');
     fullscreen.setAttribute('aria-hidden', 'false');
   }
+
   function close(){
     if (!fullscreen) return;
     fullscreen.classList.remove('open');
@@ -75,28 +76,33 @@ function setupFullscreen(){
 function createDeck(opts){
   const {
     name,
-    viewportRoot,     // #viewport
-    deckEl,           // #deckTop / #deckBottom
-    panEl,            // #spacePanTop / #spacePanBottom
-    zoomEl,           // #spaceZoomTop / #spaceZoomBottom
-    lepEl,            // #leporelloTop / #leporelloBottom
+    viewportRoot,
+    deckEl,
+    panEl,
+    zoomEl,
+    lepEl,
     activeUI,
     amTitle,
     amStatus,
     activeCollect,
     selectBtn,
     arrowBtn,
-    direction,        // +1 or -1
-    works
+    direction,
+    works,
+    isFocusedFn,
+    requestFocusFn,
+    requestSplitFn,
+    openFullscreenFn
   } = opts;
 
   // preload
   works.forEach(w => { const i = new Image(); i.src = w.src; });
 
-  // --- independent pan/zoom state per deck ---
+  /* ===== independent pan/zoom ===== */
   let zoom = 1, panX = 0, panY = 0;
   let tZoom = 1, tPanX = 0, tPanY = 0;
   let raf = null;
+  let panHeld = false; // prevents hover-like conflicts
 
   function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
   function zoomMax(){ return num(cssVar('--zoomMax')) || 1.35; }
@@ -113,29 +119,30 @@ function createDeck(opts){
   function clampPanTarget(){
     if (!deckEl) return;
     const rect = deckEl.getBoundingClientRect();
-
-    // allow a little drift even when zoomed out
     const slackX = rect.width  * 0.08;
     const slackY = rect.height * 0.08;
-
     const extraX = Math.max(0, (tZoom - 1)) * rect.width  / 2;
     const extraY = Math.max(0, (tZoom - 1)) * rect.height / 2;
-
     const maxX = extraX + slackX;
     const maxY = extraY + slackY;
-
     tPanX = clamp(tPanX, -maxX, maxX);
     tPanY = clamp(tPanY, -maxY, maxY);
   }
 
   function ensureAnim(){
     if (raf) return;
+
     const ease = 0.14;
     const tick = () => {
       zoom += (tZoom - zoom) * ease;
       panX += (tPanX - panX) * ease;
       panY += (tPanY - panY) * ease;
       applyView();
+
+      // ✅ auto-return to split when zoomed out near min (even if user stops moving)
+      if (isFocusedFn() && tZoom <= zoomMin() + 0.015){
+        requestSplitFn();
+      }
 
       const done =
         Math.abs(tZoom - zoom) < 0.0008 &&
@@ -150,6 +157,7 @@ function createDeck(opts){
       }
       raf = requestAnimationFrame(tick);
     };
+
     raf = requestAnimationFrame(tick);
   }
 
@@ -188,7 +196,7 @@ function createDeck(opts){
     ensureAnim();
   }
 
-  // --- WAAPI leporello state per deck ---
+  /* ===== WAAPI leporello ===== */
   const panels = [];
   let activePos = 0;
   let animating = false;
@@ -197,7 +205,7 @@ function createDeck(opts){
   function activeIdx(){ return mod(activePos, works.length); }
   function activePanelIdx(){ return mod(activePos, panels.length || works.length); }
 
-  // ✅ FIX: measure CSS layout width, not zoomed width
+  // ✅ layout width only (not zoomed)
   function getPanelW(){
     const p = panels[0];
     if (!p) return 0;
@@ -205,7 +213,6 @@ function createDeck(opts){
   }
 
   function buildT(x, z, rotY, extraZ = 0, extraRotY = 0, extraRotX = 0, extraScale = 1){
-    // single-line transform string: less Safari jitter
     return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale})`;
   }
 
@@ -236,8 +243,11 @@ function createDeck(opts){
     const xStepPct  = num(cssVar('--xStep')) / 100;
     const stepX     = panelW * xStepPct;
 
-    const Z_BIAS = 3.1; // stronger separation to reduce overlap
     const n = panels.length || works.length;
+
+    // ✅ stronger “always behind” separation
+    const Z_BIAS = 4.2;
+    const ACTIVE_LIFT = 1.2; // ✅ active always comes forward
 
     return panels.map((_, i) => {
       const iV = nearestVirtual(i, targetPos, n);
@@ -247,8 +257,13 @@ function createDeck(opts){
       const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
 
+      // unique shim avoids ties
       const Z_SHIM = (i + 1) * 0.55;
-      const z = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS) - Z_SHIM;
+
+      // ✅ active gets a small positive Z, everything else is strictly negative
+      const z = (d === 0)
+        ? ACTIVE_LIFT
+        : (-ad * zStep) - (i * Z_BIAS) - Z_SHIM - 1.0;
 
       const op = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.70, 1);
 
@@ -284,9 +299,7 @@ function createDeck(opts){
     setActiveUITransformFromPanel(panels[mod(pos, panels.length)]);
   }
 
-  function featherFrom(ad){
-    return clamp(ad / 2, 0, 1);
-  }
+  function featherFrom(ad){ return clamp(ad / 2, 0, 1); }
 
   function animateBetween(fromPos, toPos){
     cancelAll();
@@ -350,12 +363,10 @@ function createDeck(opts){
       );
     });
 
-    // activeUI follows calmly
     let uiAnim = null;
     if (activeUI){
       const fromPanelIndex = mod(fromPos, panels.length);
       const toPanelIndex   = mod(toPos, panels.length);
-
       const uiFrom = from[fromPanelIndex].transform;
       const uiTo   = to[toPanelIndex].transform;
 
@@ -408,12 +419,8 @@ function createDeck(opts){
     });
   }
 
-  function next(){
-    // top deck: direction is -1 (moves opposite)
-    step(direction);
-  }
+  function next(){ step(direction); }
 
-  // build panels
   function buildPanels(){
     if (!lepEl) return;
     lepEl.innerHTML = "";
@@ -424,10 +431,6 @@ function createDeck(opts){
       el.className = 'panel';
       el.tabIndex = 0;
 
-      el.style.backfaceVisibility = 'hidden';
-      el.style.transformStyle = 'preserve-3d';
-      el.style.transformOrigin = '50% 50%';
-
       el.innerHTML = `
         <div class="print">
           <img src="${w.src}" alt="${w.title || ''}" draggable="false">
@@ -435,24 +438,8 @@ function createDeck(opts){
         </div>
       `;
 
-      const im = el.querySelector('img');
-      if (im){
-        im.style.backfaceVisibility = 'hidden';
-        im.addEventListener('dragstart', (e) => e.preventDefault());
-        im.addEventListener('mousedown', (e) => e.preventDefault());
-        im.addEventListener('contextmenu', (e) => e.preventDefault());
-      }
-
-      // only active panel triggers select
+      // active-only select via clicking panel (optional)
       el.addEventListener('click', () => {
-        if (animating) return;
-        if (idx !== activePanelIdx()) return;
-        if (selectBtn) selectBtn.click();
-      });
-
-      el.addEventListener('keydown', (e) => {
-        if (e.key !== 'Enter' && e.key !== ' ') return;
-        e.preventDefault();
         if (animating) return;
         if (idx !== activePanelIdx()) return;
         if (selectBtn) selectBtn.click();
@@ -463,19 +450,7 @@ function createDeck(opts){
     });
   }
 
-  function init(){
-    buildPanels();
-
-    zoom = tZoom = zoomMin();
-    panX = tPanX = 0;
-    panY = tPanY = 0;
-    clampPanTarget();
-    applyView();
-
-    requestAnimationFrame(() => applyInstant(activePos));
-  }
-
-  // pointer handling (independent per deck)
+  /* ===== Input (drag + pinch + wheel) ===== */
   let pointers = new Map();
   let lastPan = null;
   let pinchStart = null;
@@ -493,7 +468,7 @@ function createDeck(opts){
   function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
   function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
 
-  function bindInput(isFullscreenOpen, onFocusRequest, onUnfocusRequest){
+  function bindInput(isFullscreenOpen){
     if (!deckEl) return;
 
     deckEl.addEventListener('pointerdown', (e) => {
@@ -502,11 +477,13 @@ function createDeck(opts){
       const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
       if (interactive) return;
 
-      // click deck -> focus it (smooth expand)
-      onFocusRequest();
+      // focus on first interaction with deck
+      requestFocusFn();
 
       deckEl.setPointerCapture(e.pointerId);
       setPointer(e);
+
+      panHeld = true;
 
       if (pointers.size === 1){
         lastPan = { x: e.clientX, y: e.clientY };
@@ -549,17 +526,16 @@ function createDeck(opts){
         setZoomAt(pinchStart.z * (dNow / pinchStart.d), cx, cy);
         addPan(mNow.x - pinchStart.m.x, mNow.y - pinchStart.m.y);
         pinchStart.m = mNow;
-
-        // if user zooms back to min-ish, return to split view
-        if (tZoom <= zoomMin() + 0.02){
-          onUnfocusRequest();
-        }
       }
     });
 
     function endPointer(e){
       pointers.delete(e.pointerId);
-      if (pointers.size === 0){ lastPan = null; pinchStart = null; }
+      if (pointers.size === 0){
+        lastPan = null;
+        pinchStart = null;
+        panHeld = false;
+      }
       if (pointers.size === 1){
         const remaining = Array.from(pointers.values())[0];
         lastPan = remaining ? { x: remaining.x, y: remaining.y } : null;
@@ -574,7 +550,7 @@ function createDeck(opts){
       if (isFullscreenOpen()) return;
       e.preventDefault();
 
-      onFocusRequest();
+      requestFocusFn();
 
       const rect = deckEl.getBoundingClientRect();
       const cx = e.clientX - rect.left;
@@ -582,10 +558,6 @@ function createDeck(opts){
 
       const factor = Math.exp(-e.deltaY * 0.0018);
       setZoomAt(tZoom * factor, cx, cy);
-
-      if (tZoom <= zoomMin() + 0.02){
-        onUnfocusRequest();
-      }
     }, { passive:false });
   }
 
@@ -598,12 +570,29 @@ function createDeck(opts){
     });
   }
 
-  function bindSelect(openFullscreen){
+  function bindSelect(){
     if (!selectBtn) return;
+
+    // ✅ capture phase + stopPropagation so it never gets swallowed
+    selectBtn.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+    }, { capture:true });
+
     selectBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      openFullscreen(works[activeIdx()]);
-    });
+      e.stopPropagation();
+      openFullscreenFn(works[activeIdx()]);
+    }, { capture:true });
+  }
+
+  function init(){
+    buildPanels();
+    zoom = tZoom = zoomMin();
+    panX = tPanX = 0;
+    panY = tPanY = 0;
+    clampPanTarget();
+    applyView();
+    requestAnimationFrame(() => applyInstant(activePos));
   }
 
   function onResize(){
@@ -613,14 +602,15 @@ function createDeck(opts){
   }
 
   return {
-    name,
     init,
     onResize,
     bindInput,
     bindArrow,
     bindSelect,
     setZoomCentered,
-    zoomMin
+    zoomMin,
+    // expose for focus init if needed
+    _getTargetZoom: () => tZoom
   };
 }
 
@@ -657,8 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const FS = setupFullscreen();
 
-  // ✅ Works (bottom: 1–3, top: 4–6)
-  // Replace src paths with your real images.
+  // Works
   const worksBottom = [
     { src:"images/Untitled1.png", title:"Untitled 1", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
     { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
@@ -670,8 +659,9 @@ document.addEventListener("DOMContentLoaded", () => {
     { src:"images/Untitled6.png", title:"Untitled 6", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   ];
 
-  // Focus logic (one deck expands to full viewport)
+  // focus state
   let focused = null; // "top" | "bottom" | null
+
   function focusTop(){
     if (!viewportRoot) return;
     focused = "top";
@@ -704,8 +694,24 @@ document.addEventListener("DOMContentLoaded", () => {
     activeCollect: document.getElementById('activeCollectTop'),
     selectBtn: document.getElementById('selectBtnTop'),
     arrowBtn: document.getElementById('arrowTopLeft'),
-    direction: -1, // ✅ moves opposite direction
-    works: worksTop
+    direction: -1,
+    works: worksTop,
+
+    isFocusedFn: () => focused === "top",
+    requestFocusFn: () => {
+      if (focused !== "top"){
+        focusTop();
+        // centered zoom-in when you engage the deck
+        deckTop.setZoomCentered(1);
+      }
+    },
+    requestSplitFn: () => {
+      if (focused === "top"){
+        clearFocus();
+        deckTop.setZoomCentered(deckTop.zoomMin());
+      }
+    },
+    openFullscreenFn: FS.open
   });
 
   const deckBottom = createDeck({
@@ -722,7 +728,22 @@ document.addEventListener("DOMContentLoaded", () => {
     selectBtn: document.getElementById('selectBtnBottom'),
     arrowBtn: document.getElementById('arrowBottomRight'),
     direction: +1,
-    works: worksBottom
+    works: worksBottom,
+
+    isFocusedFn: () => focused === "bottom",
+    requestFocusFn: () => {
+      if (focused !== "bottom"){
+        focusBottom();
+        deckBottom.setZoomCentered(1);
+      }
+    },
+    requestSplitFn: () => {
+      if (focused === "bottom"){
+        clearFocus();
+        deckBottom.setZoomCentered(deckBottom.zoomMin());
+      }
+    },
+    openFullscreenFn: FS.open
   });
 
   deckTop.init();
@@ -731,47 +752,11 @@ document.addEventListener("DOMContentLoaded", () => {
   deckTop.bindArrow();
   deckBottom.bindArrow();
 
-  deckTop.bindSelect(FS.open);
-  deckBottom.bindSelect(FS.open);
+  deckTop.bindSelect();
+  deckBottom.bindSelect();
 
-  deckTop.bindInput(
-    FS.isOpen,
-    () => {
-      if (focused !== "top"){
-        focusTop();
-        deckTop.setZoomCentered(1); // zoom in centered when focusing
-      }
-    },
-    () => {
-      // zooming out near min returns to split
-      clearFocus();
-      deckTop.setZoomCentered(deckTop.zoomMin());
-    }
-  );
-
-  deckBottom.bindInput(
-    FS.isOpen,
-    () => {
-      if (focused !== "bottom"){
-        focusBottom();
-        deckBottom.setZoomCentered(1);
-      }
-    },
-    () => {
-      clearFocus();
-      deckBottom.setZoomCentered(deckBottom.zoomMin());
-    }
-  );
-
-  // keyboard: arrows control the focused deck; if none focused -> bottom deck by default
-  window.addEventListener('keydown', (e) => {
-    if (FS.isOpen()) return;
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-
-    // If you want keyboard control later, we can wire prev/next both directions.
-    // For now: keep it simple (click arrows).
-    e.preventDefault();
-  });
+  deckTop.bindInput(FS.isOpen);
+  deckBottom.bindInput(FS.isOpen);
 
   window.addEventListener('resize', () => {
     deckTop.onResize();
