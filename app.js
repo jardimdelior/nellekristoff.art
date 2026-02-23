@@ -1,4 +1,12 @@
-// app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width + AIR WAVE + VIRTUAL INDEX WRAP FIX)
+// app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width
+//        + THEATRICAL “FEATHER BUBBLE” + VIRTUAL INDEX WRAP FIX)
+//
+// Key upgrades vs current:
+// - Stronger, more visible air-wave (extra Z + rotateX + extra rotateY + tiny scale “breath”)
+// - Wave strength is computed from the *virtual distance d* (not DOM index) -> no triple-flap on wrap (3 -> 1)
+// - Multi-peak wave (3 mids) for “bubble passing under paper”
+// - Active panel stays calmer; side panels get most bend
+// - Keeps “only active panel click opens fullscreen” + no side jump
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -32,7 +40,6 @@ function num(v){ return parseFloat(v) || 0; }
 // --- virtual index helpers (prevents wrap “triple flap”) ---
 function mod(n, m){ return ((n % m) + m) % m; }
 function nearestVirtual(i, targetPos, n){
-  // choose i + k*n that is closest to targetPos
   const k = Math.round((targetPos - i) / n);
   return i + k * n;
 }
@@ -102,12 +109,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function ensureAnim(){
     if (animRaf) return;
     const ease = 0.22;
-
     const tick = () => {
       zoom += (tZoom - zoom) * ease;
       panX += (tPanX - panX) * ease;
       panY += (tPanY - panY) * ease;
-
       applyView();
 
       const done =
@@ -123,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       animRaf = requestAnimationFrame(tick);
     };
-
     animRaf = requestAnimationFrame(tick);
   }
 
@@ -164,30 +168,32 @@ document.addEventListener("DOMContentLoaded", () => {
     return r.width || parseFloat(getComputedStyle(p).width) || 0;
   }
 
+  // Single-line transform string (less Safari jitter)
   function buildT(x, z, rotY, extraZ = 0, extraRotY = 0, extraRotX = 0, extraScale = 1){
     return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale})`;
   }
 
-  const DURATION = 1850;
+  // Motion feel (theatre / float)
+  const DURATION = 2100;
   const EASING   = 'cubic-bezier(.08,.92,.12,1)';
 
-  const WAVE_Z   = 46;
-  const WAVE_ROT = 12;
-  const WAVE_X   = -2.6;
-  const WAVE_S   = 1.014;
+  // THEATRICAL air-wave tuning (more visible)
+  // NOTE: extraZ is towards viewer (positive).
+  const WAVE_Z   = 110;     // BIG “bubble under paper”
+  const WAVE_ROT = 22;      // extra Y bend (sides)
+  const WAVE_X   = -9.0;    // rotateX peak (paper breathing)
+  const WAVE_S   = 1.030;   // breath scale
+  const WAVE_TWIST = 5.0;   // subtle counter-twist for drama (alternates)
 
   // --- VIRTUAL active position (fixes wrap) ---
   let activePos = 0;        // ... -1,0,1,2,3 ...
   let animating = false;
   let queuedDir = 0;
 
-  function activeIdx(){
-    return mod(activePos, works.length);
-  }
-  function activePanelIdx(){
-    return mod(activePos, panels.length || works.length);
-  }
+  function activeIdx(){ return mod(activePos, works.length); }
+  function activePanelIdx(){ return mod(activePos, (panels.length || works.length)); }
 
+  // Active UI
   const activeUI = document.getElementById('activeUI');
   const amTitle = document.getElementById('amTitle');
   const amStatus = document.getElementById('amStatus');
@@ -210,24 +216,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const xStepPct  = num(cssVar('--xStep')) / 100;
     const stepX     = panelW * xStepPct;
 
-    const Z_BIAS = 0.35;
+    // Tiny depth separation to reduce z-fight shimmer
+    const Z_BIAS = 0.45;
+
     const n = panels.length || works.length;
 
     return panels.map((_, i) => {
-      // KEY: choose the nearest “copy” of panel i around targetPos
+      // choose the nearest “copy” of panel i around targetPos
       const iV = nearestVirtual(i, targetPos, n);
-      const d = iV - targetPos;
+      const d  = iV - targetPos;
       const ad = Math.abs(d);
 
       const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
 
-      // Keep z-bias tied to DOM order to avoid z-fighting flicker
+      // z tied to DOM order bias to keep stable draw ordering
       const z   = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS);
 
-      const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
+      const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.70, 1);
 
-      return { x, z, rot, opacity: String(op), transform: buildT(x, z, rot) };
+      return {
+        d, ad, x, z, rot,
+        opacity: String(op),
+        transform: buildT(x, z, rot)
+      };
     });
   }
 
@@ -259,66 +271,109 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveUITransformFromPanel(panels[mod(pos, panels.length)]);
   }
 
+  // Feather wave intensity from virtual distance:
+  // - center (ad=0) is calmer, sides breathe strongly
+  function featherFrom(ad){
+    // With 3 panels, ad is typically 0..1..2; clamp to [0..1]
+    return clamp(ad / 2, 0, 1);
+  }
+
   function animateBetween(fromPos, toPos){
     cancelAll();
 
     const from = getTargets(fromPos);
     const to   = getTargets(toPos);
 
+    // lock exact starting state
     panels.forEach((el, i) => {
       el.style.transform = from[i].transform;
-      el.style.opacity = from[i].opacity;
+      el.style.opacity   = from[i].opacity;
     });
 
     syncActiveUIText(fromPos);
     setActiveUITransformFromPanel(panels[mod(fromPos, panels.length)]);
 
+    // Multi-peak wave = bubble rolls under paper, then settles
+    // offsets tuned for “breath”: rise -> peak -> small after-peak -> settle
+    const O1 = 0.26;
+    const O2 = 0.54;
+    const O3 = 0.74;
+
     const anims = panels.map((el, i) => {
-      // feather based on distance from CURRENT active panel
-      const ad = Math.abs(i - mod(fromPos, panels.length));
-      const feather = clamp(ad / 2, 0, 1);
+      const f = featherFrom(from[i].ad);
 
-      const extraZ1   = WAVE_Z * (0.18 + 0.55 * feather);
-      const extraRot1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.12 + 0.55 * feather));
-      const extraX1   = WAVE_X * (0.18 + 0.55 * feather);
-      const extraS1   = 1 + ((WAVE_S - 1) * (0.10 + 0.55 * feather));
+      // center calm, sides dramatic
+      const z1 = WAVE_Z * (0.18 + 0.55 * f);
+      const z2 = WAVE_Z * (0.55 + 0.95 * f);     // main bubble
+      const z3 = WAVE_Z * (0.28 + 0.65 * f);     // after-peak ripple
 
-      const extraZ2   = WAVE_Z * (0.35 + 0.80 * feather);
-      const extraRot2 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.18 + 0.80 * feather));
-      const extraX2   = WAVE_X * (0.35 + 0.80 * feather);
-      const extraS2   = 1 + ((WAVE_S - 1) * (0.16 + 0.80 * feather));
+      // extra Y bend only when already rotated (don’t tilt the active flat page too much)
+      const ry1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.12 + 0.55 * f));
+      const ry2 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.35 + 0.95 * f));
+      const ry3 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.18 + 0.70 * f));
 
-      const mid1 = buildT(from[i].x, from[i].z, from[i].rot, extraZ1, extraRot1, extraX1, extraS1);
-      const mid2 = buildT(from[i].x, from[i].z, from[i].rot, extraZ2, extraRot2, extraX2, extraS2);
+      // “paper breath” rotateX
+      const rx1 = WAVE_X * (0.16 + 0.55 * f);
+      const rx2 = WAVE_X * (0.55 + 0.95 * f);
+      const rx3 = WAVE_X * (0.22 + 0.70 * f);
+
+      // tiny scale breath
+      const s1 = 1 + ((WAVE_S - 1) * (0.10 + 0.55 * f));
+      const s2 = 1 + ((WAVE_S - 1) * (0.55 + 0.95 * f));
+      const s3 = 1 + ((WAVE_S - 1) * (0.18 + 0.70 * f));
+
+      // optional twist: alternate sign per panel DOM index, subtle theatre feel
+      const twist = (i % 2 === 0 ? 1 : -1) * WAVE_TWIST * f;
+      const mid1  = buildT(from[i].x, from[i].z, from[i].rot, z1, ry1 + twist * 0.25, rx1, s1);
+      const mid2  = buildT(from[i].x, from[i].z, from[i].rot, z2, ry2 + twist * 0.55, rx2, s2);
+      const mid3  = buildT(from[i].x, from[i].z, from[i].rot, z3, ry3 + twist * 0.35, rx3, s3);
 
       return el.animate(
         [
           { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
-          { transform: mid1,              opacity: from[i].opacity, offset: 0.36 },
-          { transform: mid2,              opacity: from[i].opacity, offset: 0.62 },
+          { transform: mid1,              opacity: from[i].opacity, offset: O1 },
+          { transform: mid2,              opacity: from[i].opacity, offset: O2 },
+          { transform: mid3,              opacity: from[i].opacity, offset: O3 },
           { transform: to[i].transform,   opacity: to[i].opacity,   offset: 1 }
         ],
         { duration: DURATION, easing: EASING, fill: 'forwards' }
       );
     });
 
+    // Active UI follows the active panel (from -> to), with a calmer wave (so buttons don’t feel chaotic)
     let uiAnim = null;
     if (activeUI){
       const fromPanelIndex = mod(fromPos, panels.length);
       const toPanelIndex   = mod(toPos, panels.length);
 
+      const fUI = 0.55; // keep UI wave moderate even in theatre mode
+
       const uiFrom = from[fromPanelIndex].transform;
       const uiTo   = to[toPanelIndex].transform;
 
-      const uiMid1 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, WAVE_Z * 0.22, 0, WAVE_X * 0.22, 1 + ((WAVE_S - 1) * 0.22));
-      const uiMid2 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, WAVE_Z * 0.42, 0, WAVE_X * 0.42, 1 + ((WAVE_S - 1) * 0.42));
+      const z1 = WAVE_Z * (0.14 + 0.28 * fUI);
+      const z2 = WAVE_Z * (0.30 + 0.55 * fUI);
+      const z3 = WAVE_Z * (0.18 + 0.35 * fUI);
+
+      const rx1 = WAVE_X * (0.12 + 0.22 * fUI);
+      const rx2 = WAVE_X * (0.25 + 0.45 * fUI);
+      const rx3 = WAVE_X * (0.16 + 0.30 * fUI);
+
+      const s1  = 1 + ((WAVE_S - 1) * (0.10 + 0.22 * fUI));
+      const s2  = 1 + ((WAVE_S - 1) * (0.22 + 0.45 * fUI));
+      const s3  = 1 + ((WAVE_S - 1) * (0.14 + 0.30 * fUI));
+
+      const uiMid1 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z1, 0, rx1, s1);
+      const uiMid2 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z2, 0, rx2, s2);
+      const uiMid3 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z3, 0, rx3, s3);
 
       uiAnim = activeUI.animate(
         [
-          { transform: uiFrom, offset: 0 },
-          { transform: uiMid1, offset: 0.36 },
-          { transform: uiMid2, offset: 0.62 },
-          { transform: uiTo,   offset: 1 }
+          { transform: uiFrom,  offset: 0 },
+          { transform: uiMid1,  offset: O1 },
+          { transform: uiMid2,  offset: O2 },
+          { transform: uiMid3,  offset: O3 },
+          { transform: uiTo,    offset: 1 }
         ],
         { duration: DURATION, easing: EASING, fill: 'forwards' }
       );
@@ -331,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cancelAll();
       panels.forEach((el, i) => {
         el.style.transform = to[i].transform;
-        el.style.opacity = to[i].opacity;
+        el.style.opacity   = to[i].opacity;
       });
 
       syncActiveUIText(toPos);
@@ -357,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
     animating = true;
 
     const fromPos = activePos;
-    const toPos   = activePos + dir;   // ALWAYS one step (no modulo jump)
+    const toPos   = activePos + dir; // ALWAYS one step (no modulo jump)
 
     animateBetween(fromPos, toPos).then(() => {
       activePos = toPos;
@@ -375,6 +430,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const el = document.createElement('div');
       el.className = 'panel';
       el.tabIndex = 0;
+
+      // Optional stability hints (won’t break if unsupported)
+      el.style.backfaceVisibility = 'hidden';
+      el.style.transformStyle = 'preserve-3d';
 
       el.innerHTML = `
         <div class="print">
@@ -413,6 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Arrow click (right)
   const arrowRight = document.getElementById('arrowRight');
   if (arrowRight){
     arrowRight.addEventListener('click', (e) => {
@@ -422,7 +482,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Optional: left arrow key already works; if you add a left button later, call prev()
+  // Optional: if you have a left arrow button later, name it arrowLeft
+  const arrowLeft = document.getElementById('arrowLeft');
+  if (arrowLeft){
+    arrowLeft.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      prev();
+    });
+  }
 
   /* ===== Fullscreen overlay ===== */
   const selectBtn = document.getElementById('selectBtn');
