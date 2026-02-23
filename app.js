@@ -179,10 +179,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const panels = [];
 
   function getPanelW(){
-    const p = panels[0];
-    if (!p) return 0;
-    const r = p.getBoundingClientRect();
-    return r.width || parseFloat(getComputedStyle(p).width) || 0;
+  const p = panels[0];
+  if (!p) return 0;
+
+  // This reads the CSS width, NOT the zoomed width
+  return parseFloat(getComputedStyle(p).width) || 0;
   }
 
   // Transform builder with tiny Z shim to reduce z-fight shimmer
