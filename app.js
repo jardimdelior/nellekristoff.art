@@ -174,8 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Motion feel (theatre / float)
-  const DURATION = 2100;
-  const EASING   = 'cubic-bezier(.08,.92,.12,1)';
+  const DURATION = 2350;
+  const EASING   = 'cubic-bezier(.06,.93,.12,1)';
 
   // THEATRICAL air-wave tuning (more visible)
   // NOTE: extraZ is towards viewer (positive).
@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const stepX     = panelW * xStepPct;
 
     // Tiny depth separation to reduce z-fight shimmer
-    const Z_BIAS = 0.45;
+    const Z_BIAS = 1.1;
 
     const n = panels.length || works.length;
 
@@ -231,7 +231,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const x   = (d === 0) ? 0 : d * stepX;
 
       // z tied to DOM order bias to keep stable draw ordering
-      const z   = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS);
+      const Z_SHIM = i * 0.22;                 // always unique per DOM panel
+      const z = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS) - Z_SHIM;
 
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.70, 1);
 
@@ -295,16 +296,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Multi-peak wave = bubble rolls under paper, then settles
     // offsets tuned for “breath”: rise -> peak -> small after-peak -> settle
-    const O1 = 0.26;
-    const O2 = 0.54;
-    const O3 = 0.74;
+    const O1 = 0.30;
+    const O2 = 0.60;
+    const O3 = 0.80;
 
     const anims = panels.map((el, i) => {
       const f = featherFrom(from[i].ad);
 
       // center calm, sides dramatic
       const z1 = WAVE_Z * (0.18 + 0.55 * f);
-      const z2 = WAVE_Z * (0.55 + 0.95 * f);     // main bubble
+      const z2 = WAVE_Z * (0.48 + 0.88 * f);     // main bubble
       const z3 = WAVE_Z * (0.28 + 0.65 * f);     // after-peak ripple
 
       // extra Y bend only when already rotated (don’t tilt the active flat page too much)
