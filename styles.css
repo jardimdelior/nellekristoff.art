@@ -607,10 +607,9 @@ html.ready .space-viewport{
 
 /* fullscreen */
 .fullscreen{
-  position:absolute;
+  position:fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 30vw;
   width: 40vw;
   max-width: 720px;
   min-width: 320px;
