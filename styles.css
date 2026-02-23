@@ -62,6 +62,9 @@ body{
 
   opacity:0;
 }
+
+body.noscroll{ overflow: hidden; }
+
 html.ready body{
   opacity:1;
   transition: opacity 1.0s ease;
@@ -381,6 +384,7 @@ html.ready .space-viewport{
   overflow:hidden;
   pointer-events:auto;
   z-index:2;
+  touch-action: none;
 
   /* per-deck pan/zoom vars */
   --panX: 0px;
