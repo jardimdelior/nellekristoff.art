@@ -1,6 +1,8 @@
 // app.js (WAAPI deterministic 3D core + stable Active UI + correct panel width
 //        + THEATRICAL “FEATHER BUBBLE” + TRAVELING WAVE + VIRTUAL INDEX WRAP FIX
-//        + START AT ZOOM MIN + PAN WHEN ZOOMED OUT + ANTI Z-FIGHT SHIM)
+//        + START AT ZOOM MIN + PAN WHEN ZOOMED OUT + ANTI Z-FIGHT SHIM
+//        + SNAP VIEW BEFORE PANEL ANIM (fix post-zoom first-arrow jump)
+//        + REMOVE MICRO translateZ SHIM IN buildT (reduce seams/poke-through))
 
 // Prevent image drag / context menu
 document.addEventListener('dragstart', (e) => {
@@ -86,21 +88,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ Allow pan when zoomed OUT (<1) by giving “slack” inside viewport
   function clampPanTarget(){
-  if (!viewport) return;
-  const rect = viewport.getBoundingClientRect();
+    if (!viewport) return;
+    const rect = viewport.getBoundingClientRect();
 
-  // allow a little drag even at min zoom
-  const slackX = rect.width  * 0.08;  // 8% feel-good drift
-  const slackY = rect.height * 0.08;
+    const slackX = rect.width  * 0.08;  // 8% drift
+    const slackY = rect.height * 0.08;
 
-  const extraX = Math.max(0, (tZoom - 1)) * rect.width  / 2;
-  const extraY = Math.max(0, (tZoom - 1)) * rect.height / 2;
+    const extraX = Math.max(0, (tZoom - 1)) * rect.width  / 2;
+    const extraY = Math.max(0, (tZoom - 1)) * rect.height / 2;
 
-  const maxX = extraX + slackX;
-  const maxY = extraY + slackY;
+    const maxX = extraX + slackX;
+    const maxY = extraY + slackY;
 
-  tPanX = clamp(tPanX, -maxX, maxX);
-  tPanY = clamp(tPanY, -maxY, maxY);
+    tPanX = clamp(tPanX, -maxX, maxX);
+    tPanY = clamp(tPanY, -maxY, maxY);
   }
 
   function applyView(){
@@ -142,6 +143,18 @@ document.addEventListener("DOMContentLoaded", () => {
     animRaf = requestAnimationFrame(tick);
   }
 
+  // ✅ NEW: snap camera to target immediately (fix first-arrow jump after zoom/pan)
+  function snapView(){
+    if (animRaf){
+      cancelAnimationFrame(animRaf);
+      animRaf = null;
+    }
+    zoom = tZoom;
+    panX = tPanX;
+    panY = tPanY;
+    applyView();
+  }
+
   function setZoomAt(newZoom, cx, cy){
     newZoom = clamp(newZoom, zoomMin(), zoomMax());
     if (!viewport) return;
@@ -172,17 +185,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const lep = document.getElementById('leporello');
   const panels = [];
 
+  // ✅ Fix: measure the unscaled panel width (CSS layout width), not the zoomed width
   function getPanelW(){
-  const p = panels[0];
-  if (!p) return 0;
-
-  // This reads the CSS width, NOT the zoomed width
-  return parseFloat(getComputedStyle(p).width) || 0;
+    const p = panels[0];
+    if (!p) return 0;
+    return parseFloat(getComputedStyle(p).width) || 0;
   }
 
-  // Transform builder with tiny Z shim to reduce z-fight shimmer
+  // ✅ buildT WITHOUT micro translateZ tail (reduces seams/poke-through)
   function buildT(x, z, rotY, extraZ = 0, extraRotY = 0, extraRotX = 0, extraScale = 1){
-    return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale}) translateZ(0.01px)`;
+    return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale})`;
   }
 
   // Motion feel
@@ -282,10 +294,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function featherFrom(ad){
-    // IMPORTANT: center gets bubble too (not only sides)
-    // ad in 0..2 typically, map to 0..1
-    const f = clamp(ad / 2, 0, 1);
-    return f;
+    // center gets bubble too (not only sides)
+    return clamp(ad / 2, 0, 1);
   }
 
   function animateBetween(fromPos, toPos){
@@ -437,6 +447,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const fromPos = activePos;
     const toPos   = activePos + dir; // ALWAYS one step (no modulo jump)
+
+    // ✅ Fix post-zoom first-arrow jump: snap camera before panel WAAPI
+    snapView();
 
     animateBetween(fromPos, toPos).then(() => {
       activePos = toPos;
@@ -685,14 +698,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function init(){
-  zoom = tZoom = zoomMin();   // start at min zoom like you want
-  panX = tPanX = 0;
-  panY = tPanY = 0;
+    zoom = tZoom = zoomMin();   // start at min zoom like you want
+    panX = tPanX = 0;
+    panY = tPanY = 0;
 
-  clampPanTarget();
-  applyView();
+    clampPanTarget();
+    applyView();
 
-  requestAnimationFrame(() => applyInstant(activePos));
+    requestAnimationFrame(() => applyInstant(activePos));
   }
   init();
 
