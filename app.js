@@ -207,7 +207,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
       const x   = (d === 0) ? 0 : d * stepX;
-      const z   = (d === 0) ? 0 : -ad * zStep;
+      const Z_BIAS = 0.35; // tiny: separates panels in GPU depth buffer (prevents flicker)
+      const z = (d === 0) ? 0 : (-ad * zStep) - (i * Z_BIAS);
       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.05, 0.72, 1);
 
       return { x, z, rot, opacity: String(op), transform: buildT(x, z, rot) };
@@ -259,8 +260,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveUITransformFromPanel(panels[idxFrom]);
 
     const anims = panels.map((el, i) => {
-      const extraRot = (from[i].rot === 0) ? 0 : WAVE_ROT;
-      const midT = buildT(from[i].x, from[i].z, from[i].rot, WAVE_Z, extraRot, WAVE_X, WAVE_S);
+      const ad = Math.abs(i - idxFrom);           // distance from current active
+      const feather = clamp(ad / 2, 0, 1);        // 0 for center, 1 for far sides
+      const extraZ   = WAVE_Z * (0.35 + 0.85 * feather);    // sides get more lift + more bend; center stays calmer
+      const extraRot = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.25 + 0.95 * feather));
+      const extraX   = WAVE_X * (0.35 + 0.85 * feather);
+      const extraS   = 1 + ((WAVE_S - 1) * (0.25 + 0.95 * feather));
+
+      const midT = buildT(from[i].x, from[i].z, from[i].rot, extraZ, extraRot, extraX, extraS);
 
       return el.animate(
         [
