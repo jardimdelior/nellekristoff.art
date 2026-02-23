@@ -54,6 +54,7 @@
   --leftLabelWeight: 500;
 
   --pillH: 40px;
+  --deckSplit: 25vh;
 }
 
 /* base */
@@ -466,6 +467,24 @@ main{
   transform:
     translateZ(var(--zoomZ, 0px))
     scale(var(--zoom, 1));
+}
+
+/* two stacked deck anchors inside the same leporello */
+.deck{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:1px;
+  height:1px;
+  transform-style:preserve-3d;
+}
+
+/* deck split: top and bottom halves */
+.deck-top{
+  transform: translate3d(0, -25vh, 0);
+}
+.deck-bottom{
+  transform: translate3d(0, 25vh, 0);
 }
 
 /* leporello */
