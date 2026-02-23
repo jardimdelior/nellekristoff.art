@@ -634,11 +634,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Desktop hover tilt (per deck)
     deckEl.addEventListener('mousemove', (e) => {
+      // ✅ per-deck tilt only when deck is focused
+      const isFocused =
+        viewport && (viewport.classList.contains('focus-top') || viewport.classList.contains('focus-bottom'));
+      if (!isFocused) return;
+
       const r = deckEl.getBoundingClientRect();
       const nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
       const ny = clamp(((e.clientY - r.top)  / r.height) * 2 - 1, -1, 1);
 
-      // subtle tilt
       deckEl.style.setProperty('--tiltY', (nx * 5).toFixed(2) + 'deg');
       deckEl.style.setProperty('--tiltX', (-ny * 4).toFixed(2) + 'deg');
     });
