@@ -12,9 +12,9 @@
   --headerH: 52px;
   --footerGap: 6px;
 
-  /* side bays (currently empty but stable) */
-  --leftBayW: clamp(0px, 0vw, 0px); /* set later if you want */
-  --rightBayW: clamp(0px, 0vw, 0px);
+  /* side bays (empty for now) */
+  --leftBayW: 0px;
+  --rightBayW: 0px;
 
   /* VIEWPORT */
   --maxFilmH: 78vh;
@@ -24,7 +24,7 @@
   /* DECK SPLIT */
   --deckGap: clamp(10px, 2.2vh, 18px);
 
-  /* MINIMUM "composition gaps" */
+  /* UI spacing */
   --panelToButtonsGap: 12px;
   --metaLift: calc(-1 * (var(--pillH) + 8px));
 
@@ -45,7 +45,7 @@
   --btnH: 52px;
   --pillH: 40px;
 
-  /* brand animation tuning (kept) */
+  /* brand animation tuning */
   --burgerScale: 1;
   --monoScale: 1.06;
   --burgerShift: 10px;
@@ -55,6 +55,10 @@
   --leftLabelSize: clamp(12px, 1.4vw, 16px);
   --leftLabelTrack: 1.6px;
   --leftLabelWeight: 500;
+
+  /* overview tilt */
+  --overviewTopTilt: -6deg;
+  --overviewBottomTilt: 6deg;
 }
 
 html, body{ height:100%; }
@@ -82,7 +86,7 @@ html.ready body{
   justify-content:center;
 }
 
-/* ======= FRAME GRID (header + viewport + footer aligned) ======= */
+/* ======= FRAME GRID ======= */
 .frame{
   width:min(96vw, 1400px);
   margin:0 auto;
@@ -97,7 +101,7 @@ html.ready body{
   min-height:100vh;
 }
 
-/* Header spans width, but content aligns to viewport column */
+/* ======= HEADER ======= */
 .frame-header{
   grid-column: 1 / 4;
   grid-row: 1;
@@ -105,65 +109,37 @@ html.ready body{
   display:grid;
   grid-template-columns: var(--leftBayW) 1fr var(--rightBayW);
   align-items:center;
+
+  z-index: 30;
 }
 
-.header-inner{
+/* header-inner lives in the viewport column and splits left/right */
+.frame-header .header-inner{
+  grid-column: 2;
   width:100%;
+  height: var(--headerH);
+
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap: 12px;
 }
 
-/* LEFT/RIGHT header bays both sit in viewport column, aligned to its edges */
 .header-bay-left{
-  grid-column: 2;
-  justify-self:start;
+  flex: 1 1 auto;
+  min-width: 0;
   height: var(--headerH);
   display:flex;
   align-items:center;
 }
 .header-bay-right{
-  grid-column: 2;
-  justify-self:end;
+  flex: 0 0 auto;
   height: var(--headerH);
   display:flex;
   align-items:center;
 }
 
-/* middle row */
-.frame-leftbay{ grid-column:1; grid-row:2; }
-.frame-viewportWrap{ grid-column:2; grid-row:2; min-height:0; }
-.frame-rightbay{ grid-column:3; grid-row:2; }
-
-/* Footer spans, inner aligns to viewport width */
-.frame-footer{
-  grid-column: 1 / 4;
-  grid-row: 3;
-
-  display:grid;
-  grid-template-columns: var(--leftBayW) 1fr var(--rightBayW);
-  align-items:center;
-
-  margin-top: calc(var(--footerGap) - var(--frameGap));
-}
-.footer-inner{
-  grid-column:2;
-  justify-self:center;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-size:12.5px;
-  opacity:.55;
-}
-.footer-inner .icon-monogram{
-  width:14px;
-  height:14px;
-  display:block;
-  color: var(--brand);
-}
-
-/* ======= HEADER MENU (HeaderBayLeft) ======= */
+/* ======= HEADER MENU (left) ======= */
 .menu{
   display:flex;
   gap:10px;
@@ -174,9 +150,22 @@ html.ready body{
   letter-spacing: var(--leftLabelTrack);
   text-transform: uppercase;
   line-height: 1;
+
+ /* NEW: collapsed by default */
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .22s ease, transform .28s cubic-bezier(.18,.9,.2,1);
 }
 
-/* buttons style shared */
+/* NEW: open state */
+.menu.open{
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* shared button style */
 .menu a, .abtn, .film-arrow{
   height: var(--pillH);
   min-height: var(--pillH);
@@ -232,19 +221,20 @@ html.ready body{
   display:block;
 }
 
-/* each layer is absolute so they can animate independently */
+/* all layers overlay each other (not flowing vertically) */
 .layer-bay{
   position:absolute;
   top:50%;
+  right:0;
   transform: translateY(-50%);
   display:flex;
   align-items:center;
   justify-content:flex-end;
   height: var(--headerH);
-  pointer-events:none; /* only burger needs pointer events */
+  pointer-events:none;
 }
 
-/* Layer positions: right-aligned like your original setup */
+/* Layer positions: aligned to right */
 .layer-bay-1{ right: calc(var(--headerH) + 10px); } /* brand text */
 .layer-bay-2{ right: calc(var(--headerH) + 10px); } /* selected works */
 .layer-bay-3{ right: calc(var(--headerH) + 10px); } /* monogram */
@@ -275,7 +265,7 @@ html.ready body{
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
 }
 
-/* monogram layer */
+/* monogram */
 .brand-mark{
   width: var(--headerH);
   height: var(--headerH);
@@ -322,7 +312,7 @@ html.ready body{
   transform: scale(var(--burgerScale));
 }
 
-/* ======= Menu-open animation mapping (keeps your original feel) ======= */
+/* menu-open mapping */
 .film-header.menu-open .menu-btn{
   transform: translateX(calc(var(--burgerShift) * -1));
 }
@@ -339,6 +329,38 @@ html.ready body{
 .film-header.menu-open .subtitle-inline{
   opacity:0;
   transform: translateX(-8px);
+}
+
+/* ======= GRID MIDDLE ROW ======= */
+.frame-leftbay{ grid-column:1; grid-row:2; }
+.frame-viewportWrap{ grid-column:2; grid-row:2; min-height:0; }
+.frame-rightbay{ grid-column:3; grid-row:2; }
+
+/* ======= FOOTER ======= */
+.frame-footer{
+  grid-column: 1 / 4;
+  grid-row: 3;
+
+  display:grid;
+  grid-template-columns: var(--leftBayW) 1fr var(--rightBayW);
+  align-items:center;
+
+  margin-top: calc(var(--footerGap) - var(--frameGap));
+}
+.footer-inner{
+  grid-column:2;
+  justify-self:center;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12.5px;
+  opacity:.55;
+}
+.footer-inner .icon-monogram{
+  width:14px;
+  height:14px;
+  display:block;
+  color: var(--brand);
 }
 
 /* ======= VIEWPORT ======= */
@@ -385,7 +407,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   mix-blend-mode: multiply;
   opacity:.85;
 }
-
 .space-bg{
   position:absolute;
   inset:-8%;
@@ -403,7 +424,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   opacity:.95;
 }
 
-/* deck layers: give us a clean structure for future spacing */
+/* deck layers */
 .deck-layer{
   position:absolute;
   left:0;
@@ -420,7 +441,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   height: calc(50% - (var(--deckGap) / 2));
 }
 
-/* actual deck viewport inside each layer */
+/* deck viewport */
 .deck-viewport{
   position:absolute;
   inset:0;
@@ -452,12 +473,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   transform-origin: 50% 50%;
 }
 
-:root{
-  --overviewTopTilt: -6deg;
-  --overviewBottomTilt: 6deg;
-}
-
-/* focus mode: expand selected deck to fill viewport */
+/* focus mode */
 .space-viewport.focus-top #deckLayerTop{
   top:0 !important;
   height:100% !important;
@@ -467,7 +483,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   opacity:0;
   pointer-events:none;
 }
-
 .space-viewport.focus-bottom #deckLayerBottom{
   top:0 !important;
   height:100% !important;
@@ -478,6 +493,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   pointer-events:none;
 }
 
+/* pan + zoom wrappers */
 .space-pan{
   position:absolute;
   inset:0;
@@ -488,9 +504,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
     translate3d(var(--panX), var(--panY), 0)
     rotateX(var(--tiltX))
     rotateY(var(--tiltY));
-  will-change: transform;
 }
-
 .space-zoom{
   position:absolute;
   inset:0;
@@ -498,7 +512,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   transform:
     translateZ(var(--zoomZ))
     scale(var(--zoom));
-  will-change: transform;
   z-index:2;
   overflow:hidden;
 }
@@ -514,7 +527,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   z-index:0;
 }
 
-/* leporello + ui above */
+/* leporello + ui above canvas */
 .space-zoom > .leporello,
 .space-zoom > .active-ui{
   position:relative;
@@ -536,7 +549,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   top:50%;
   transform-style: preserve-3d;
   backface-visibility: hidden;
-  will-change: transform, opacity;
   cursor:pointer;
   transform-origin: 50% 50%;
   contain: layout paint style;
@@ -563,7 +575,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display:block;
   pointer-events:none;
   -webkit-user-drag:none;
-  user-drag:none;
   -webkit-touch-callout:none;
   -webkit-user-select:none;
   user-select:none;
@@ -596,7 +607,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   right:12px;
   bottom:12px;
   z-index:60;
-  pointer-events:none;
+  pointer-events:none; /* slot doesn't block */
 }
 .arrow-slot--top-left{
   left:12px;
@@ -614,7 +625,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display:grid;
   place-items:center;
   background: rgba(239,231,220,.70);
-  pointer-events:auto;
+  pointer-events:auto; /* button clickable */
   position:relative;
   z-index:70;
 }
@@ -628,7 +639,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   transform-style: preserve-3d;
   pointer-events:none;
 }
-
 .active-meta{
   position:absolute;
   right:0;
@@ -644,7 +654,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   pointer-events:none;
   max-width: min(360px, 92%);
 }
-
 .am-title, .am-status{
   max-width: 18ch;
   overflow:hidden;
@@ -693,7 +702,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   gap:12px;
   max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
 }
-
 .fs-meta{
   position:absolute;
   right:0;
@@ -716,7 +724,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   border: 1px solid rgba(255,255,255,.35);
   color: rgba(255,255,255,.92);
 }
-
 .fs-frame{
   flex: 1 1 auto;
   min-height:0;
@@ -724,10 +731,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   max-height: calc(100dvh - 2 * clamp(14px, 3vw, 34px) - 88px);
   margin: 0 auto;
 }
-
 .fullscreen .print{ padding: clamp(8px, 1.6vw, 16px); }
 .fullscreen .fs-frame img{ width:100%; height:100%; object-fit:contain; display:block; }
-
 .fs-actions{
   flex:0 0 auto;
   width: min(560px, 92%);
@@ -741,12 +746,9 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 /* responsive */
 @media (max-width: 760px){
-  :root{
-    --maxFilmH: 74vh;
-  }
-  .layer-bay-2{ display:none; } /* selected works can hide on small screens */
+  :root{ --maxFilmH: 74vh; }
+  .layer-bay-2{ display:none; } /* hide Selected Works on small screens */
 }
-
 @media (max-width: 520px){
   :root{
     --panelW: 86vw;
@@ -764,11 +766,9 @@ html.ready .space-viewport{ opacity:1; transform:none; }
     --deckGap: clamp(8px, 2vh, 14px);
     --panelToButtonsGap: 10px;
   }
-
   .fullscreen{ left:0 !important; width:100vw !important; }
   .brand-text{ font-size: clamp(16px, 5vw, 20px); letter-spacing:.6px; }
 }
-
 @media (prefers-reduced-motion: reduce){
   .noise{ animation:none !important; }
 }
