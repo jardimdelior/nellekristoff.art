@@ -420,8 +420,9 @@ html.ready .space-viewport{
   width:100%;
   height:100%;
   display:block;
-  pointer-events:none; /* keep your DOM buttons working */
+  pointer-events:none; /* keep DOM buttons */
   border-radius: inherit;
+  z-index:0;    /* behind all in the deck */
 }
 
 /* Deck is a positioning context */
@@ -456,7 +457,7 @@ html.ready .space-viewport{
 
 /* inner layers */
 .space-pan{
-  position:absolute;
+  position:relative;
   inset:0;
   display:grid;
   place-items:center;
@@ -477,6 +478,7 @@ html.ready .space-viewport{
     translateZ(var(--zoomZ))
     scale(var(--zoom));
   will-change: transform;
+  z-index:2;
 }
 
 /* leporello anchor */
@@ -485,6 +487,7 @@ html.ready .space-viewport{
   width:1px;
   height:1px;
   transform-style: preserve-3d;
+  z-index:2;
 }
 
 /* panels */
@@ -561,10 +564,10 @@ html.ready .space-viewport{
 
 /* arrows */
 .arrow-slot{
-  position:absolute;
+  position:relative;
   right:12px;
   bottom:12px;
-  z-index:10;
+  z-index:2;
   pointer-events:auto;
 }
 .arrow-slot--top-left{
@@ -576,10 +579,10 @@ html.ready .space-viewport{
 
 /* active UI */
 .active-ui{
-  position:absolute;
+  position:relative;
   left:0;
   top:0;
-  z-index:9;
+  z-index:2;
   transform: translate3d(0,0,0);
   pointer-events:none;
 }
