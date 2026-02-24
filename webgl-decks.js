@@ -184,11 +184,11 @@ async function initDeck({
   return { renderer, scene, camera, group, meshes, resize };
 }
 
-// Hook into your existing worksTop / worksBottom (already global in app.js)
+// Existing worksTop / worksBottom (already global in app.js)
 // We wait until DOM is ready and those arrays exist.
 window.addEventListener("DOMContentLoaded", async () => {
-  // If your app.js is module-scoped, these won't be on window.
-  // Easiest: attach worksTop/worksBottom to window in app.js (see note below).
+  // If app.js is module-scoped, these won't be on window.
+  // WorksTop/worksBottom to window in app.js).
   const worksTop = window.worksTop;
   const worksBottom = window.worksBottom;
 
