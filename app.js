@@ -1,6 +1,5 @@
-// app.js — TWO independent decks (top + bottom), WAAPI 3D,
-// per-deck pan/zoom + per-deck hover tilt + focus mode,
-// fixed: top deck buttons, top select opens fullscreen, top can drag.
+// app.js — two decks, WAAPI 3D, per-deck pan/zoom, focus-on-zoom,
+// active UI attached to active middle panel.
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -9,13 +8,11 @@ document.addEventListener('contextmenu', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
 });
 
-/* Contact */
 window.contact = function contact(e){
   if (e) e.preventDefault();
   window.location.href = "mailto:nellekristoff@gmail.com";
 };
 
-/* Works (split into top + bottom) */
 const worksTop = [
   { src:"images/Untitled4.png", title:"Untitled 4", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   { src:"images/Untitled5.png", title:"Untitled 5", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
@@ -31,10 +28,8 @@ const worksBottom = [
 window.worksTop = worksTop;
 window.worksBottom = worksBottom;
 
-// preload
 [...worksTop, ...worksBottom].forEach(w => { const i = new Image(); i.src = w.src; });
 
-/* helpers */
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 function numPx(v){ return parseFloat(String(v).replace('px','')) || 0; }
@@ -52,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewport = document.getElementById('viewport');
   const spaceBg  = document.getElementById('spaceBg');
 
-  /* ===== Menu ===== */
+  /* menu */
   const menuBtn = document.getElementById('menuBtn');
   const menu = document.getElementById('menu');
   const header = document.querySelector('.film-header');
@@ -75,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     menu.addEventListener('click', (e) => e.stopPropagation());
   }
 
-  /* ===== Shared Fullscreen ===== */
+  /* fullscreen */
   const fullscreen = document.getElementById('fullscreen');
   const fsImg = document.getElementById('fsImg');
   const fsTitle = document.getElementById('fsTitle');
@@ -94,14 +89,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (fsCollect) fsCollect.href = w.collect || "https://collect.nellekristoff.art";
     fullscreen.classList.add('open');
     fullscreen.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('noscroll');   // ✅ add
+    document.body.classList.add('noscroll');
   }
 
   function closeFullscreen(){
     if (!fullscreen) return;
     fullscreen.classList.remove('open');
     fullscreen.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('noscroll'); // ✅ add
+    document.body.classList.remove('noscroll');
   }
 
   if (closeBtn){
@@ -119,39 +114,26 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === 'Escape' && isFullscreenOpen()) closeFullscreen();
   });
 
-  /* ===== Build a deck (independent) ===== */
   function createDeck(opts){
     const {
-      deckEl,
-      panEl,
-      zoomEl,
-      lepEl,
-      activeUIEl,
-      titleEl,
-      statusEl,
-      collectEl,
-      selectBtn,
-      arrowBtn,
-      works,
-      direction,           // +1 or -1 for what “next” means
+      deckEl, lepEl, activeUIEl, titleEl, statusEl, collectEl,
+      selectBtn, arrowBtn, works,
+      direction, // +1 or -1
+      focusClass // 'focus-top' or 'focus-bottom'
     } = opts;
 
-    // Pan/zoom state (per deck)
     let zoom = 1, panX = 0, panY = 0;
     let tZoom = 1, tPanX = 0, tPanY = 0;
     let raf = null;
 
-    // WAAPI state (per deck)
     const panels = [];
     let activePos = 0;
     let animating = false;
     let queuedDir = 0;
 
-    // Motion feel
     const DURATION = 2650;
     const EASING   = 'cubic-bezier(.10,.88,.16,1)';
 
-    // Bubble tuning
     const WAVE_Z     = 120;
     const WAVE_ROT   = 16;
     const WAVE_X     = -7.2;
@@ -162,6 +144,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
     function zoomMax(){ return num(cssVar('--zoomMax')) || 1.35; }
 
+    function focus(){
+      if (!viewport) return;
+      viewport.classList.remove('focus-top','focus-bottom');
+      viewport.classList.add(focusClass);
+    }
+    function unfocus(){
+      if (!viewport) return;
+      viewport.classList.remove('focus-top','focus-bottom');
+    }
+
     function applyView(){
       const zoomZ = Math.max(0, (zoom - 1)) * 320;
       deckEl.style.setProperty('--zoom', String(zoom));
@@ -170,7 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
       deckEl.style.setProperty('--panY', panY.toFixed(1) + 'px');
     }
 
-    // Allow a little pan even at min zoom (“feel-good drift”)
     function clampPanTarget(){
       const rect = deckEl.getBoundingClientRect();
       const slackX = rect.width  * 0.08;
@@ -207,10 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
           applyView();
           raf = null;
 
-          // ✅ if user zoomed back to min: exit focus (show both decks again)
-          if (Math.abs(zoom - zoomMin()) < 0.002){
-            if (viewport) viewport.classList.remove('focus-top', 'focus-bottom');
-          }
+          if (Math.abs(zoom - zoomMin()) < 0.002) unfocus();
           return;
         }
         raf = requestAnimationFrame(tick);
@@ -219,7 +207,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setZoomAt(newZoom, cx, cy){
-      newZoom = clamp(newZoom, zoomMin(), zoomMax());
+      const zMin = zoomMin();
+      newZoom = clamp(newZoom, zMin, zoomMax());
+      if (newZoom > zMin + 0.01) focus();
 
       const rect = deckEl.getBoundingClientRect();
       const ccx = cx - rect.width  / 2;
@@ -237,13 +227,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function addPan(dx, dy){
+      if (tZoom > zoomMin() + 0.01) focus();
       tPanX += dx;
       tPanY += dy;
       clampPanTarget();
       ensureAnim();
     }
 
-    // ✅ stable panel width (not zoomed)
     function getPanelW(){
       const p = panels[0];
       if (!p) return 0;
@@ -279,13 +269,9 @@ document.addEventListener("DOMContentLoaded", () => {
       activeUIEl.style.transform = panelEl.style.transform || "";
       activeUIEl.style.width  = getComputedStyle(panelEl).width;
       activeUIEl.style.height = getComputedStyle(panelEl).height;
-      activeUIEl.style.left   = getComputedStyle(panelEl).left;
-      activeUIEl.style.top    = getComputedStyle(panelEl).top;
     }
 
-    function featherFrom(ad){
-      return clamp(ad / 2, 0, 1);
-    }
+    function featherFrom(ad){ return clamp(ad / 2, 0, 1); }
 
     function getTargets(targetPos){
       const panelW = getPanelW();
@@ -296,8 +282,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const stepX     = panelW * xStepPct;
 
       const n = panels.length;
-
-      // ✅ stronger depth separation (reduces overlap)
       const Z_BIAS = 3.4;
 
       return panels.map((_, i) => {
@@ -305,25 +289,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const d  = iV - targetPos;
         const ad = Math.abs(d);
 
-        // ✅ active is flat always
         const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
         const x   = (d === 0) ? 0 : d * stepX;
 
-        // ✅ side panels go deeper (more negative Z), active stays near
         const Z_SHIM = (i + 1) * 0.65;
         const z = (d === 0) ? 0 : (-ad * zStep) - (ad * 18) - (i * Z_BIAS) - Z_SHIM;
 
         const op = (d === 0) ? 1 : clamp(1 - ad * 0.06, 0.68, 1);
-
-        // ✅ stable stacking hint: active always highest
         const zIndex = String(100 - Math.round(ad * 10));
 
-        return {
-          d, ad, x, z, rot,
-          opacity: String(op),
-          zIndex,
-          transform: buildT(x, z, rot)
-        };
+        return { d, ad, x, z, rot, opacity: String(op), zIndex, transform: buildT(x, z, rot) };
       });
     }
 
@@ -355,7 +330,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setActiveUITransformFromPanel(panels[mod(fromPos, panels.length)]);
 
       const BASE_O1 = 0.26, BASE_O2 = 0.52, BASE_O3 = 0.76;
-
       const maxD = Math.max(1, ...from.map(p => Math.abs(p.d || 0)));
       const denom = 2 * maxD;
 
@@ -395,48 +369,23 @@ document.addEventListener("DOMContentLoaded", () => {
         return el.animate(
           [
             { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
-            { transform: mid1,              opacity: from[i].opacity, offset: O1 },
-            { transform: mid2,              opacity: from[i].opacity, offset: O2 },
-            { transform: mid3,              opacity: from[i].opacity, offset: O3 },
-            { transform: to[i].transform,   opacity: to[i].opacity,   offset: 1 }
+            { transform: mid1, opacity: from[i].opacity, offset: O1 },
+            { transform: mid2, opacity: from[i].opacity, offset: O2 },
+            { transform: mid3, opacity: from[i].opacity, offset: O3 },
+            { transform: to[i].transform, opacity: to[i].opacity, offset: 1 }
           ],
           { duration: DURATION, easing: EASING, fill: 'forwards' }
         );
       });
 
-      // Active UI follows calmly
       let uiAnim = null;
       if (activeUIEl){
         const fromPanelIndex = mod(fromPos, panels.length);
         const toPanelIndex   = mod(toPos, panels.length);
 
-        const uiFrom = from[fromPanelIndex].transform;
-        const uiTo   = to[toPanelIndex].transform;
-
-        const z1 = WAVE_Z * 0.16;
-        const z2 = WAVE_Z * 0.34;
-        const z3 = WAVE_Z * 0.20;
-
-        const rx1 = WAVE_X * 0.16;
-        const rx2 = WAVE_X * 0.30;
-        const rx3 = WAVE_X * 0.20;
-
-        const s1  = 1 + ((WAVE_S - 1) * 0.16);
-        const s2  = 1 + ((WAVE_S - 1) * 0.30);
-        const s3  = 1 + ((WAVE_S - 1) * 0.20);
-
-        const uiMid1 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z1, 0, rx1, s1);
-        const uiMid2 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z2, 0, rx2, s2);
-        const uiMid3 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z3, 0, rx3, s3);
-
         uiAnim = activeUIEl.animate(
-          [
-            { transform: uiFrom, offset: 0 },
-            { transform: uiMid1, offset: BASE_O1 },
-            { transform: uiMid2, offset: BASE_O2 },
-            { transform: uiMid3, offset: BASE_O3 },
-            { transform: uiTo,  offset: 1 }
-          ],
+          [{ transform: from[fromPanelIndex].transform, offset: 0 },
+           { transform: to[toPanelIndex].transform, offset: 1 }],
           { duration: DURATION, easing: EASING, fill: 'forwards' }
         );
       }
@@ -465,10 +414,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function step(dir){
       if (works.length < 2) return;
-      if (animating){
-        queuedDir += dir;
-        return;
-      }
+      if (animating){ queuedDir += dir; return; }
       animating = true;
       const fromPos = activePos;
       const toPos   = activePos + dir;
@@ -481,7 +427,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function next(){ step(+1 * direction); }
 
-    // Build panels
     works.forEach((w, idx) => {
       const el = document.createElement('div');
       el.className = 'panel';
@@ -493,12 +438,12 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      // only active panel reacts to click/enter (prevents side jump)
       el.addEventListener('click', () => {
         if (animating) return;
         if (idx !== activePanelIdx()) return;
         if (selectBtn) selectBtn.click();
       });
+
       el.addEventListener('keydown', (e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         e.preventDefault();
@@ -511,7 +456,6 @@ document.addEventListener("DOMContentLoaded", () => {
       panels.push(el);
     });
 
-    // Select -> fullscreen (THIS FIXES TOP DECK)
     if (selectBtn){
       selectBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -520,7 +464,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Arrow
     if (arrowBtn){
       arrowBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -529,20 +472,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Focus on pointerdown inside deck (but ignore buttons/arrows)
-    deckEl.addEventListener('pointerdown', (e) => {
-      if (isFullscreenOpen()) return;
-      const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
-      if (interactive) return;
-
-      // focus this deck
-      if (viewport){
-        viewport.classList.remove('focus-top', 'focus-bottom');
-        viewport.classList.add(deckEl.id === 'deckTop' ? 'focus-top' : 'focus-bottom');
-      }
-    });
-
-    // Pointer pan/zoom (per deck)
     let pointers = new Map();
     let lastPan = null;
     let pinchStart = null;
@@ -624,7 +553,6 @@ document.addEventListener("DOMContentLoaded", () => {
     deckEl.addEventListener('pointerup', endPointer);
     deckEl.addEventListener('pointercancel', endPointer);
 
-    // Wheel zoom (per deck)
     deckEl.addEventListener('wheel', (e) => {
       if (isFullscreenOpen()) return;
       e.preventDefault();
@@ -637,13 +565,10 @@ document.addEventListener("DOMContentLoaded", () => {
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
 
-    // Desktop hover tilt (per deck)
     deckEl.addEventListener('mousemove', (e) => {
       const r = deckEl.getBoundingClientRect();
       const nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
       const ny = clamp(((e.clientY - r.top)  / r.height) * 2 - 1, -1, 1);
-
-      // subtle tilt
       deckEl.style.setProperty('--tiltY', (nx * 5).toFixed(2) + 'deg');
       deckEl.style.setProperty('--tiltX', (-ny * 4).toFixed(2) + 'deg');
     });
@@ -652,7 +577,6 @@ document.addEventListener("DOMContentLoaded", () => {
       deckEl.style.setProperty('--tiltY', '0deg');
     });
 
-    // Init
     function init(){
       zoom = tZoom = zoomMin();
       panX = tPanX = 0;
@@ -663,22 +587,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     init();
 
-    // resize
     window.addEventListener('resize', () => {
       clampPanTarget();
       ensureAnim();
       requestAnimationFrame(() => applyInstant(activePos));
     });
-
-    // public API (if needed)
-    return { next, applyInstant };
   }
 
-  // Create decks
-  const top = createDeck({
+  // Top: left arrow moves the panels left visually => direction +1
+  createDeck({
     deckEl: document.getElementById('deckTop'),
-    panEl: document.getElementById('spacePanTop'),
-    zoomEl: document.getElementById('spaceZoomTop'),
     lepEl: document.getElementById('leporelloTop'),
     activeUIEl: document.getElementById('activeUITop'),
     titleEl: document.getElementById('amTitleTop'),
@@ -687,16 +605,13 @@ document.addEventListener("DOMContentLoaded", () => {
     selectBtn: document.getElementById('selectBtnTop'),
     arrowBtn: document.getElementById('arrowTopLeft'),
     works: worksTop,
-
-    // ✅ “left arrow should slide left” feel:
-    // (this means the content advances in the opposite direction of bottom)
     direction: +1,
+    focusClass: 'focus-top'
   });
 
-  const bottom = createDeck({
+  // Bottom: right arrow moves the panels right visually => direction -1
+  createDeck({
     deckEl: document.getElementById('deckBottom'),
-    panEl: document.getElementById('spacePanBottom'),
-    zoomEl: document.getElementById('spaceZoomBottom'),
     lepEl: document.getElementById('leporelloBottom'),
     activeUIEl: document.getElementById('activeUIBottom'),
     titleEl: document.getElementById('amTitleBottom'),
@@ -705,12 +620,11 @@ document.addEventListener("DOMContentLoaded", () => {
     selectBtn: document.getElementById('selectBtnBottom'),
     arrowBtn: document.getElementById('arrowBottomRight'),
     works: worksBottom,
-
-    // bottom right arrow: “next to the right”
-    direction: +1,
+    direction: -1,
+    focusClass: 'focus-bottom'
   });
 
-  // Optional: background “breath” shift (very subtle)
+  // subtle background drift
   if (spaceBg){
     let t = 0;
     const tick = () => {
