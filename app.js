@@ -1,6 +1,6 @@
-// app.js — two independent decks, WAAPI 3D,
-// per-deck pan/zoom + per-deck hover tilt + focus mode,
-// UI attached to active middle panel.
+// app.js — two independent decks (top + bottom)
+// WAAPI 3D slide, per-deck pan/zoom + hover tilt + focus mode.
+// Active UI follows the active panel transform.
 
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
@@ -52,27 +52,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewport = document.getElementById('viewport');
   const spaceBg  = document.getElementById('spaceBg');
 
-  // deck layers for focus
-  const deckLayerTop = document.getElementById('deckLayerTop');
-  const deckLayerBottom = document.getElementById('deckLayerBottom');
-
-  /* ===== Menu toggle (burger) ===== */
+  /* ===== Menu toggle ===== */
   const menuBtn = document.getElementById('menuBtn');
   const menu = document.getElementById('menu');
   const header = document.getElementById('siteHeader');
 
   function setMenu(open){
     if (!menuBtn || !menu) return;
+    menu.classList.toggle('open', open);
     menuBtn.setAttribute('aria-expanded', String(open));
     if (header) header.classList.toggle('menu-open', open);
-
-    // Optional: show/hide menu with opacity, but keep layout stable.
-    // If you want menu always visible, remove these two lines:
-    menu.style.opacity = open ? '1' : '';
-    menu.style.pointerEvents = open ? 'auto' : '';
   }
-
-  if (menuBtn && menu){
+  if (menu){
+  menu.addEventListener('click', (e) => e.stopPropagation());
+  }
+  if (menuBtn){
     menuBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -81,10 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.addEventListener('click', () => setMenu(false));
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
-    menu.addEventListener('click', (e) => e.stopPropagation());
   }
 
-  /* ===== Fullscreen ===== */
+  /* ===== Shared Fullscreen ===== */
   const fullscreen = document.getElementById('fullscreen');
   const fsImg = document.getElementById('fsImg');
   const fsTitle = document.getElementById('fsTitle');
@@ -105,14 +98,12 @@ document.addEventListener("DOMContentLoaded", () => {
     fullscreen.setAttribute('aria-hidden', 'false');
     document.body.classList.add('noscroll');
   }
-
   function closeFullscreen(){
     if (!fullscreen) return;
     fullscreen.classList.remove('open');
     fullscreen.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('noscroll');
   }
-
   if (closeBtn){
     closeBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -132,8 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function createDeck(opts){
     const {
       deckEl,
-      layerEl,             // deckLayerTop or deckLayerBottom
-      lepEl,
       activeUIEl,
       titleEl,
       statusEl,
@@ -142,7 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
       arrowBtn,
       works,
       direction,
-      focusClass,          // focus-top or focus-bottom
     } = opts;
 
     // Pan/zoom state
@@ -150,13 +138,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let tZoom = 1, tPanX = 0, tPanY = 0;
     let raf = null;
 
-    // WAAPI state
+    // slide state
     const panels = [];
     let activePos = 0;
     let animating = false;
     let queuedDir = 0;
 
-    // Motion feel
     const DURATION = 2650;
     const EASING   = 'cubic-bezier(.10,.88,.16,1)';
 
@@ -170,16 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
     function zoomMax(){ return num(cssVar('--zoomMax')) || 1.35; }
-
-    function focusDeck(){
-      if (!viewport) return;
-      viewport.classList.remove('focus-top', 'focus-bottom');
-      viewport.classList.add(focusClass);
-    }
-    function unfocusDeck(){
-      if (!viewport) return;
-      viewport.classList.remove('focus-top', 'focus-bottom');
-    }
 
     function applyView(){
       const zoomZ = Math.max(0, (zoom - 1)) * 320;
@@ -207,7 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function ensureAnim(){
       if (raf) return;
       const ease = 0.14;
-
       const tick = () => {
         zoom += (tZoom - zoom) * ease;
         panX += (tPanX - panX) * ease;
@@ -225,7 +201,10 @@ document.addEventListener("DOMContentLoaded", () => {
           applyView();
           raf = null;
 
-          if (Math.abs(zoom - zoomMin()) < 0.002) unfocusDeck();
+          // if user zoomed back to min: exit focus
+          if (Math.abs(zoom - zoomMin()) < 0.002){
+            if (viewport) viewport.classList.remove('focus-top', 'focus-bottom');
+          }
           return;
         }
         raf = requestAnimationFrame(tick);
@@ -234,9 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setZoomAt(newZoom, cx, cy){
-      const zMin = zoomMin();
-      newZoom = clamp(newZoom, zMin, zoomMax());
-      if (newZoom > zMin + 0.01) focusDeck();
+      newZoom = clamp(newZoom, zoomMin(), zoomMax());
 
       const rect = deckEl.getBoundingClientRect();
       const ccx = cx - rect.width  / 2;
@@ -254,7 +231,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function addPan(dx, dy){
-      if (tZoom > zoomMin() + 0.01) focusDeck();
       tPanX += dx;
       tPanY += dy;
       clampPanTarget();
@@ -291,14 +267,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (collectEl) collectEl.href = w.collect || "https://collect.nellekristoff.art";
     }
 
+    // Attach active UI transform to the active panel transform (buttons move with drag/zoom/slide)
     function setActiveUITransformFromPanel(panelEl){
       if (!activeUIEl || !panelEl) return;
       activeUIEl.style.transform = panelEl.style.transform || "";
       activeUIEl.style.width  = getComputedStyle(panelEl).width;
       activeUIEl.style.height = getComputedStyle(panelEl).height;
+      activeUIEl.style.left   = getComputedStyle(panelEl).left;
+      activeUIEl.style.top    = getComputedStyle(panelEl).top;
     }
 
-    function featherFrom(ad){ return clamp(ad / 2, 0, 1); }
+    function featherFrom(ad){
+      return clamp(ad / 2, 0, 1);
+    }
 
     function getTargets(targetPos){
       const panelW = getPanelW();
@@ -316,6 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const d  = iV - targetPos;
         const ad = Math.abs(d);
 
+        // active always flat
         const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
         const x   = (d === 0) ? 0 : d * stepX;
 
@@ -325,7 +307,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const op = (d === 0) ? 1 : clamp(1 - ad * 0.06, 0.68, 1);
         const zIndex = String(100 - Math.round(ad * 10));
 
-        return { d, ad, x, z, rot, opacity: String(op), zIndex, transform: buildT(x, z, rot) };
+        return {
+          d, ad, x, z, rot,
+          opacity: String(op),
+          zIndex,
+          transform: buildT(x, z, rot)
+        };
       });
     }
 
@@ -343,6 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function animateBetween(fromPos, toPos){
       cancelAll();
+
       const from = getTargets(fromPos);
       const to   = getTargets(toPos);
 
@@ -404,14 +392,38 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       });
 
+      // Active UI follows calmly
       let uiAnim = null;
       if (activeUIEl){
         const fromPanelIndex = mod(fromPos, panels.length);
         const toPanelIndex   = mod(toPos, panels.length);
+
+        const uiFrom = from[fromPanelIndex].transform;
+        const uiTo   = to[toPanelIndex].transform;
+
+        const z1 = WAVE_Z * 0.16;
+        const z2 = WAVE_Z * 0.34;
+        const z3 = WAVE_Z * 0.20;
+
+        const rx1 = WAVE_X * 0.16;
+        const rx2 = WAVE_X * 0.30;
+        const rx3 = WAVE_X * 0.20;
+
+        const s1  = 1 + ((WAVE_S - 1) * 0.16);
+        const s2  = 1 + ((WAVE_S - 1) * 0.30);
+        const s3  = 1 + ((WAVE_S - 1) * 0.20);
+
+        const uiMid1 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z1, 0, rx1, s1);
+        const uiMid2 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z2, 0, rx2, s2);
+        const uiMid3 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z3, 0, rx3, s3);
+
         uiAnim = activeUIEl.animate(
           [
-            { transform: from[fromPanelIndex].transform, offset: 0 },
-            { transform: to[toPanelIndex].transform, offset: 1 }
+            { transform: uiFrom, offset: 0 },
+            { transform: uiMid1, offset: BASE_O1 },
+            { transform: uiMid2, offset: BASE_O2 },
+            { transform: uiMid3, offset: BASE_O3 },
+            { transform: uiTo,  offset: 1 }
           ],
           { duration: DURATION, easing: EASING, fill: 'forwards' }
         );
@@ -458,6 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function next(){ step(+1 * direction); }
 
     // Build panels
+    const lepEl = deckEl.querySelector('.leporello');
     works.forEach((w, idx) => {
       const el = document.createElement('div');
       el.className = 'panel';
@@ -469,7 +482,6 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      // only active panel triggers select
       el.addEventListener('click', () => {
         if (animating) return;
         if (idx !== activePanelIdx()) return;
@@ -487,13 +499,16 @@ document.addEventListener("DOMContentLoaded", () => {
       panels.push(el);
     });
 
+    // Select -> fullscreen
     if (selectBtn){
       selectBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        openFullscreenFromWork(works[activeIdx()] || works[0]);
+        const w = works[activeIdx()] || works[0];
+        openFullscreenFromWork(w);
       });
     }
 
+    // Arrow
     if (arrowBtn){
       arrowBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -502,12 +517,16 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Focus when interacting with deck area (ignore buttons)
+    // Focus on pointerdown inside deck (ignore buttons/arrows)
     deckEl.addEventListener('pointerdown', (e) => {
       if (isFullscreenOpen()) return;
       const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
       if (interactive) return;
-      focusDeck();
+
+      if (viewport){
+        viewport.classList.remove('focus-top', 'focus-bottom');
+        viewport.classList.add(deckEl.id === 'deckTop' ? 'focus-top' : 'focus-bottom');
+      }
     });
 
     // Pointer pan/zoom
@@ -591,6 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
     deckEl.addEventListener('pointerup', endPointer);
     deckEl.addEventListener('pointercancel', endPointer);
 
+    // Wheel zoom
     deckEl.addEventListener('wheel', (e) => {
       if (isFullscreenOpen()) return;
       e.preventDefault();
@@ -603,7 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
 
-    // hover tilt
+    // Hover tilt (desktop)
     deckEl.addEventListener('mousemove', (e) => {
       const r = deckEl.getBoundingClientRect();
       const nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
@@ -616,6 +636,7 @@ document.addEventListener("DOMContentLoaded", () => {
       deckEl.style.setProperty('--tiltY', '0deg');
     });
 
+    // Init
     function init(){
       zoom = tZoom = zoomMin();
       panX = tPanX = 0;
@@ -631,13 +652,13 @@ document.addEventListener("DOMContentLoaded", () => {
       ensureAnim();
       requestAnimationFrame(() => applyInstant(activePos));
     });
+
+    return { next, applyInstant };
   }
 
-  // Top deck: left arrow “slides left”
+  // Create decks
   createDeck({
     deckEl: document.getElementById('deckTop'),
-    layerEl: deckLayerTop,
-    lepEl: document.getElementById('leporelloTop'),
     activeUIEl: document.getElementById('activeUITop'),
     titleEl: document.getElementById('amTitleTop'),
     statusEl: document.getElementById('amStatusTop'),
@@ -646,14 +667,10 @@ document.addEventListener("DOMContentLoaded", () => {
     arrowBtn: document.getElementById('arrowTopLeft'),
     works: worksTop,
     direction: +1,
-    focusClass: 'focus-top',
   });
 
-  // Bottom deck: right arrow “slides right”
   createDeck({
     deckEl: document.getElementById('deckBottom'),
-    layerEl: deckLayerBottom,
-    lepEl: document.getElementById('leporelloBottom'),
     activeUIEl: document.getElementById('activeUIBottom'),
     titleEl: document.getElementById('amTitleBottom'),
     statusEl: document.getElementById('amStatusBottom'),
@@ -661,11 +678,10 @@ document.addEventListener("DOMContentLoaded", () => {
     selectBtn: document.getElementById('selectBtnBottom'),
     arrowBtn: document.getElementById('arrowBottomRight'),
     works: worksBottom,
-    direction: -1,
-    focusClass: 'focus-bottom',
+    direction: +1,
   });
 
-  // subtle bg drift
+  // subtle background “breath”
   if (spaceBg){
     let t = 0;
     const tick = () => {
