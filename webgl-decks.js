@@ -117,12 +117,12 @@ async function initDeck({ canvasId, works, measureEl, noiseSrc="images/noise.png
     const mat = buildPanelMaterial(artTex, noiseTex);
     const m = new THREE.Mesh(geo, mat);
 
-    const d = i - 1;               // -1, 0, +1
+    const d = i - 1; // -1,0,1
     m.position.x = d * 2.2;
     m.position.z = -Math.abs(d) * 0.9;
     m.rotation.y = d * -0.28;
 
-    // ✅ middle flat
+    // middle panel flat
     if (d === 0){
       m.material.uniforms.uBend.value = 0.0;
       m.material.uniforms.uTwist.value = 0.0;
@@ -180,15 +180,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   if (!Array.isArray(worksTop) || !Array.isArray(worksBottom)) return;
 
-  await initDeck({
-    canvasId: "glTop",
-    works: worksTop,
-    measureEl: document.getElementById("deckTop"),
-  });
-
-  await initDeck({
-    canvasId: "glBottom",
-    works: worksBottom,
-    measureEl: document.getElementById("deckBottom"),
-  });
+  await initDeck({ canvasId: "glTop", works: worksTop, measureEl: document.getElementById("deckTop") });
+  await initDeck({ canvasId: "glBottom", works: worksBottom, measureEl: document.getElementById("deckBottom") });
 });
