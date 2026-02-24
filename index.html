@@ -11,37 +11,50 @@
 
 <body>
 <main class="page">
-  <section class="film-main" aria-label="Leporello space gallery">
+  <section class="frame" aria-label="Site frame">
 
-    <!-- HEADER -->
-    <header class="film-header" id="siteHeader">
-      <div class="header-bar">
-        <div class="subtitle-inline" aria-hidden="false">Selected Works</div>
+    <!-- HEADER (outside viewport, aligned to viewport edges) -->
+    <header class="film-header frame-header" id="siteHeader" aria-label="Header">
 
+      <!-- HeaderBayLeft: ONLY menu links -->
+      <div class="header-bay header-bay-left" id="headerBayLeft" aria-label="Header bay left">
         <nav class="menu" id="menu" aria-label="Site menu">
           <a href="about.html">About</a>
           <a href="#" onclick="contact(event)">Contact</a>
           <a href="posts.html">Posts</a>
         </nav>
+      </div>
 
-        <!-- Right bay stays the same setup, just placed inside a bay -->
-        <div class="header-bay" aria-hidden="false">
-          <div class="header-right">
-            <div class="brand" aria-label="Site title">
-              <span class="brand-text">Nelle Kristoff</span>
+      <!-- HeaderBayRight: layered bays -->
+      <div class="header-bay header-bay-right" id="headerBayRight" aria-label="Header bay right">
+        <div class="header-layer-stack" aria-hidden="false">
 
-              <span class="brand-mark" aria-hidden="true">
-                <svg class="icon-monogram"
-                     viewBox="516.693 329.310 496.951 359.707"
-                     xmlns="http://www.w3.org/2000/svg"
-                     aria-hidden="true"
-                     preserveAspectRatio="xMidYMid meet">
-                  <path fill="currentColor"
-                    d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
-                </svg>
-              </span>
-            </div>
+          <!-- LayerBay1: Brand name -->
+          <div class="layer-bay layer-bay-1" aria-label="Layer 1 brand">
+            <span class="brand-text">Nelle Kristoff</span>
+          </div>
 
+          <!-- LayerBay2: Selected Works text -->
+          <div class="layer-bay layer-bay-2" aria-label="Layer 2 selected works">
+            <span class="subtitle-inline">Selected Works</span>
+          </div>
+
+          <!-- LayerBay3: Monogram -->
+          <div class="layer-bay layer-bay-3" aria-label="Layer 3 monogram">
+            <span class="brand-mark" aria-hidden="true">
+              <svg class="icon-monogram"
+                   viewBox="516.693 329.310 496.951 359.707"
+                   xmlns="http://www.w3.org/2000/svg"
+                   aria-hidden="true"
+                   preserveAspectRatio="xMidYMid meet">
+                <path fill="currentColor"
+                  d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
+              </svg>
+            </span>
+          </div>
+
+          <!-- LayerBay4: Burger -->
+          <div class="layer-bay layer-bay-4" aria-label="Layer 4 burger">
             <button class="menu-btn" id="menuBtn"
                     aria-label="Open menu"
                     aria-expanded="false"
@@ -58,79 +71,108 @@
               </svg>
             </button>
           </div>
+
         </div>
       </div>
     </header>
 
-    <!-- VIEWPORT -->
-    <div class="space-viewport" id="viewport" aria-label="Artwork space">
-      <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
+    <!-- LEFT BAY (empty for now, aligned to viewport height) -->
+    <aside class="frame-leftbay" id="leftBay" aria-label="Left bay"></aside>
 
-      <!-- TOP DECK -->
-      <div class="deck-viewport deck-top" id="deckTop" aria-label="Top deck area">
-        <div class="space-pan" id="spacePanTop">
-          <div class="space-zoom" id="spaceZoomTop">
-            <canvas id="glTop" class="gl-canvas" aria-hidden="true"></canvas>
-            <div class="leporello" id="leporelloTop" aria-label="Top deck panels"></div>
+    <!-- VIEWPORT WRAP (the actual viewport aligned to header/footer edges) -->
+    <section class="frame-viewportWrap" aria-label="Viewport area">
+      <div class="space-viewport" id="viewport" aria-label="Artwork space">
+        <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
 
-            <!-- Active UI is “bound” to active (middle) panel -->
-            <div class="active-ui" id="activeUITop">
-              <div class="active-meta">
-                <span class="am-title" id="amTitleTop">Untitled</span>
-                <span class="am-status" id="amStatusTop">Unveiling soon</span>
+        <!-- TOP DECK LAYER -->
+        <div class="deck-layer deck-layer-top" id="deckLayerTop" aria-label="Top deck layer">
+          <div class="deck-viewport deck-top" id="deckTop" aria-label="Top deck area">
+            <div class="space-pan" id="spacePanTop">
+              <div class="space-zoom" id="spaceZoomTop">
+                <canvas id="glTop" class="gl-canvas" aria-hidden="true"></canvas>
+                <div class="leporello" id="leporelloTop" aria-label="Top deck panels"></div>
+
+                <div class="active-ui" id="activeUITop">
+                  <div class="active-meta">
+                    <span class="am-title" id="amTitleTop">Untitled</span>
+                    <span class="am-status" id="amStatusTop">Unveiling soon</span>
+                  </div>
+
+                  <div class="active-actions">
+                    <a href="#" class="abtn active-left" onclick="contact(event)">Inquire</a>
+                    <button class="abtn abtn-primary" id="selectBtnTop" type="button">Select</button>
+                    <a href="#" class="abtn active-right" id="activeCollectTop" target="_blank" rel="noopener">Collect</a>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div class="active-actions">
-                <a href="#" class="abtn active-left" onclick="contact(event)">Inquire</a>
-                <button class="abtn abtn-primary" id="selectBtnTop" type="button">Select</button>
-                <a href="#" class="abtn active-right" id="activeCollectTop" target="_blank" rel="noopener">Collect</a>
-              </div>
+            <div class="arrow-slot arrow-slot--top-left">
+              <button class="film-arrow" id="arrowTopLeft" aria-label="Top deck slide left" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M15 6l-6 6 6 6"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
 
-        <div class="arrow-slot arrow-slot--top-left">
-          <button class="film-arrow" id="arrowTopLeft" aria-label="Top deck slide left" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M15 6l-6 6 6 6"/>
-            </svg>
-          </button>
-        </div>
-      </div>
+        <!-- BOTTOM DECK LAYER -->
+        <div class="deck-layer deck-layer-bottom" id="deckLayerBottom" aria-label="Bottom deck layer">
+          <div class="deck-viewport deck-bottom" id="deckBottom" aria-label="Bottom deck area">
+            <div class="space-pan" id="spacePanBottom">
+              <div class="space-zoom" id="spaceZoomBottom">
+                <canvas id="glBottom" class="gl-canvas" aria-hidden="true"></canvas>
+                <div class="leporello" id="leporelloBottom" aria-label="Bottom deck panels"></div>
 
-      <!-- BOTTOM DECK -->
-      <div class="deck-viewport deck-bottom" id="deckBottom" aria-label="Bottom deck area">
-        <div class="space-pan" id="spacePanBottom">
-          <div class="space-zoom" id="spaceZoomBottom">
-            <canvas id="glBottom" class="gl-canvas" aria-hidden="true"></canvas>
-            <div class="leporello" id="leporelloBottom" aria-label="Bottom deck panels"></div>
+                <div class="active-ui" id="activeUIBottom">
+                  <div class="active-meta">
+                    <span class="am-title" id="amTitleBottom">Untitled</span>
+                    <span class="am-status" id="amStatusBottom">Unveiling soon</span>
+                  </div>
 
-            <div class="active-ui" id="activeUIBottom">
-              <div class="active-meta">
-                <span class="am-title" id="amTitleBottom">Untitled</span>
-                <span class="am-status" id="amStatusBottom">Unveiling soon</span>
+                  <div class="active-actions">
+                    <a href="#" class="abtn active-left" onclick="contact(event)">Inquire</a>
+                    <button class="abtn abtn-primary" id="selectBtnBottom" type="button">Select</button>
+                    <a href="#" class="abtn active-right" id="activeCollectBottom" target="_blank" rel="noopener">Collect</a>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div class="active-actions">
-                <a href="#" class="abtn active-left" onclick="contact(event)">Inquire</a>
-                <button class="abtn abtn-primary" id="selectBtnBottom" type="button">Select</button>
-                <a href="#" class="abtn active-right" id="activeCollectBottom" target="_blank" rel="noopener">Collect</a>
-              </div>
+            <div class="arrow-slot">
+              <button class="film-arrow" id="arrowBottomRight" aria-label="Bottom deck slide right" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M9 6l6 6-6 6"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
 
-        <div class="arrow-slot">
-          <button class="film-arrow" id="arrowBottomRight" aria-label="Bottom deck slide right" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M9 6l6 6-6 6"/>
-            </svg>
-          </button>
-        </div>
       </div>
-    </div>
+    </section>
 
-    <!-- FULLSCREEN -->
+    <!-- RIGHT BAY (empty for now) -->
+    <aside class="frame-rightbay" id="rightBay" aria-label="Right bay"></aside>
+
+    <!-- FOOTER aligned to viewport edges -->
+    <footer class="frame-footer" aria-label="Footer">
+      <div class="footer-inner">
+        <span class="footer-mark" aria-hidden="true">
+          <svg class="icon-monogram"
+               viewBox="516.693 329.310 496.951 359.707"
+               xmlns="http://www.w3.org/2000/svg"
+               preserveAspectRatio="xMidYMid meet">
+            <path fill="currentColor"
+              d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
+          </svg>
+        </span>
+        <span>© 2026 Nelle Kristoff — All rights reserved</span>
+      </div>
+    </footer>
+
+    <!-- FULLSCREEN (shared, outside grid so it overlays everything) -->
     <div class="fullscreen" id="fullscreen" aria-hidden="true">
       <div class="fs-inner">
         <div class="fs-meta">
@@ -150,20 +192,6 @@
         </div>
       </div>
     </div>
-
-    <!-- FOOTER (centered, minimal gap, monogram before ©) -->
-    <footer class="site-footer">
-      <span class="footer-mark" aria-hidden="true">
-        <svg class="icon-monogram"
-             viewBox="516.693 329.310 496.951 359.707"
-             xmlns="http://www.w3.org/2000/svg"
-             preserveAspectRatio="xMidYMid meet">
-          <path fill="currentColor"
-            d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
-        </svg>
-      </span>
-      <span>© 2026 Nelle Kristoff — All rights reserved</span>
-    </footer>
 
   </section>
 </main>
