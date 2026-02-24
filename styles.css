@@ -708,6 +708,13 @@ footer{
     --overviewBottomTilt: 5deg;
   }
 
+  .fs-actions{ width: 100%; }
+  .fs-meta{ right: 10px; }
+  .fullscreen{ 
+    left: 0 !important;
+    width: 100vw !important;
+  }
+
   .brand-text{
     font-size: clamp(16px, 5vw, 20px);
     letter-spacing:.6px;
