@@ -1,6 +1,5 @@
 // app.js — two decks, WAAPI 3D, per-deck pan/zoom, focus-on-zoom,
 // active UI attached to active middle panel.
-
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
 });
