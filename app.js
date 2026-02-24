@@ -28,6 +28,9 @@ const worksBottom = [
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 
+window.worksTop = worksTop;
+window.worksBottom = worksBottom;
+
 // preload
 [...worksTop, ...worksBottom].forEach(w => { const i = new Image(); i.src = w.src; });
 
