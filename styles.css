@@ -11,6 +11,7 @@
   --frameGap: clamp(6px, 1.2vw, 10px);
   --headerH: 52px;
   --footerGap: clamp(4px, 1.2vh, 10px);
+  --headerRightW: clamp(240px, 34vw, 560px);
 
   /* side bays (empty for now) */
   --leftBayW: 0px;
@@ -107,12 +108,13 @@ html.ready body{
 .frame-header{
   grid-column: 1 / 4;
   grid-row: 1;
+  position: relative;
 
   display:grid;
   grid-template-columns: var(--leftBayW) 1fr var(--rightBayW);
   align-items:center;
 
-  z-index: 30;
+  z-index: 80;
 }
 
 /* header-inner lives in the viewport column and splits left/right */
@@ -156,7 +158,7 @@ html.ready body{
  /* NEW: collapsed by default */
   opacity: 0;
   transform: translateY(-6px);
-  pointer-events: none;
+  pointer-events: auto;
   transition: opacity .22s ease, transform .28s cubic-bezier(.18,.9,.2,1);
 }
 
@@ -218,7 +220,7 @@ html.ready body{
 /* ======= HEADERBAYRIGHT LAYERED STACK ======= */
 .header-layer-stack{
   position:relative;
-  width: max-content;
+  width: calc(var(--headerH) + var(--headerRightW));
   height: 100%;
   display:block;
 }
@@ -235,11 +237,12 @@ html.ready body{
 }
 
 /* Layer positions: aligned to right */
-.layer-bay-1{ right: calc(var(--headerH) + 10px); } /* brand text */
+.layer-bay-1{ right: calc(var(--headerH) + 10px); } /* brand text layer */
 .layer-bay-2{ right: calc(var(--headerH) + 10px); } /* selected works */
 .layer-bay-3{ right: calc(var(--headerH) + 10px); } /* monogram */
-.layer-bay-4{ right: 0; pointer-events:auto; }      /* burger */
-
+.layer-bay-4{ right: calc(var(--headerH) + 10px); pointer-events:auto; z-index: 10; }      /* burger */
+.layer-bay-4 .menu-btn{ position: relative; z-index: 11; }
+/* brand text */
 .brand-text{
   opacity:1;
   font-size: clamp(22px, 2.8vw, 28px);
