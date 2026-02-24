@@ -678,8 +678,6 @@ html.ready .space-viewport{
   min-height:44px;
 }
 
-#closeBtn{ width: var(--btnH); padding:0; }
-
 footer{
   text-align:center;
   padding: 18px 20px 22px;
