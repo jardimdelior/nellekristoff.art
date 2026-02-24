@@ -13,78 +13,82 @@
 <main class="page">
   <section class="frame" aria-label="Site frame">
 
-    <!-- HEADER (outside viewport, aligned to viewport edges) -->
+    <!-- HEADER -->
     <header class="film-header frame-header" id="siteHeader" aria-label="Header">
-  <div class="header-inner">
+      <div class="header-inner">
 
-    <!-- HeaderBayLeft: ONLY menu links -->
-    <div class="header-bay header-bay-left" id="headerBayLeft" aria-label="Header bay left">
-      <nav class="menu" id="menu" aria-label="Site menu">
-        <a href="about.html">About</a>
-        <a href="#" onclick="contact(event)">Contact</a>
-        <a href="posts.html">Posts</a>
-      </nav>
-    </div>
-
-    <!-- HeaderBayRight: layered bays -->
-    <div class="header-bay header-bay-right" id="headerBayRight" aria-label="Header bay right">
-      <div class="header-layer-stack" aria-hidden="false">
-
-        <div class="layer-bay layer-bay-1" aria-label="Layer 1 brand">
-          <span class="brand-text">Nelle Kristoff</span>
+        <!-- HeaderBayLeft -->
+        <div class="header-bay header-bay-left" id="headerBayLeft" aria-label="Header bay left">
+          <nav class="menu" id="menu" aria-label="Site menu">
+            <a href="about.html">About</a>
+            <a href="#" onclick="contact(event)">Contact</a>
+            <a href="posts.html">Posts</a>
+          </nav>
         </div>
 
-        <div class="layer-bay layer-bay-2" aria-label="Layer 2 selected works">
-          <span class="subtitle-inline">Selected Works</span>
+        <!-- HeaderBayRight -->
+        <div class="header-bay header-bay-right" id="headerBayRight" aria-label="Header bay right">
+          <div class="header-layer-stack" aria-hidden="false">
+
+            <!-- LayerBay1: Brand name -->
+            <div class="layer-bay layer-bay-1" aria-label="Layer 1 brand">
+              <span class="brand-text">Nelle Kristoff</span>
+            </div>
+
+            <!-- LayerBay2: Selected Works -->
+            <div class="layer-bay layer-bay-2" aria-label="Layer 2 selected works">
+              <span class="subtitle-inline">Selected Works</span>
+            </div>
+
+            <!-- LayerBay3: Monogram -->
+            <div class="layer-bay layer-bay-3" aria-label="Layer 3 monogram">
+              <span class="brand-mark" aria-hidden="true">
+                <svg class="icon-monogram"
+                     viewBox="516.693 329.310 496.951 359.707"
+                     xmlns="http://www.w3.org/2000/svg"
+                     preserveAspectRatio="xMidYMid meet">
+                  <path fill="currentColor"
+                    d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
+                </svg>
+              </span>
+            </div>
+
+            <!-- LayerBay4: Burger -->
+            <div class="layer-bay layer-bay-4" aria-label="Layer 4 burger">
+              <button class="menu-btn" id="menuBtn"
+                      aria-label="Open menu"
+                      aria-expanded="false"
+                      type="button">
+                <svg class="icon-burger"
+                     viewBox="571.766 351.497 359.988 296.918"
+                     xmlns="http://www.w3.org/2000/svg"
+                     aria-hidden="true"
+                     preserveAspectRatio="xMidYMid meet">
+                  <path fill="currentColor"
+                    d="m 571.76604,351.49699 v 43.5293 h 359.98828 v -43.5293 z
+                       m 0,126.67383 v 43.52929 h 359.98828 v -43.52929 z
+                       m 0,126.71679 v 43.52735 h 359.98828 v -43.52735 z"/>
+                </svg>
+              </button>
+            </div>
+
+          </div>
         </div>
 
-        <div class="layer-bay layer-bay-3" aria-label="Layer 3 monogram">
-          <span class="brand-mark" aria-hidden="true">
-            <svg class="icon-monogram"
-                 viewBox="516.693 329.310 496.951 359.707"
-                 xmlns="http://www.w3.org/2000/svg"
-                 preserveAspectRatio="xMidYMid meet">
-              <path fill="currentColor"
-                d="M 957.26562 329.30955 L 793.62891 461.31932 L 793.62891 329.3115 L 750.10547 329.3115 L 750.10547 531.07713 L 549.94531 329.31346 L 549.94336 329.31346 L 516.69336 329.31346 L 516.69336 626.23338 L 549.94336 626.23338 L 549.94336 379.00096 L 750.10547 580.76853 L 750.10547 689.01658 L 793.62891 689.01658 L 793.62891 506.30369 L 818.69727 486.13768 L 959.1582 626.28416 L 1007.5586 626.28611 L 846.41016 463.84471 L 1013.6445 329.31541 L 957.26562 329.30955 z"/>
-            </svg>
-          </span>
-        </div>
+      </div><!-- /.header-inner -->
+    </header>
 
-        <div class="layer-bay layer-bay-4" aria-label="Layer 4 burger">
-          <button class="menu-btn" id="menuBtn"
-                  aria-label="Open menu"
-                  aria-expanded="false"
-                  type="button">
-            <svg class="icon-burger"
-                 viewBox="571.766 351.497 359.988 296.918"
-                 xmlns="http://www.w3.org/2000/svg"
-                 aria-hidden="true"
-                 preserveAspectRatio="xMidYMid meet">
-              <path fill="currentColor"
-                d="m 571.76604,351.49699 v 43.5293 h 359.98828 v -43.5293 z
-                   m 0,126.67383 v 43.52929 h 359.98828 v -43.52929 z
-                   m 0,126.71679 v 43.52735 h 359.98828 v -43.52735 z"/>
-            </svg>
-          </button>
-        </div>
-
-      </div>
-    </div>
-
-  </div><!-- /.header-inner -->
-</header>
-
-    <!-- LEFT BAY (empty for now, aligned to viewport height) -->
+    <!-- LEFT BAY (empty for now) -->
     <aside class="frame-leftbay" id="leftBay" aria-label="Left bay"></aside>
 
-    <!-- VIEWPORT WRAP (the actual viewport aligned to header/footer edges) -->
+    <!-- VIEWPORT WRAP -->
     <section class="frame-viewportWrap" aria-label="Viewport area">
       <div class="space-viewport" id="viewport" aria-label="Artwork space">
         <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
 
         <!-- TOP DECK LAYER -->
         <div class="deck-layer deck-layer-top" id="deckLayerTop" aria-label="Top deck layer">
-          <div class="deck-viewport deck-top" id="deckTop" aria-label="Top deck area">
+          <div class="deck-viewport" id="deckTop" aria-label="Top deck area">
             <div class="space-pan" id="spacePanTop">
               <div class="space-zoom" id="spaceZoomTop">
                 <canvas id="glTop" class="gl-canvas" aria-hidden="true"></canvas>
@@ -102,6 +106,7 @@
                     <a href="#" class="abtn active-right" id="activeCollectTop" target="_blank" rel="noopener">Collect</a>
                   </div>
                 </div>
+
               </div>
             </div>
 
@@ -117,7 +122,7 @@
 
         <!-- BOTTOM DECK LAYER -->
         <div class="deck-layer deck-layer-bottom" id="deckLayerBottom" aria-label="Bottom deck layer">
-          <div class="deck-viewport deck-bottom" id="deckBottom" aria-label="Bottom deck area">
+          <div class="deck-viewport" id="deckBottom" aria-label="Bottom deck area">
             <div class="space-pan" id="spacePanBottom">
               <div class="space-zoom" id="spaceZoomBottom">
                 <canvas id="glBottom" class="gl-canvas" aria-hidden="true"></canvas>
@@ -135,6 +140,7 @@
                     <a href="#" class="abtn active-right" id="activeCollectBottom" target="_blank" rel="noopener">Collect</a>
                   </div>
                 </div>
+
               </div>
             </div>
 
@@ -154,7 +160,7 @@
     <!-- RIGHT BAY (empty for now) -->
     <aside class="frame-rightbay" id="rightBay" aria-label="Right bay"></aside>
 
-    <!-- FOOTER aligned to viewport edges -->
+    <!-- FOOTER -->
     <footer class="frame-footer" aria-label="Footer">
       <div class="footer-inner">
         <span class="footer-mark" aria-hidden="true">
@@ -170,7 +176,7 @@
       </div>
     </footer>
 
-    <!-- FULLSCREEN (shared, outside grid so it overlays everything) -->
+    <!-- FULLSCREEN -->
     <div class="fullscreen" id="fullscreen" aria-hidden="true">
       <div class="fs-inner">
         <div class="fs-meta">
