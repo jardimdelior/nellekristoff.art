@@ -8,9 +8,9 @@
   --radius:2px;
 
   /* GLOBAL FRAME */
-  --frameGap: clamp(8px, 1.6vw, 14px);
+  --frameGap: clamp(6px, 1.2vw, 10px);
   --headerH: 52px;
-  --footerGap: 6px;
+  --footerGap: clamp(4px, 1.2vh, 10px);
 
   /* side bays (empty for now) */
   --leftBayW: 0px;
@@ -99,6 +99,8 @@ html.ready body{
   align-items:stretch;
   position:relative;
   min-height:100vh;
+  column-gap: var(--frameGap);
+  row-gap: 0;
 }
 
 /* ======= HEADER ======= */
@@ -217,20 +219,18 @@ html.ready body{
 .header-layer-stack{
   position:relative;
   width: max-content;
-  height: var(--headerH);
+  height: 100%;
   display:block;
 }
 
 /* all layers overlay each other (not flowing vertically) */
 .layer-bay{
   position:absolute;
-  top:50%;
-  right:0;
-  transform: translateY(-50%);
+  inset:0;
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  height: var(--headerH);
+  height: 100%;
   pointer-events:none;
 }
 
@@ -344,8 +344,7 @@ html.ready body{
   display:grid;
   grid-template-columns: var(--leftBayW) 1fr var(--rightBayW);
   align-items:center;
-
-  margin-top: calc(var(--footerGap) - var(--frameGap));
+  margin-top: var(--footerGap);
 }
 .footer-inner{
   grid-column:2;
