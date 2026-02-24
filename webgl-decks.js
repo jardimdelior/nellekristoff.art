@@ -1,3 +1,4 @@
+// webgl-decks.js (ES module)
 import * as THREE from "./vendor/three/three.module.js";
 
 function makeDeckRenderer(canvas){
@@ -19,18 +20,20 @@ function buildPanelMaterial(artTex, noiseTex){
   return new THREE.ShaderMaterial({
     transparent: true,
     uniforms: {
-      uArt:     { value: artTex },
-      uNoise:   { value: noiseTex },
-      uTime:    { value: 0 },
-      uBorder:  { value: 0.075 },
-      uBend:    { value: 0.30 },
-      uTwist:   { value: 0.18 },
+      uArt:    { value: artTex },
+      uNoise:  { value: noiseTex },
+      uTime:   { value: 0 },
+      uBorder: { value: 0.075 },
+      uBend:   { value: 0.30 },
+      uTwist:  { value: 0.18 },
       uNoiseAmt:{ value: 0.10 },
+      uFlat:   { value: 0.0 },   // 1.0 means “flatten”
     },
     vertexShader: `
       uniform float uTime;
       uniform float uBend;
       uniform float uTwist;
+      uniform float uFlat;
       varying vec2 vUv;
 
       void main(){
@@ -40,12 +43,15 @@ function buildPanelMaterial(artTex, noiseTex){
         float x = (uv.x - 0.5) * 2.0;
         float y = (uv.y - 0.5) * 2.0;
 
+        // If active panel: flatten
+        float bend = mix(uBend, 0.0, uFlat);
+        float twistAmt = mix(uTwist, 0.0, uFlat);
+
         float center = 1.0 - clamp(abs(y), 0.0, 1.0);
+        p.z += (x*x) * bend * (0.65 + 0.35*center);
+        p.z += mix(0.03 * sin(x*3.0 + uTime*1.35) * (0.35 + 0.65*center), 0.0, uFlat);
 
-        p.z += (x*x) * uBend * (0.65 + 0.35*center);
-        p.z += 0.03 * sin(x*3.0 + uTime*1.35) * (0.35 + 0.65*center);
-
-        float twist = uTwist * x;
+        float twist = twistAmt * x;
         float c = cos(twist);
         float s = sin(twist);
         float py = p.y;
@@ -91,7 +97,12 @@ function buildPanelMaterial(artTex, noiseTex){
   });
 }
 
-async function initDeck({ canvasId, works, measureEl, noiseSrc="images/noise.png" }){
+async function initDeck({
+  canvasId,
+  works,
+  yOffset = 0,
+  noiseSrc = "images/noise.png",
+}){
   const canvas = document.getElementById(canvasId);
   if (!canvas) return null;
 
@@ -102,16 +113,22 @@ async function initDeck({ canvasId, works, measureEl, noiseSrc="images/noise.png
   camera.position.set(0, 0, 2.9);
 
   const loader = new THREE.TextureLoader();
-  const noiseTex = await new Promise((res, rej) => loader.load(noiseSrc, res, undefined, rej));
+
+  const noiseTex = await new Promise((res, rej) => {
+    loader.load(noiseSrc, res, undefined, rej);
+  });
 
   const group = new THREE.Group();
+  group.position.y = yOffset;
   scene.add(group);
 
-  const geo = new THREE.PlaneGeometry(3.4, 4.4, 64, 64);
   const meshes = [];
+  const geo = new THREE.PlaneGeometry(3.4, 4.4, 64, 64);
 
   for (let i = 0; i < works.length; i++){
-    const artTex = await new Promise((res, rej) => loader.load(works[i].src, res, undefined, rej));
+    const artTex = await new Promise((res, rej) => {
+      loader.load(works[i].src, res, undefined, rej);
+    });
     artTex.colorSpace = THREE.SRGBColorSpace;
 
     const mat = buildPanelMaterial(artTex, noiseTex);
@@ -122,27 +139,19 @@ async function initDeck({ canvasId, works, measureEl, noiseSrc="images/noise.png
     m.position.z = -Math.abs(d) * 0.9;
     m.rotation.y = d * -0.28;
 
-    // middle panel flat
-    if (d === 0){
-      m.material.uniforms.uBend.value = 0.0;
-      m.material.uniforms.uTwist.value = 0.0;
-    }
+    // Active (middle) is flat in shader:
+    m.material.uniforms.uFlat.value = (d === 0) ? 1.0 : 0.0;
 
     group.add(m);
     meshes.push(m);
   }
 
   function resize(){
-    const el = measureEl || canvas;
-    const rect = el.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const wCss = Math.max(1, Math.floor(rect.width));
-    const hCss = Math.max(1, Math.floor(rect.height));
-
-    renderer.setPixelRatio(dpr);
-    renderer.setSize(wCss, hCss, false);
-
-    camera.aspect = wCss / hCss;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const w = Math.max(1, Math.floor(rect.width));
+    const h = Math.max(1, Math.floor(rect.height));
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
   }
   resize();
@@ -155,13 +164,9 @@ async function initDeck({ canvasId, works, measureEl, noiseSrc="images/noise.png
     group.rotation.y = Math.sin(t * 0.22) * 0.05;
 
     meshes.forEach((m, i) => {
-      const d = i - 1;
-      const amp = (d === 0) ? 0.010 : 0.030;
       const tt = t + i * 0.6;
-
-      m.position.y = Math.sin(tt * 0.6) * amp;
-      m.rotation.x = Math.sin(tt * 0.5) * (d === 0 ? 0.006 : 0.02);
-
+      m.position.y = Math.sin(tt * 0.6) * 0.03;
+      m.rotation.x = Math.sin(tt * 0.5) * 0.02;
       m.material.uniforms.uTime.value = t;
     });
 
@@ -171,15 +176,19 @@ async function initDeck({ canvasId, works, measureEl, noiseSrc="images/noise.png
   requestAnimationFrame(tick);
 
   window.addEventListener("resize", resize);
-  return { renderer, scene, camera, group, meshes };
+
+  return { renderer, scene, camera, group, meshes, resize };
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
   const worksTop = window.worksTop;
   const worksBottom = window.worksBottom;
 
-  if (!Array.isArray(worksTop) || !Array.isArray(worksBottom)) return;
+  if (!Array.isArray(worksTop) || !Array.isArray(worksBottom)){
+    console.warn("Expose worksTop/worksBottom on window (app.js).");
+    return;
+  }
 
-  await initDeck({ canvasId: "glTop", works: worksTop, measureEl: document.getElementById("deckTop") });
-  await initDeck({ canvasId: "glBottom", works: worksBottom, measureEl: document.getElementById("deckBottom") });
+  await initDeck({ canvasId: "glTop",    works: worksTop,    yOffset: +1.6 });
+  await initDeck({ canvasId: "glBottom", works: worksBottom, yOffset: -1.6 });
 });
