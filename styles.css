@@ -609,9 +609,6 @@ html.ready .space-viewport{
 .fullscreen{
   position:fixed;
   top: 0;
-  inset: 0;
-  max-width: 720px;
-  min-width: 320px;
   left: 30vw;
   width: 40vw;
   height: 100dvh;
