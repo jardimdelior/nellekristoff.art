@@ -148,7 +148,7 @@ async function initDeck({
   }
 
   function resize(){
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvas.parentElement.getBoundingClientRect();
     const w = Math.max(1, Math.floor(rect.width));
     const h = Math.max(1, Math.floor(rect.height));
     renderer.setSize(w, h, false);
