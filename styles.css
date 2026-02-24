@@ -240,7 +240,7 @@ html.ready body{
 .layer-bay-1{ right: calc(var(--headerH) + 10px); } /* brand text layer */
 .layer-bay-2{ right: calc(var(--headerH) + 10px); } /* selected works */
 .layer-bay-3{ right: calc(var(--headerH) + 10px); } /* monogram */
-.layer-bay-4{ right: calc(var(--headerH) + 10px); pointer-events:auto; z-index: 10; }      /* burger */
+.layer-bay-4{ right: 0; pointer-events:auto; z-index: 10; }      /* burger */
 .layer-bay-4 .menu-btn{ position: relative; z-index: 11; }
 /* brand text */
 .brand-text{
