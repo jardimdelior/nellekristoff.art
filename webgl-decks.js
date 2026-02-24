@@ -126,7 +126,7 @@ async function initDeck({
   scene.add(group);
 
   const meshes = [];
-  const geo = new THREE.PlaneGeometry(2.4, 3.1, 64, 64);
+  const geo = new THREE.PlaneGeometry(3.4, 4.4, 64, 64);
 
   for (let i = 0; i < works.length; i++){
     const artTex = await new Promise((res, rej) => {
