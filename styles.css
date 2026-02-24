@@ -107,6 +107,14 @@ html.ready body{
   align-items:center;
 }
 
+.header-inner{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+
 /* LEFT/RIGHT header bays both sit in viewport column, aligned to its edges */
 .header-bay-left{
   grid-column: 2;
