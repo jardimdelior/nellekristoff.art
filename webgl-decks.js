@@ -1,4 +1,4 @@
-// webgl-decks.js (ES module)
+// webgl-decks.js (ES module) — LOCAL three.js (no CORS)
 import * as THREE from "./vendor/three/three.module.js";
 
 function makeDeckRenderer(canvas){
@@ -13,27 +13,25 @@ function makeDeckRenderer(canvas){
   return renderer;
 }
 
-function buildPanelMaterial(artTex, noiseTex){
+function buildPanelMaterial(artTex, noiseTex, { flat = false } = {}){
   noiseTex.wrapS = noiseTex.wrapT = THREE.RepeatWrapping;
   noiseTex.repeat.set(4, 4);
 
   return new THREE.ShaderMaterial({
     transparent: true,
     uniforms: {
-      uArt:    { value: artTex },
-      uNoise:  { value: noiseTex },
-      uTime:   { value: 0 },
-      uBorder: { value: 0.075 },
-      uBend:   { value: 0.30 },
-      uTwist:  { value: 0.18 },
-      uNoiseAmt:{ value: 0.10 },
-      uFlat:   { value: 0.0 },   // 1.0 means “flatten”
+      uArt:      { value: artTex },
+      uNoise:    { value: noiseTex },
+      uTime:     { value: 0 },
+      uBorder:   { value: 0.075 },
+      uBend:     { value: flat ? 0.0 : 0.30 },   // ✅ center panel flat
+      uTwist:    { value: flat ? 0.0 : 0.18 },
+      uNoiseAmt: { value: 0.10 },
     },
     vertexShader: `
       uniform float uTime;
       uniform float uBend;
       uniform float uTwist;
-      uniform float uFlat;
       varying vec2 vUv;
 
       void main(){
@@ -43,15 +41,12 @@ function buildPanelMaterial(artTex, noiseTex){
         float x = (uv.x - 0.5) * 2.0;
         float y = (uv.y - 0.5) * 2.0;
 
-        // If active panel: flatten
-        float bend = mix(uBend, 0.0, uFlat);
-        float twistAmt = mix(uTwist, 0.0, uFlat);
-
         float center = 1.0 - clamp(abs(y), 0.0, 1.0);
-        p.z += (x*x) * bend * (0.65 + 0.35*center);
-        p.z += mix(0.03 * sin(x*3.0 + uTime*1.35) * (0.35 + 0.65*center), 0.0, uFlat);
+        p.z += (x*x) * uBend * (0.65 + 0.35*center);
 
-        float twist = twistAmt * x;
+        p.z += 0.03 * sin(x*3.0 + uTime*1.35) * (0.35 + 0.65*center);
+
+        float twist = uTwist * x;
         float c = cos(twist);
         float s = sin(twist);
         float py = p.y;
@@ -110,7 +105,7 @@ async function initDeck({
   const scene = new THREE.Scene();
 
   const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-  camera.position.set(0, 0, 1.1);
+  camera.position.set(0, 0, 2.9);
 
   const loader = new THREE.TextureLoader();
 
@@ -131,16 +126,15 @@ async function initDeck({
     });
     artTex.colorSpace = THREE.SRGBColorSpace;
 
-    const mat = buildPanelMaterial(artTex, noiseTex);
+    // center (i==1) is flat
+    const flat = (i === 1);
+    const mat = buildPanelMaterial(artTex, noiseTex, { flat });
     const m = new THREE.Mesh(geo, mat);
 
     const d = i - 1; // -1,0,1
     m.position.x = d * 2.2;
     m.position.z = -Math.abs(d) * 0.9;
     m.rotation.y = d * -0.28;
-
-    // Active (middle) is flat in shader:
-    m.material.uniforms.uFlat.value = (d === 0) ? 1.0 : 0.0;
 
     group.add(m);
     meshes.push(m);
@@ -155,6 +149,7 @@ async function initDeck({
     camera.updateProjectionMatrix();
   }
   resize();
+  window.addEventListener("resize", resize);
 
   let t0 = performance.now();
   function tick(now){
@@ -175,9 +170,7 @@ async function initDeck({
   }
   requestAnimationFrame(tick);
 
-  window.addEventListener("resize", resize);
-
-  return { renderer, scene, camera, group, meshes, resize };
+  return { renderer, scene, camera, group, meshes };
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
@@ -185,7 +178,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const worksBottom = window.worksBottom;
 
   if (!Array.isArray(worksTop) || !Array.isArray(worksBottom)){
-    console.warn("Expose worksTop/worksBottom on window (app.js).");
+    console.warn("worksTop/worksBottom not found on window.");
     return;
   }
 
