@@ -11,9 +11,6 @@
   --frameGap: clamp(6px, 1.2vw, 10px);
   --headerH: 52px;
   --footerGap: clamp(4px, 1.2vh, 10px);
-  /* HEADER RIGHT */
-  --headerRightW: clamp(220px, 34vw, 560px);
-  --monoGap: 10px;
 
   /* side bays (empty for now) */
   --leftBayW: 0px;
@@ -62,6 +59,10 @@
   /* overview tilt */
   --overviewTopTilt: -6deg;
   --overviewBottomTilt: 6deg;
+
+  /* header right layout */
+  --headerRightSlotW: clamp(220px, 34vw, 560px);
+  --headerRightGap: 10px;
 }
 
 html, body{ height:100%; }
@@ -102,24 +103,22 @@ html.ready body{
   align-items:stretch;
   position:relative;
   min-height:100vh;
-  column-gap: var(--frameGap);
-  row-gap: 0;
 }
 
 /* ======= HEADER ======= */
 .frame-header{
   grid-column: 1 / 4;
   grid-row: 1;
-  position: relative;
 
   display:grid;
   grid-template-columns: var(--leftBayW) 1fr var(--rightBayW);
   align-items:center;
 
-  z-index: 80;
+  position:relative;
+  z-index: 80; /* always above viewport */
 }
 
-/* header-inner lives in the viewport column and splits left/right */
+/* header-inner lives in the viewport column */
 .frame-header .header-inner{
   grid-column: 2;
   width:100%;
@@ -131,19 +130,22 @@ html.ready body{
   gap: 12px;
 }
 
+/* left = aligned to viewport left edge */
 .header-bay-left{
   flex: 1 1 auto;
   min-width: 0;
-  height: var(--headerH);
+  height: 100%;
   display:flex;
   align-items:center;
 }
+
+/* right = aligned to viewport right edge */
 .header-bay-right{
-  position: relative;
   flex: 0 0 auto;
-  height: var(--headerH);
+  height: 100%;
   display:flex;
   align-items:center;
+  position:relative;
 }
 
 /* ======= HEADER MENU (left) ======= */
@@ -158,14 +160,12 @@ html.ready body{
   text-transform: uppercase;
   line-height: 1;
 
- /* NEW: collapsed by default */
+  /* collapsed by default */
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
   transition: opacity .22s ease, transform .28s cubic-bezier(.18,.9,.2,1);
 }
-
-/* NEW: open state */
 .menu.open{
   opacity: 1;
   transform: translateY(0);
@@ -220,87 +220,60 @@ html.ready body{
 }
 .menu a, .abtn{ padding: 0 8px; }
 
-/* ======= HEADERBAYRIGHT LAYERED STACK ======= */
+/* ======= HEADER RIGHT: stable slot + burger =======
+   We DO NOT rely on absolute children to size the parent.
+   header-layer-stack gets an explicit width:
+   [slot (brand/subtitle/monogram)] + [gap] + [burger]
+*/
 .header-layer-stack{
-  position:relative;
-  width: calc(var(--headerH) +var(--monoGap) + var(--headerRightW));
+  position: relative;
   height: 100%;
-  display:block;
+  width: calc(var(--headerRightSlotW) + var(--headerRightGap) + var(--headerH));
 }
 
-/* all layers overlay each other (not flowing vertically) */
+/* make all layers same height as header */
 .layer-bay{
-  position:absolute;
-  top: 0;
-  inset:0;
+  position: absolute;
+  top:0;
+  height: 100%;
   display:flex;
   align-items:center;
-  justify-content:flex-end;
-  height: 100%;
   pointer-events:none;
 }
 
-/* Layer positions: aligned to right */
-.layer-bay-1{ right: calc(var(--headerH) + 10px); z-index: 2; } /* brand text layer */
-.layer-bay-2{ right: calc(var(--headerH) + 10px); z-index: 2; } /* selected works */
-.layer-bay-3{ right: calc(var(--headerH) + 10px); z-index: 3; } /* monogram */
-
-/* burger */
-.layer-bay-4{ 
-  right: 0; 
-  pointer-events:auto; 
+/* burger at far right */
+.layer-bay-4{
+  right: 0;
   width: var(--headerH);
-  justify-content: flex-end;
-  z-index: 10; 
+  justify-content:flex-end;
+  pointer-events:auto;
+  z-index: 10;
 }
 
-.layer-bay-4 .menu-btn{ 
-  position: relative; 
-  z-index: 11;
-  width: var(--headerH);
-  height: var(--headerH);
-  pointer-events: auto; 
-}
-
-/* SLOT (everything left of burger) aligns to burger with a gap */
+/* shared slot (everything left of burger) */
 .layer-bay-1,
 .layer-bay-2,
 .layer-bay-3{
-  right: calc(var(--headerH) + var(--monoGap));
-  width: var(--headerRightW);
-  justify-content: flex-end;
+  right: calc(var(--headerH) + var(--headerRightGap));
+  width: var(--headerRightSlotW);
+  justify-content:flex-end;
 }
 
-/* Make brand text sit in the TOP half */
-.layer-bay-1 .brand-text{
-  display: block;
-  position: relative;
-  top: -10%;                 /* moves into top half */
-  transform-origin: 100% 50%;
-}
+/* Brand + subtitle stacked (no HTML change) */
+.layer-bay-1{ z-index: 3; }
+.layer-bay-2{ z-index: 3; }
 
-/* Make Selected Works sit in the BOTTOM half */
-.layer-bay-2 .subtitle-inline{
-  display: block;
-  position: relative;
-  top: 18%;                  /* moves into bottom half */
-  transform-origin: 100% 50%;
-}
-
-.layer-bay-3 .brand-mark{
-  width: var(--headerH);
-  height: var(--headerH);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* brand text */
+/* brand in top half */
 .brand-text{
   opacity:1;
   font-size: clamp(22px, 2.8vw, 28px);
   letter-spacing: .08em;
   text-transform: uppercase;
+
+  /* stack position */
+  position: relative;
+  top: -10%;
+
   transform-origin: 100% 50%;
   transition:
     opacity .22s ease,
@@ -308,6 +281,7 @@ html.ready body{
     filter .22s ease;
 }
 
+/* subtitle in bottom half */
 .subtitle-inline{
   font-size: var(--leftLabelSize);
   font-weight: var(--leftLabelWeight);
@@ -316,7 +290,11 @@ html.ready body{
   opacity:.82;
   white-space:nowrap;
   line-height:1;
-  pointer-events:none;
+
+  /* stack position */
+  position: relative;
+  top: 18%;
+
   transform-origin: 100% 50%;
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
 }
@@ -330,6 +308,7 @@ html.ready body{
   justify-content:center;
   opacity:0;
   color: var(--brand);
+
   transform: translateX(10px) scaleX(.25);
   filter: blur(.2px);
   transform-origin: 100% 50%;
@@ -345,7 +324,7 @@ html.ready body{
   transform: scale(var(--monoScale));
 }
 
-/* burger */
+/* burger button */
 .menu-btn{
   width: var(--headerH);
   height: var(--headerH);
@@ -368,7 +347,7 @@ html.ready body{
   transform: scale(var(--burgerScale));
 }
 
-/* menu-open mapping */
+/* menu-open mapping (fold into monogram) */
 .film-header.menu-open .menu-btn{
   transform: translateX(calc(var(--burgerShift) * -1));
 }
@@ -377,40 +356,14 @@ html.ready body{
   transform: translateX(var(--foldShift)) scaleX(.05) skewY(6deg);
   filter: blur(.6px);
 }
-.film-header.menu-open .brand-mark{
-  opacity:1;
-  transform: translateX(0) scaleX(1);
-  filter:none;
-}
 .film-header.menu-open .subtitle-inline{
   opacity:0;
   transform: translateX(-8px);
 }
-
-/* When menu opens: show monogram, hide brand+subtitle */
-.film-header.menu-open .layer-bay-1 .brand-text{
-  opacity:0;
-  transform: translateX(var(--foldShift)) scaleX(.05) skewY(6deg);
-  filter: blur(.6px);
-}
-
-.film-header.menu-open .layer-bay-2 .subtitle-inline{
-  opacity:0;
-  transform: translateX(-8px);
-}
-
-.film-header.menu-open .layer-bay-3 .brand-mark{
+.film-header.menu-open .brand-mark{
   opacity:1;
   transform: translateX(0) scaleX(1);
   filter:none;
-}
-
-/* default state: monogram hidden */
-.layer-bay-3 .brand-mark{
-  opacity:0;
-  transform: translateX(10px) scaleX(.25);
-  filter: blur(.2px);
-  transition: opacity .22s ease, transform .32s cubic-bezier(.18,.9,.2,1), filter .22s ease;
 }
 
 /* ======= GRID MIDDLE ROW ======= */
@@ -426,6 +379,7 @@ html.ready body{
   display:grid;
   grid-template-columns: var(--leftBayW) 1fr var(--rightBayW);
   align-items:center;
+
   margin-top: var(--footerGap);
 }
 .footer-inner{
@@ -688,7 +642,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   right:12px;
   bottom:12px;
   z-index:60;
-  pointer-events:none; /* slot doesn't block */
+  pointer-events:none;
 }
 .arrow-slot--top-left{
   left:12px;
@@ -706,13 +660,13 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display:grid;
   place-items:center;
   background: rgba(239,231,220,.70);
-  pointer-events:auto; /* button clickable */
+  pointer-events:auto;
   position:relative;
   z-index:70;
 }
 .film-arrow svg{ width:18px; height:18px; }
 
-/* active UI attached to active panel */
+/* active UI follows active panel */
 .active-ui{
   position:absolute;
   left:50%;
@@ -828,7 +782,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* responsive */
 @media (max-width: 760px){
   :root{ --maxFilmH: 74vh; }
-  .layer-bay-2{ display:none; } /* hide Selected Works on small screens */
+  .layer-bay-2{ display:none; }
 }
 @media (max-width: 520px){
   :root{
@@ -846,6 +800,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
     --pillH: 36px;
     --deckGap: clamp(8px, 2vh, 14px);
     --panelToButtonsGap: 10px;
+    --headerRightSlotW: clamp(150px, 42vw, 320px);
   }
   .fullscreen{ left:0 !important; width:100vw !important; }
   .brand-text{ font-size: clamp(16px, 5vw, 20px); letter-spacing:.6px; }
