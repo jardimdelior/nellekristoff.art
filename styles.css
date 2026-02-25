@@ -11,7 +11,9 @@
   --frameGap: clamp(6px, 1.2vw, 10px);
   --headerH: 52px;
   --footerGap: clamp(4px, 1.2vh, 10px);
-  --headerRightW: clamp(240px, 34vw, 560px);
+  /* HEADER RIGHT */
+  --headerRightW: clamp(220px, 34vw, 560px);
+  --monoGap: 10px;
 
   /* side bays (empty for now) */
   --leftBayW: 0px;
@@ -137,6 +139,7 @@ html.ready body{
   align-items:center;
 }
 .header-bay-right{
+  position: relative;
   flex: 0 0 auto;
   height: var(--headerH);
   display:flex;
@@ -158,7 +161,7 @@ html.ready body{
  /* NEW: collapsed by default */
   opacity: 0;
   transform: translateY(-6px);
-  pointer-events: auto;
+  pointer-events: none;
   transition: opacity .22s ease, transform .28s cubic-bezier(.18,.9,.2,1);
 }
 
@@ -220,7 +223,7 @@ html.ready body{
 /* ======= HEADERBAYRIGHT LAYERED STACK ======= */
 .header-layer-stack{
   position:relative;
-  width: calc(var(--headerH) + var(--headerRightW));
+  width: calc(var(--headerH) +var(--monoGap) + var(--headerRightW));
   height: 100%;
   display:block;
 }
@@ -228,6 +231,7 @@ html.ready body{
 /* all layers overlay each other (not flowing vertically) */
 .layer-bay{
   position:absolute;
+  top: 0;
   inset:0;
   display:flex;
   align-items:center;
@@ -237,11 +241,60 @@ html.ready body{
 }
 
 /* Layer positions: aligned to right */
-.layer-bay-1{ right: calc(var(--headerH) + 10px); } /* brand text layer */
-.layer-bay-2{ right: calc(var(--headerH) + 10px); } /* selected works */
-.layer-bay-3{ right: calc(var(--headerH) + 10px); } /* monogram */
-.layer-bay-4{ right: 0; pointer-events:auto; z-index: 10; }      /* burger */
-.layer-bay-4 .menu-btn{ position: relative; z-index: 11; }
+.layer-bay-1{ right: calc(var(--headerH) + 10px); z-index: 2; } /* brand text layer */
+.layer-bay-2{ right: calc(var(--headerH) + 10px); z-index: 2; } /* selected works */
+.layer-bay-3{ right: calc(var(--headerH) + 10px); z-index: 3; } /* monogram */
+
+/* burger */
+.layer-bay-4{ 
+  right: 0; 
+  pointer-events:auto; 
+  width: var(--headerH);
+  justify-content: flex-end;
+  z-index: 10; 
+}
+
+.layer-bay-4 .menu-btn{ 
+  position: relative; 
+  z-index: 11;
+  width: var(--headerH);
+  height: var(--headerH);
+  pointer-events: auto; 
+}
+
+/* SLOT (everything left of burger) aligns to burger with a gap */
+.layer-bay-1,
+.layer-bay-2,
+.layer-bay-3{
+  right: calc(var(--headerH) + var(--monoGap));
+  width: var(--headerRightW);
+  justify-content: flex-end;
+}
+
+/* Make brand text sit in the TOP half */
+.layer-bay-1 .brand-text{
+  display: block;
+  position: relative;
+  top: -10%;                 /* moves into top half */
+  transform-origin: 100% 50%;
+}
+
+/* Make Selected Works sit in the BOTTOM half */
+.layer-bay-2 .subtitle-inline{
+  display: block;
+  position: relative;
+  top: 18%;                  /* moves into bottom half */
+  transform-origin: 100% 50%;
+}
+
+.layer-bay-3 .brand-mark{
+  width: var(--headerH);
+  height: var(--headerH);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* brand text */
 .brand-text{
   opacity:1;
@@ -332,6 +385,32 @@ html.ready body{
 .film-header.menu-open .subtitle-inline{
   opacity:0;
   transform: translateX(-8px);
+}
+
+/* When menu opens: show monogram, hide brand+subtitle */
+.film-header.menu-open .layer-bay-1 .brand-text{
+  opacity:0;
+  transform: translateX(var(--foldShift)) scaleX(.05) skewY(6deg);
+  filter: blur(.6px);
+}
+
+.film-header.menu-open .layer-bay-2 .subtitle-inline{
+  opacity:0;
+  transform: translateX(-8px);
+}
+
+.film-header.menu-open .layer-bay-3 .brand-mark{
+  opacity:1;
+  transform: translateX(0) scaleX(1);
+  filter:none;
+}
+
+/* default state: monogram hidden */
+.layer-bay-3 .brand-mark{
+  opacity:0;
+  transform: translateX(10px) scaleX(.25);
+  filter: blur(.2px);
+  transition: opacity .22s ease, transform .32s cubic-bezier(.18,.9,.2,1), filter .22s ease;
 }
 
 /* ======= GRID MIDDLE ROW ======= */
