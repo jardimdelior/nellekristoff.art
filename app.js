@@ -1,7 +1,3 @@
-// app.js — two independent decks (top + bottom)
-// WAAPI 3D slide, per-deck pan/zoom + hover tilt + focus mode.
-// Active UI follows the active panel transform.
-
 document.addEventListener('dragstart', (e) => {
   if (e.target && e.target.tagName === 'IMG') e.preventDefault();
 });
@@ -31,7 +27,7 @@ const worksBottom = [
 window.worksTop = worksTop;
 window.worksBottom = worksBottom;
 
-// preload
+/* preload */
 [...worksTop, ...worksBottom].forEach(w => { const i = new Image(); i.src = w.src; });
 
 /* helpers */
@@ -52,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewport = document.getElementById('viewport');
   const spaceBg  = document.getElementById('spaceBg');
 
-  /* ===== Menu toggle ===== */
+  /* ===== Menu toggle (RESTORED) ===== */
   const menuBtn = document.getElementById('menuBtn');
   const menu = document.getElementById('menu');
   const header = document.getElementById('siteHeader');
@@ -63,9 +59,9 @@ document.addEventListener("DOMContentLoaded", () => {
     menuBtn.setAttribute('aria-expanded', String(open));
     if (header) header.classList.toggle('menu-open', open);
   }
-  if (menu){
-  menu.addEventListener('click', (e) => e.stopPropagation());
-  }
+
+  if (menu) menu.addEventListener('click', (e) => e.stopPropagation());
+
   if (menuBtn){
     menuBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -77,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
   }
 
-  /* ===== Shared Fullscreen ===== */
+  /* ===== Fullscreen ===== */
   const fullscreen = document.getElementById('fullscreen');
   const fsImg = document.getElementById('fsImg');
   const fsTitle = document.getElementById('fsTitle');
@@ -98,12 +94,14 @@ document.addEventListener("DOMContentLoaded", () => {
     fullscreen.setAttribute('aria-hidden', 'false');
     document.body.classList.add('noscroll');
   }
+
   function closeFullscreen(){
     if (!fullscreen) return;
     fullscreen.classList.remove('open');
     fullscreen.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('noscroll');
   }
+
   if (closeBtn){
     closeBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -123,6 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function createDeck(opts){
     const {
       deckEl,
+      lepEl,
       activeUIEl,
       titleEl,
       statusEl,
@@ -130,30 +129,21 @@ document.addEventListener("DOMContentLoaded", () => {
       selectBtn,
       arrowBtn,
       works,
-      direction,
+      direction
     } = opts;
 
-    // Pan/zoom state
+    // per deck pan/zoom
     let zoom = 1, panX = 0, panY = 0;
     let tZoom = 1, tPanX = 0, tPanY = 0;
     let raf = null;
 
-    // slide state
+    // slideshow state
     const panels = [];
     let activePos = 0;
     let animating = false;
-    let queuedDir = 0;
 
-    const DURATION = 2650;
+    const DURATION = 1100;
     const EASING   = 'cubic-bezier(.10,.88,.16,1)';
-
-    // bubble tuning
-    const WAVE_Z     = 120;
-    const WAVE_ROT   = 16;
-    const WAVE_X     = -7.2;
-    const WAVE_S     = 1.020;
-    const WAVE_TWIST = 5.0;
-    const TRAVEL_SPREAD = 0.22;
 
     function zoomMin(){ return num(cssVar('--zoomMin')) || 0.65; }
     function zoomMax(){ return num(cssVar('--zoomMax')) || 1.35; }
@@ -170,13 +160,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const rect = deckEl.getBoundingClientRect();
       const slackX = rect.width  * 0.08;
       const slackY = rect.height * 0.08;
-
       const extraX = Math.max(0, (tZoom - 1)) * rect.width  / 2;
       const extraY = Math.max(0, (tZoom - 1)) * rect.height / 2;
-
       const maxX = extraX + slackX;
       const maxY = extraY + slackY;
-
       tPanX = clamp(tPanX, -maxX, maxX);
       tPanY = clamp(tPanY, -maxY, maxY);
     }
@@ -184,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function ensureAnim(){
       if (raf) return;
       const ease = 0.14;
+
       const tick = () => {
         zoom += (tZoom - zoom) * ease;
         panX += (tPanX - panX) * ease;
@@ -201,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
           applyView();
           raf = null;
 
-          // if user zoomed back to min: exit focus
+          // if zoomed out: show both decks
           if (Math.abs(zoom - zoomMin()) < 0.002){
             if (viewport) viewport.classList.remove('focus-top', 'focus-bottom');
           }
@@ -243,17 +231,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return parseFloat(getComputedStyle(p).width) || 0;
     }
 
-    function buildT(x, z, rotY, extraZ = 0, extraRotY = 0, extraRotX = 0, extraScale = 1){
-      return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z + extraZ}px) rotateY(${rotY + extraRotY}deg) rotateX(${extraRotX}deg) scale(${extraScale})`;
-    }
-
-    function cancelAnim(el){
-      if (!el || typeof el.getAnimations !== 'function') return;
-      el.getAnimations().forEach(a => a.cancel());
-    }
-    function cancelAll(){
-      panels.forEach(cancelAnim);
-      cancelAnim(activeUIEl);
+    function buildT(x, z, rotY){
+      return `translate3d(-50%, -50%, 0) translate3d(${x}px, 0px, ${z}px) rotateY(${rotY}deg)`;
     }
 
     function activeIdx(){ return mod(activePos, works.length); }
@@ -267,7 +246,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (collectEl) collectEl.href = w.collect || "https://collect.nellekristoff.art";
     }
 
-    // Attach active UI transform to the active panel transform (buttons move with drag/zoom/slide)
     function setActiveUITransformFromPanel(panelEl){
       if (!activeUIEl || !panelEl) return;
       activeUIEl.style.transform = panelEl.style.transform || "";
@@ -275,10 +253,6 @@ document.addEventListener("DOMContentLoaded", () => {
       activeUIEl.style.height = getComputedStyle(panelEl).height;
       activeUIEl.style.left   = getComputedStyle(panelEl).left;
       activeUIEl.style.top    = getComputedStyle(panelEl).top;
-    }
-
-    function featherFrom(ad){
-      return clamp(ad / 2, 0, 1);
     }
 
     function getTargets(targetPos){
@@ -290,34 +264,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const stepX     = panelW * xStepPct;
 
       const n = panels.length;
-      const Z_BIAS = 3.4;
 
       return panels.map((_, i) => {
         const iV = nearestVirtual(i, targetPos, n);
         const d  = iV - targetPos;
         const ad = Math.abs(d);
 
-        // active always flat
+        // active stays flat
         const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
         const x   = (d === 0) ? 0 : d * stepX;
+        const z   = (d === 0) ? 0 : (-ad * zStep);
 
-        const Z_SHIM = (i + 1) * 0.65;
-        const z = (d === 0) ? 0 : (-ad * zStep) - (ad * 18) - (i * Z_BIAS) - Z_SHIM;
-
-        const op = (d === 0) ? 1 : clamp(1 - ad * 0.06, 0.68, 1);
+        const op  = (d === 0) ? 1 : clamp(1 - ad * 0.08, 0.68, 1);
         const zIndex = String(100 - Math.round(ad * 10));
 
-        return {
-          d, ad, x, z, rot,
-          opacity: String(op),
-          zIndex,
-          transform: buildT(x, z, rot)
-        };
+        return { transform: buildT(x, z, rot), opacity: String(op), zIndex };
       });
     }
 
     function applyInstant(pos){
-      cancelAll();
       const t = getTargets(pos);
       panels.forEach((el, i) => {
         el.style.transform = t[i].transform;
@@ -328,9 +293,11 @@ document.addEventListener("DOMContentLoaded", () => {
       setActiveUITransformFromPanel(panels[mod(pos, panels.length)]);
     }
 
-    function animateBetween(fromPos, toPos){
-      cancelAll();
+    function animateTo(toPos){
+      if (animating) return;
+      animating = true;
 
+      const fromPos = activePos;
       const from = getTargets(fromPos);
       const to   = getTargets(toPos);
 
@@ -340,137 +307,37 @@ document.addEventListener("DOMContentLoaded", () => {
         el.style.zIndex    = from[i].zIndex;
       });
 
-      syncActiveUIText(fromPos);
-      setActiveUITransformFromPanel(panels[mod(fromPos, panels.length)]);
+      const anims = panels.map((el, i) => el.animate(
+        [
+          { transform: from[i].transform, opacity: from[i].opacity },
+          { transform: to[i].transform,   opacity: to[i].opacity }
+        ],
+        { duration: DURATION, easing: EASING, fill: 'forwards' }
+      ));
 
-      const BASE_O1 = 0.26, BASE_O2 = 0.52, BASE_O3 = 0.76;
-      const maxD = Math.max(1, ...from.map(p => Math.abs(p.d || 0)));
-      const denom = 2 * maxD;
+      // UI follows active panel
+      const uiAnim = activeUIEl ? activeUIEl.animate(
+        [
+          { transform: from[mod(fromPos, panels.length)].transform },
+          { transform: to[mod(toPos, panels.length)].transform }
+        ],
+        { duration: DURATION, easing: EASING, fill: 'forwards' }
+      ) : null;
 
-      const anims = panels.map((el, i) => {
-        const f = featherFrom(from[i].ad);
-        const strength = 0.62 + 0.70 * f;
-
-        const phase = clamp(((from[i].d || 0) + maxD) / denom, 0, 1);
-        const shift = (phase - 0.5) * TRAVEL_SPREAD;
-
-        const O1 = clamp(BASE_O1 + shift, 0.10, 0.72);
-        const O2 = clamp(BASE_O2 + shift, 0.22, 0.88);
-        const O3 = clamp(BASE_O3 + shift, 0.36, 0.95);
-
-        const z1 = WAVE_Z * (0.22 * strength);
-        const z2 = WAVE_Z * (0.70 * strength);
-        const z3 = WAVE_Z * (0.38 * strength);
-
-        const ry1 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.18 * strength));
-        const ry2 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.55 * strength));
-        const ry3 = (from[i].rot === 0) ? 0 : (WAVE_ROT * (0.28 * strength));
-
-        const rx1 = WAVE_X * (0.22 * strength);
-        const rx2 = WAVE_X * (0.82 * strength);
-        const rx3 = WAVE_X * (0.36 * strength);
-
-        const s1 = 1 + ((WAVE_S - 1) * (0.22 * strength));
-        const s2 = 1 + ((WAVE_S - 1) * (0.85 * strength));
-        const s3 = 1 + ((WAVE_S - 1) * (0.38 * strength));
-
-        const twist = (i % 2 === 0 ? 1 : -1) * WAVE_TWIST * f;
-
-        const mid1 = buildT(from[i].x, from[i].z, from[i].rot, z1, ry1 + twist * 0.20, rx1, s1);
-        const mid2 = buildT(from[i].x, from[i].z, from[i].rot, z2, ry2 + twist * 0.55, rx2, s2);
-        const mid3 = buildT(from[i].x, from[i].z, from[i].rot, z3, ry3 + twist * 0.32, rx3, s3);
-
-        return el.animate(
-          [
-            { transform: from[i].transform, opacity: from[i].opacity, offset: 0 },
-            { transform: mid1,              opacity: from[i].opacity, offset: O1 },
-            { transform: mid2,              opacity: from[i].opacity, offset: O2 },
-            { transform: mid3,              opacity: from[i].opacity, offset: O3 },
-            { transform: to[i].transform,   opacity: to[i].opacity,   offset: 1 }
-          ],
-          { duration: DURATION, easing: EASING, fill: 'forwards' }
-        );
-      });
-
-      // Active UI follows calmly
-      let uiAnim = null;
-      if (activeUIEl){
-        const fromPanelIndex = mod(fromPos, panels.length);
-        const toPanelIndex   = mod(toPos, panels.length);
-
-        const uiFrom = from[fromPanelIndex].transform;
-        const uiTo   = to[toPanelIndex].transform;
-
-        const z1 = WAVE_Z * 0.16;
-        const z2 = WAVE_Z * 0.34;
-        const z3 = WAVE_Z * 0.20;
-
-        const rx1 = WAVE_X * 0.16;
-        const rx2 = WAVE_X * 0.30;
-        const rx3 = WAVE_X * 0.20;
-
-        const s1  = 1 + ((WAVE_S - 1) * 0.16);
-        const s2  = 1 + ((WAVE_S - 1) * 0.30);
-        const s3  = 1 + ((WAVE_S - 1) * 0.20);
-
-        const uiMid1 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z1, 0, rx1, s1);
-        const uiMid2 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z2, 0, rx2, s2);
-        const uiMid3 = buildT(from[fromPanelIndex].x, from[fromPanelIndex].z, from[fromPanelIndex].rot, z3, 0, rx3, s3);
-
-        uiAnim = activeUIEl.animate(
-          [
-            { transform: uiFrom, offset: 0 },
-            { transform: uiMid1, offset: BASE_O1 },
-            { transform: uiMid2, offset: BASE_O2 },
-            { transform: uiMid3, offset: BASE_O3 },
-            { transform: uiTo,  offset: 1 }
-          ],
-          { duration: DURATION, easing: EASING, fill: 'forwards' }
-        );
-      }
-
-      return Promise.allSettled([
-        ...anims.map(a => a.finished),
-        uiAnim ? uiAnim.finished : Promise.resolve()
-      ]).then(() => {
-        cancelAll();
-        panels.forEach((el, i) => {
-          el.style.transform = to[i].transform;
-          el.style.opacity   = to[i].opacity;
-          el.style.zIndex    = to[i].zIndex;
+      Promise.allSettled([...anims.map(a => a.finished), uiAnim ? uiAnim.finished : Promise.resolve()])
+        .then(() => {
+          activePos = toPos;
+          animating = false;
+          applyInstant(activePos);
         });
-        syncActiveUIText(toPos);
-        setActiveUITransformFromPanel(panels[mod(toPos, panels.length)]);
-      });
     }
 
-    function runQueued(){
-      if (queuedDir === 0) return;
-      const dir = Math.sign(queuedDir);
-      queuedDir -= dir;
-      step(dir);
-    }
-
-    function step(dir){
+    function next(){
       if (works.length < 2) return;
-      if (animating){
-        queuedDir += dir;
-        return;
-      }
-      animating = true;
-      const fromPos = activePos;
-      const toPos   = activePos + dir;
-      animateBetween(fromPos, toPos).then(() => {
-        activePos = toPos;
-        animating = false;
-        runQueued();
-      });
+      animateTo(activePos + direction);
     }
 
-    function next(){ step(+1 * direction); }
-
-    // Build panels
-    const lepEl = deckEl.querySelector('.leporello');
+    // Build panels (DOM)
     works.forEach((w, idx) => {
       const el = document.createElement('div');
       el.className = 'panel';
@@ -482,14 +349,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
+      // only active opens fullscreen
       el.addEventListener('click', () => {
-        if (animating) return;
-        if (idx !== activePanelIdx()) return;
-        if (selectBtn) selectBtn.click();
-      });
-      el.addEventListener('keydown', (e) => {
-        if (e.key !== 'Enter' && e.key !== ' ') return;
-        e.preventDefault();
         if (animating) return;
         if (idx !== activePanelIdx()) return;
         if (selectBtn) selectBtn.click();
@@ -517,7 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Focus on pointerdown inside deck (ignore buttons/arrows)
+    // Focus on pointerdown in deck (ignore UI/buttons)
     deckEl.addEventListener('pointerdown', (e) => {
       if (isFullscreenOpen()) return;
       const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
@@ -623,11 +484,12 @@ document.addEventListener("DOMContentLoaded", () => {
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
 
-    // Hover tilt (desktop)
+    // Hover tilt
     deckEl.addEventListener('mousemove', (e) => {
       const r = deckEl.getBoundingClientRect();
       const nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
       const ny = clamp(((e.clientY - r.top)  / r.height) * 2 - 1, -1, 1);
+
       deckEl.style.setProperty('--tiltY', (nx * 5).toFixed(2) + 'deg');
       deckEl.style.setProperty('--tiltX', (-ny * 4).toFixed(2) + 'deg');
     });
@@ -659,6 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Create decks
   createDeck({
     deckEl: document.getElementById('deckTop'),
+    lepEl: document.getElementById('leporelloTop'),
     activeUIEl: document.getElementById('activeUITop'),
     titleEl: document.getElementById('amTitleTop'),
     statusEl: document.getElementById('amStatusTop'),
@@ -671,6 +534,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   createDeck({
     deckEl: document.getElementById('deckBottom'),
+    lepEl: document.getElementById('leporelloBottom'),
     activeUIEl: document.getElementById('activeUIBottom'),
     titleEl: document.getElementById('amTitleBottom'),
     statusEl: document.getElementById('amStatusBottom'),
@@ -681,7 +545,7 @@ document.addEventListener("DOMContentLoaded", () => {
     direction: +1,
   });
 
-  // subtle background “breath”
+  // subtle background drift
   if (spaceBg){
     let t = 0;
     const tick = () => {
