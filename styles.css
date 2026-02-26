@@ -425,11 +425,11 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* vignette */
 .space-viewport::after{
   content:"";
-  position:relative;
+  position:absolute;
   inset:0;
   border-radius: var(--cornerRadius);
   pointer-events:none;
-  z-index:1;
+  z-index:2;
   background:
     radial-gradient(120% 55% at 50% 56%,
       rgba(0,0,0,.12) 0%,
