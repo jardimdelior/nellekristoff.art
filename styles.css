@@ -429,7 +429,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   inset:0;
   border-radius: var(--cornerRadius);
   pointer-events:none;
-  z-index:2;
+  z-index:4;
   background:
     radial-gradient(120% 55% at 50% 56%,
       rgba(0,0,0,.12) 0%,
@@ -483,7 +483,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   left:0;
   width:100%;
   overflow:hidden;
-  z-index:3;
+  z-index:5;
 }
 .deck-layer-top{
   top:0;
