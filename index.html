@@ -78,13 +78,22 @@
       </div><!-- /.header-inner -->
     </header>
 
-    <!-- LEFT BAY (empty for now) -->
-    <aside class="frame-leftbay" id="leftBay" aria-label="Left bay"></aside>
+    <!-- FRAME BAYS -->
+    <aside class="frame-bay frame-left-bay" id="frameLeftBay" aria-label="Left bay">
+      <button class="bay-action" id="openTopDeck" type="button" aria-controls="topDeckFullscreen">
+        Photography
+      </button>
+    </aside>
 
     <!-- VIEWPORT WRAP -->
     <section class="frame-viewportWrap" aria-label="Viewport area">
       <div class="space-viewport" id="viewport" aria-label="Artwork space">
         <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
+
+        <!-- WEBGL OVERLAY LAYER (new) -->
+        <div class="viewport-layer viewport-webgl" id="viewportWebgl" aria-label="WebGL overlay layer" aria-hidden="true">
+         <canvas id="webglCanvas" class="gl-canvas gl-overlay" aria-hidden="true"></canvas>
+        </div>
 
         <!-- TOP DECK LAYER -->
         <div class="deck-layer deck-layer-top" id="deckLayerTop" aria-label="Top deck layer">
@@ -158,7 +167,11 @@
     </section>
 
     <!-- RIGHT BAY (empty for now) -->
-    <aside class="frame-rightbay" id="rightBay" aria-label="Right bay"></aside>
+    <aside class="frame-bay frame-right-bay" id="frameRightBay" aria-label="Right bay">
+      <button class="bay-action" id="openBottomDeck" type="button" aria-controls="bottomDeckFullscreen">
+        Digital Art
+      </button>
+    </aside>
 
     <!-- FOOTER -->
     <footer class="frame-footer" aria-label="Footer">
