@@ -221,7 +221,7 @@ html.ready body{
 .menu a, .abtn{ padding: 0 8px; }
 
 /* ======= HEADER RIGHT: stable slot + burger =======
-   We DO NOT rely on absolute children to size the parent.
+   DO NOT rely on absolute children to size the parent.
    header-layer-stack gets an explicit width:
    [slot (brand/subtitle/monogram)] + [gap] + [burger]
 */
@@ -444,7 +444,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   opacity:.85;
 }
 
-#space-bg{
+#spaceBg{
   position:absolute;
   inset:-8%;
   border-radius: var(--cornerRadius);
