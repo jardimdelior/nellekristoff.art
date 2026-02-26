@@ -679,7 +679,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   height:100%;
   display:block;
   pointer-events:none !important;
-  z-index:0;
 }
 
 /* leporello + ui above canvas */
