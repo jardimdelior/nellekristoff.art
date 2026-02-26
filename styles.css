@@ -259,7 +259,7 @@ html.ready body{
   justify-content:flex-end;
 }
 
-/* Brand + subtitle stacked (no HTML change) */
+/* Brand + subtitle stacked */
 .layer-bay-1{ z-index: 3; }
 .layer-bay-2{ z-index: 3; }
 
@@ -400,6 +400,7 @@ html.ready body{
 
 /* ======= VIEWPORT ======= */
 .space-viewport{
+  position:relative
   width:100%;
   height:100%;
   position:relative;
@@ -425,7 +426,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* vignette */
 .space-viewport::after{
   content:"";
-  position:absolute;
+  position:relative;
   inset:0;
   border-radius: var(--cornerRadius);
   pointer-events:none;
@@ -442,7 +443,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   mix-blend-mode: multiply;
   opacity:.85;
 }
-.space-bg{
+
+#space-bg{
   position:absolute;
   inset:-8%;
   border-radius: var(--cornerRadius);
@@ -459,9 +461,24 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   opacity:.95;
 }
 
+#viewportWebgl{
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .18;
+  transition: opacity .35s ease;
+}
+
+#webglCanvas{
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 /* deck layers */
 .deck-layer{
-  position:absolute;
+  position:relative;
   left:0;
   width:100%;
   overflow:hidden;
@@ -526,6 +543,109 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .space-viewport.focus-bottom #deckLayerTop{
   opacity:0;
   pointer-events:none;
+}
+
+.fullview-inner{
+  position: absolute;
+  inset: clamp(14px, 3vw, 34px);
+  border-radius: var(--radius, 2px);
+  overflow: hidden;
+
+  /* Optional subtle plate so UI is readable, keep transparent */
+  background: rgba(239, 231, 220, 0.92);
+  box-shadow: var(--shadow, 0 14px 50px rgba(0,0,0,.32));
+}
+
+.fullview-close{
+  position: fixed;
+  top: clamp(10px, 2vw, 18px);
+  right: clamp(10px, 2vw, 18px);
+  z-index: 1000;
+
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+
+  background: rgba(255,255,255,0.75);
+  color: var(--ink, #2F2A26);
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+}
+
+.frame.is-fullview #viewportWebgl{
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+
+.frame-viewportWrap{
+  position: relative;
+}
+
+/* Side-label bays on top of the layout, but outside the viewport edge */
+#frameLeftBay,
+#frameRightBay{
+  position: absolute;
+  z-index: 50;
+  pointer-events: none; /* bay itself doesn't block anything */
+}
+
+/* Left label: align to TOP-LEFT of viewport */
+#frameLeftBay{
+  left: 0;
+  top: 0;
+  transform: translateX(-100%); /* push fully outside */
+}
+
+/* Right label: align to BOTTOM-RIGHT of viewport */
+#frameRightBay{
+  right: 0;
+  bottom: 0;
+  transform: translateX(100%); /* push fully outside */
+}
+
+#frameLeftBay .bay-action,
+#frameRightBay .bay-action{
+  pointer-events: auto;         /* button clickable */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Tight label look */
+  padding: 10px 8px;
+  border-radius: 2px;           /* squared */
+  border: 1px solid currentColor;
+
+  background: transparent;      /* or card color */
+  color: var(--ink, #2F2A26);
+
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+
+  /* match “arrow” vibe */
+  box-shadow: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Photography: bottom -> top */
+#frameLeftBay .bay-action{
+  writing-mode: vertical-rl;
+  transform: rotate(180deg); /* reads bottom-to-top */
+  transform-origin: center;
+}
+
+/* Digital Art: top -> bottom */
+#frameRightBay .bay-action{
+  writing-mode: vertical-rl;
+  transform: none; /* reads top-to-bottom */
+}
+
+#frameLeftBay .bay-action:hover,
+#frameRightBay .bay-action:hover{
+  background: rgba(255,255,255,.35);
 }
 
 /* pan + zoom wrappers */
@@ -783,6 +903,14 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 @media (max-width: 760px){
   :root{ --maxFilmH: 74vh; }
   .layer-bay-2{ display:none; }
+  #frameLeftBay{ transform: translateX(-92%); }
+  #frameRightBay{ transform: translateX(92%); }
+
+  #frameLeftBay .bay-action,
+  #frameRightBay .bay-action{
+    padding: 8px 7px;
+    letter-spacing: .06em;
+  }
 }
 @media (max-width: 520px){
   :root{
@@ -804,6 +932,15 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   }
   .fullscreen{ left:0 !important; width:100vw !important; }
   .brand-text{ font-size: clamp(16px, 5vw, 20px); letter-spacing:.6px; }
+  
+  #frameLeftBay{ transform: translateX(-92%); }
+  #frameRightBay{ transform: translateX(92%); }
+
+  #frameLeftBay .bay-action,
+  #frameRightBay .bay-action{
+    padding: 8px 7px;
+    letter-spacing: .06em;
+  }
 }
 @media (prefers-reduced-motion: reduce){
   .noise{ animation:none !important; }
