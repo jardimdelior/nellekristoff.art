@@ -80,7 +80,7 @@
 
     <!-- FRAME BAYS -->
     <aside class="frame-bay frame-left-bay" id="frameLeftBay" aria-label="Left bay">
-      <button class="bay-action" id="openTopDeck" type="button" aria-controls="topDeckFullscreen">
+      <button class="bay-action" id="openTopDeck" type="button" aria-controls="topDeckFullview">
         Photography
       </button>
     </aside>
@@ -168,10 +168,26 @@
 
     <!-- RIGHT BAY (empty for now) -->
     <aside class="frame-bay frame-right-bay" id="frameRightBay" aria-label="Right bay">
-      <button class="bay-action" id="openBottomDeck" type="button" aria-controls="bottomDeckFullscreen">
+      <button class="bay-action" id="openBottomDeck" type="button" aria-controls="bottomDeckFullview">
         Digital Art
       </button>
     </aside>
+
+    <!-- FULLVIEW SPACE VIEWPORT TOP DECK -->
+    <section class="fullview" id="topDeckFullview" aria-label="Top deck fullview" aria-hidden="true">
+      <button class="fullview-close" id="closeTopFullview" type="button" aria-label="Close top fullview">×</button>
+      <div class="fullview-inner" id="topFullviewInner">
+        <!-- App.js clone or move deck content here, or render separate layout -->
+      </div>
+    </section>
+
+    <!-- FULLVIEW SPACE VIEWPORT BOTTOM DECK -->
+    <section class="fullview" id="bottomDeckFullview" aria-label="Bottom deck fullview" aria-hidden="true">
+      <button class="fullview-close" id="closeBottomFullview" type="button" aria-label="Close bottom fullview">×</button>
+      <div class="fullview-inner" id="bottomFullviewInner">
+        <!-- App.js clone or move deck content here, or render separate layout -->
+      </div>
+    </section>
 
     <!-- FOOTER -->
     <footer class="frame-footer" aria-label="Footer">
