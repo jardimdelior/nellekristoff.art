@@ -617,21 +617,48 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   transform-style: preserve-3d;
   pointer-events:none;
 }
+/* META (Untitled + Unveiling soon) => same design language as edge tabs */
 .active-meta{
+
+  /* keep its current position logic (attached to the active panel) */
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,.35);
+  /* same gradient/glass look */
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
+  box-shadow: 0 12px 26px rgba(0,0,0,.12);
+  padding: 8px 10px;
+  gap:6px;
+  /* feel like a “label tab” */
+  text-transform: uppercase;
+  letter-spacing: .08em;
   position:absolute;
+  overflow: hidden;
   right:0;
   top: calc(-1 * (var(--pillH) + 10px));
   display:flex;
-  gap:6px;
   align-items:baseline;
-  padding:4px 6px;
-  border-radius:14px;
-  background: rgba(255,255,255,.28);
   backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(255,255,255,.16);
   pointer-events:none;
   max-width: min(360px, 92%);
 }
+
+.active-meta::after{
+  content:"";
+  position:absolute;
+  left: -1px;
+  top: 0;
+  width: var(--edgeTabFade, 26px);
+  height: 100%;
+  pointer-events:none;
+
+  /* fade from transparent (panel side) into solid (label body) */
+  background: linear-gradient(
+    to right,
+    rgba(239,231,220,0) 0%,
+    rgba(239,231,220,0.45) 100%
+  );
+}
+
 .am-title, .am-status{
   max-width: 18ch;
   overflow:hidden;
@@ -651,6 +678,17 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   align-items:center;
   justify-content:center;
   pointer-events:auto;
+}
+
+.active-meta .am-title,
+.active-meta .am-status{
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: .08em;
+}
+
+.active-meta .am-status{
+  opacity: .70;
 }
 
 /* ======= FOOTER ======= */
