@@ -438,7 +438,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   position:absolute;
   left: 0;
   top: 0;
-  transform: none;
+  transform: rotate(180deg);
+  transform-origin:center;
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--edgeTabFade));
   mask-image: linear-gradient(90deg, transparent 0, #000 var(--edgeTabFade));
 }
