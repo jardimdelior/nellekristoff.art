@@ -16,6 +16,11 @@
 
   --footerGap: clamp(4px, 1.2vh, 10px);
 
+  /* MENU */
+  --menuDrop: 10px;   /* increase = menu goes lower */
+  --menuInset: 2px;   /* tiny nudge from the left edge */
+  --menuFadeW: 26px;  /* fade width (same as edge labels) */
+
   /* VIEWPORT */
   --maxFilmH: 78vh;
   --persp: 2800px;
@@ -119,7 +124,7 @@ html.ready body{
   min-width: 0;
   height: 100%;
   display:flex;
-  align-items:center;
+  align-items:flex-start; /* allow vertical nudging */
 }
 .header-bay-right{
   flex: 0 0 auto;
@@ -157,7 +162,19 @@ html.ready body{
 }
 
 .tabBtn{ padding: 0 14px; }
-.menu a{ padding: 0 12px; }
+
+.menu a{
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  padding: 0 10px;
+  letter-spacing: .08em;
+
+  /* fade at the bottom edge (connecting to viewport) */
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - var(--menuFadeW)), transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - var(--menuFadeW)), transparent 100%);
+}
+
 .film-arrow{ width: var(--pillH); padding: 0; }
 
 .tabBtn:hover,
@@ -192,6 +209,8 @@ html.ready body{
   letter-spacing: var(--leftLabelTrack);
   text-transform: uppercase;
   line-height: 1;
+  margin-top: var(--menuDrop);
+  margin-left: var(--menuInset);
 
   opacity: 0;
   transform: translateY(-6px);
