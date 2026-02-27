@@ -619,14 +619,22 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   pointer-events:none;
 }
 .arrow-slot--top-left{
-  right:12px;
-  top:12px;
+  right: 0;
+  top: 0;
   left:auto;    /* reset previous */
+  transform: rotate(180deg);
+  transform-origin:center;
+  -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
+  mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
 }
 .arrow-slot--bottom-right{
-  left:12px;
-  bottom:12px;
+  left: 0;
+  bottom: 0;
   right:auto;   /* reset previous */
+  transform: rotate(180deg);
+  transform-origin:center;
+  -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
+  mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
 }
 .tabIcon{ pointer-events:auto; }
 .film-arrow svg{ width:18px; height:18px; }
