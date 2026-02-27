@@ -367,9 +367,9 @@ html.ready body{
 }
 
 /* ======= GRID MIDDLE ROW ======= */
-.frame-leftbay{ grid-column:1; grid-row:2; }
+.frame-left-bay{ grid-column:1; grid-row:2; }
 .frame-viewportWrap{ grid-column:2; grid-row:2; min-height:0; }
-.frame-rightbay{ grid-column:3; grid-row:2; }
+.frame-right-bay{ grid-column:3; grid-row:2; }
 
 /* ======= FOOTER ======= */
 .frame-footer{
@@ -608,15 +608,15 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 #frameLeftBay,
 #frameRightBay{
   position: absolute;
+  top: 0;
+  height: 100%;
   z-index: 90;
   pointer-events: none;
 }
 
 /* Left label: align to TOP-LEFT of viewport */
 #frameLeftBay{
-  left: calc(var(--frameGap) * -1);
-  top: 0;
-  height: var(--maxFilmH);
+  left: 0;
   display:flex;
   align-items:flex-start;
   transform: translateX(-100%); /* push fully outside */
@@ -624,9 +624,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 /* Right label: align to BOTTOM-RIGHT of viewport */
 #frameRightBay{
-  right: calc(var(--frameGap) * -1);
-  top: 0;
-  height: var(--maxFilmH);
+  right: 0;
   display:flex;
   align-items:flex-end;
   transform: translateX(100%); /* push fully outside */
