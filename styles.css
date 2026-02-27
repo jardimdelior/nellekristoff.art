@@ -420,8 +420,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   left: 0;
   top: 0;
   transform: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--edgeTabFade));
-  mask-image: linear-gradient(90deg, transparent 0, #000 var(--edgeTabFade));
+  -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
+  mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
 }
 
 /* Digital Art: bottom-right -> up */
