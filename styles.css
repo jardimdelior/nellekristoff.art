@@ -639,49 +639,59 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .tabIcon{ pointer-events:auto; }
 .film-arrow svg{ width:18px; height:18px; }
 
-/* active UI follows active panel */
+/* ===== Active UI follows active (middle) panel ===== */
 .active-ui{
-  position:absolute;
-  left:50%;
-  top:50%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
   transform-style: preserve-3d;
-  pointer-events:none;
+  pointer-events: none; /* default: UI wrapper doesn't steal clicks */
 }
-/* META (Untitled + Unveiling soon) => same design language as edge tabs */
-.active-meta{
 
-  /* keep its current position logic (attached to the active panel) */
+/* ===== Untitled + status: bottom-left of active panel ===== */
+.active-meta{
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  right: auto;
+  top: auto;
+
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+
+  /* responsive */
+  font-size: clamp(10px, 1.05vw, 13px);
+  line-height: 1;
+
+  /* label-tab styling (keep vibe) */
+  padding: 8px 10px;
   border-radius: 2px;
   border: 1px solid rgba(0,0,0,.35);
-  /* same gradient/glass look */
   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
   box-shadow: 0 12px 26px rgba(0,0,0,.12);
-  padding: 8px 10px;
-  gap:6px;
-  /* feel like a “label tab” */
+  backdrop-filter: blur(10px) saturate(120%);
+
   text-transform: uppercase;
   letter-spacing: .08em;
-  position:absolute;
+
   overflow: hidden;
-  right:0;
-  top: calc(-1 * (var(--pillH) + 10px));
-  display:flex;
-  align-items:baseline;
-  backdrop-filter: blur(10px) saturate(120%);
-  pointer-events:none;
-  max-width: min(360px, 92%);
+  pointer-events: none;
+
+  /* leave space for Select on the right */
+  max-width: calc(100% - 120px);
 }
 
 .active-meta::after{
   content:"";
-  position:absolute;
-  left: -1px;
+  position: absolute;
   top: 0;
+  bottom: 0;
+  left: -1px;
   width: var(--edgeTabFade, 26px);
-  height: 100%;
-  pointer-events:none;
+  pointer-events: none;
 
-  /* fade from transparent (panel side) into solid (label body) */
+  /* fade edge (like tabs) */
   background: linear-gradient(
     to right,
     rgba(239,231,220,0) 0%,
@@ -691,34 +701,29 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 .am-title, .am-status{
   max-width: 18ch;
-  overflow:hidden;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.am-title{ font-size:13px; opacity:.92; }
-.am-status{ font-size:12px; opacity:.68; }
+.am-title{ font-size: clamp(11px, 1.1vw, 13px); opacity:.92; }
+.am-status{ font-size: clamp(10px, 1.05vw, 12px); opacity:.70; }
 
+/* ===== Select: bottom-right of active panel ===== */
 .active-actions{
-  position:absolute;
-  left:50%;
-  top: calc(100% + var(--panelToButtonsGap));
-  transform: translateX(-50%);
-  width: min(520px, 92%);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  pointer-events:auto;
-}
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  left: auto;
+  top: auto;
 
-.active-meta .am-title,
-.active-meta .am-status{
-  font-size: 12px;
-  line-height: 1;
-  letter-spacing: .08em;
-}
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 
-.active-meta .am-status{
-  opacity: .70;
+  width: auto;
+  transform: none;
+
+  pointer-events: none; /* container doesn't catch clicks */
 }
 
 /* ======= FOOTER ======= */
