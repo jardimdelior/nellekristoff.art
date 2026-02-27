@@ -62,8 +62,11 @@
   --edgeTabFade: 22px;         /* fade width */
   --edgeArrowSize: 52px;       /* must match arrow button size */
   --edgeArrowGap: 10px;        /* gap between arrow and label text */
-  --edgeTextPad: 6px;          /* tiny distance from OUTSIDE border */
+  --edgeTextPad: 2px;          /* tiny distance from OUTSIDE border */
   --edgeFont: clamp(10px, 1.05vw, 14px);
+
+  /* ======= ARROWS (CLICKABLE, ABOVE LABELS) ======= */
+  --arrowInset: 6px;
 }
 
 html, body{ height:100%; }
@@ -695,21 +698,27 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 /* arrows */
 .arrow-slot{
-  position:absolute;
-  z-index: 1500;    /* higher than .edge-bay (999) so arrow wins the click */
-  pointer-events:none;
-}
-.arrow-slot--top-left{
-  left:6px;
-  top:6px;
-}
-.arrow-slot--bottom-right{
-  right:6px;
-  bottom:6px;
+  position: absolute;
+  z-index: 2000;          /* above edge labels */
+  pointer-events: none;   /* slot doesn’t capture clicks */
 }
 
-/* prevent label hover from “peeking” under arrow */
-.arrow-slot .film-arrow{ position: relative; z-index: 1501; pointer-events:auto; }
+.arrow-slot--top-left{
+  left: var(--arrowInset);
+  top:  var(--arrowInset);
+}
+
+.arrow-slot--bottom-right{
+  right:  var(--arrowInset);
+  bottom: var(--arrowInset);
+}
+
+/* the actual arrow button MUST be clickable */
+.arrow-slot .film-arrow{
+  pointer-events: auto;
+  position: relative;
+  z-index: 2001;
+}
 .film-arrow svg{ width:18px; height:18px; }
 
 /* active UI follows active panel */
