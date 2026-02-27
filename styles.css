@@ -619,12 +619,14 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   pointer-events:none;
 }
 .arrow-slot--top-left{
-  left:12px;
+  right:12px;
   top:12px;
+  left:auto;    /* reset previous */
 }
 .arrow-slot--bottom-right{
-  right:12px;
+  left:12px;
   bottom:12px;
+  right:auto;   /* reset previous */
 }
 .tabIcon{ pointer-events:auto; }
 .film-arrow svg{ width:18px; height:18px; }
