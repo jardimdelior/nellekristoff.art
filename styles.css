@@ -479,7 +479,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 /* deck layers */
 .deck-layer{
-  position:relative;
+  position:absolute;
   left:0;
   width:100%;
   overflow:hidden;
@@ -490,7 +490,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   height: calc(50% - (var(--deckGap) / 2));
 }
 .deck-layer-bottom{
-  top: 0;
+  bottom: 0;
   height: calc(50% - (var(--deckGap) / 2));
 }
 
@@ -676,14 +676,50 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   writing-mode: vertical-rl;
   transform: rotate(180deg); /* reads bottom-to-top */
   transform-origin: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#frameLeftBay .bay-action::after{
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -1px;
+  width: 10px; /* adjust softness */
+  height: 100%;
+  pointer-events: none;
+
+  background: linear-gradient(
+    to right,
+    rgba(239,231,220,0) 0%,
+    rgba(239,231,220,0.4) 100%
+  );
 }
 
 /* Digital Art: top -> bottom */
 #frameRightBay .bay-action{
+  position: relative;
+  overflow: hidden;
   writing-mode: vertical-rl;
   pointer-events: auto;
   transform: rotate(180deg);  /* <-- key change */
   transform-origin: center;
+}
+
+#frameRightBay .bay-action::after{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -1px;
+  width: 10px;
+  height: 100%;
+  pointer-events: none;
+
+  background: linear-gradient(
+    to left,
+    rgba(239,231,220,0) 0%,
+    rgba(239,231,220,0.4) 100%
+  );
 }
 
 #frameLeftBay .bay-action:hover,
@@ -732,9 +768,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 }
 
 .leporello{
-  position:relative;
-  width:1px;
-  height:1px;
+  position:absolute;
+  inset: 0;
   transform-style: preserve-3d;
 }
 
@@ -748,6 +783,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   backface-visibility: hidden;
   cursor:pointer;
   transform-origin: 50% 50%;
+  transform: translate(-50%, -50%);
   contain: layout paint style;
 }
 
