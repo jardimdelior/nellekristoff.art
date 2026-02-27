@@ -54,12 +54,16 @@
   --leftLabelWeight: 500;
 
   /* overview tilt */
-  --overviewTopTilt: -6deg;
-  --overviewBottomTilt: 6deg;
+  --overviewTopTilt: -20deg;
+  --overviewBottomTilt: 20deg;
 
-  /* edge label */
-  --edgeTabW: 44px;
-  --edgeTabFade: 26px;
+  /* ======= EDGE LABELS (CLEAN + MIRRORED + FLIP) ======= */
+  --edgeTabW: 44px;            /* label strip width */
+  --edgeTabFade: 22px;         /* fade width */
+  --edgeArrowSize: 52px;       /* must match arrow button size */
+  --edgeArrowGap: 10px;        /* gap between arrow and label text */
+  --edgeTextPad: 6px;          /* tiny distance from OUTSIDE border */
+  --edgeFont: clamp(10px, 1.05vw, 14px);
 }
 
 html, body{ height:100%; }
@@ -414,68 +418,122 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   opacity:.85;
 }
 
-/* ======= EDGE LABELS (IMPORTANT: visible & clickable) ======= */
+/* ======= EDGE LABELS (CLEAN + MIRRORED + FLIP) ======= */
 .edge-bay{
-  position:absolute;
-  top:0;
-  height:100%;
-  z-index: 999;     /* always above viewport layers */
-  pointer-events:none;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  z-index: 900;               /* below arrows */
+  pointer-events: none;       /* bay itself never blocks */
 }
-.edge-bay-left{ left:0; }
-.edge-bay-right{ right:0; }
+.edge-bay-left{ left: 0; }
+.edge-bay-right{ right: 0; }
 
 .edgeTab{
-  pointer-events:auto;
+  pointer-events: auto;       /* the button is clickable */
   width: var(--edgeTabW);
   height: 50%;
-  padding: 10px 8px;
+
+  display: flex;
   writing-mode: vertical-rl;
-  transition: transform .28s cubic-bezier(.18,.9,.2,1), background .22s ease;
+  text-orientation: mixed;
+
+  font-size: var(--edgeFont);
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1;
+
+  border-radius: 2px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: var(--ink, #2F2A26);
+  user-select: none;
+
+  /* flip animation base */
   transform-style: preserve-3d;
-  backface-visibility: hidden !important;
+  backface-visibility: hidden;
+  transition: transform .45s cubic-bezier(.18,.9,.2,1), background .22s ease;
+  will-change: transform;
+
+  /* IMPORTANT: base transform comes from per-button variable */
+  transform: var(--edgeBase, none);
 }
 
-/* Photography: top-left -> down */
+/* Shared hover: true card flip (keeps each button's base orientation) */
+.edgeTab:hover{
+  transform: var(--edgeBase, none) perspective(900px) rotateY(180deg);
+}
+
+/* ----- PHOTOGRAPHY (LEFT, TOP HALF) ----- */
+/* Arrow is at TOP-LEFT corner → reserve space at the TOP so text never overlaps arrow.
+   Text starts from bottom (center of viewport) and reads upward toward the arrow. */
 .edgeTab--photo{
-  position:absolute;
+  position: absolute;
   left: 0;
   top: 0;
-  transform: rotate(180deg) !important;
-  transform-origin: center !important;
 
-  -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
-  mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
-  display:flex;
-  align-items:flex-end;      /* push text to bottom */
-  padding-top: 42px;         /* match arrow size */
+  /* bottom->top reading */
+  --edgeBase: rotate(180deg);
+
+  justify-content: flex-end; /* text starts at bottom */
+  align-items: center;
+
+  /* outside border spacing */
+  padding-left: var(--edgeTextPad);
+  padding-right: var(--edgeTextPad);
+
+  /* reserve arrow zone at top + gap */
+  padding-top: calc(var(--edgeArrowSize) + var(--edgeArrowGap));
+  padding-bottom: 8px;
+
+  overflow: hidden;
 }
 
-/* Digital Art: bottom-right -> up */
-.edgeTab--digital{
-  display:flex;
-  justify-content:flex-start;  /* start at top */
-  align-items:center;
-  padding-top: 6px;            /* small gap from top border */
-  padding-bottom: 42px;        /* keep space for bottom arrow */
+/* Fade on the INSIDE edge that touches viewport = RIGHT edge (since label is on the left) */
+.edgeTab--photo::after{
+  content:"";
   position:absolute;
+  top:0; bottom:0;
+  right:-1px;
+  width: var(--edgeTabFade);
+  pointer-events:none;
+  background: linear-gradient(to right, rgba(239,231,220,0) 0%, rgba(239,231,220,0.55) 100%);
+}
+
+/* ----- DIGITAL ART (RIGHT, BOTTOM HALF) ----- */
+/* Arrow is at BOTTOM-RIGHT corner → reserve space at the BOTTOM so text never overlaps arrow.
+   Mirrored: text starts from top (center of viewport) and goes downward toward the arrow. */
+.edgeTab--digital{
+  position: absolute;
   right: 0;
   bottom: 0;
-  transform: rotate(180deg);
-  transform-origin: center !important;
-  
-  -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
-  mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
+
+  /* top->bottom reading (mirrored vs photo) */
+  --edgeBase: rotate(0deg);
+
+  justify-content: flex-start; /* text starts at top */
+  align-items: center;
+
+  padding-left: var(--edgeTextPad);
+  padding-right: var(--edgeTextPad);
+
+  /* reserve arrow zone at bottom + gap */
+  padding-top: 8px;
+  padding-bottom: calc(var(--edgeArrowSize) + var(--edgeArrowGap));
+
+  overflow: hidden;
 }
 
-/* Photography: add a similar 3D tilt */
-.edgeTab--photo:hover{
-  transform: rotate(180deg) perspective(900px) rotateY(180deg);
-}
-
-/* Digital Art keeps its rotate(180deg) but also gets the same tilt */
-.edgeTab--digital:hover{
-  transform: rotate(180deg) perspective(900px) rotateY(180deg);
+/* Fade on the INSIDE edge that touches viewport = LEFT edge (since label is on the right) */
+.edgeTab--digital::after{
+  content:"";
+  position:absolute;
+  top:0; bottom:0;
+  left:-1px;
+  width: var(--edgeTabFade);
+  pointer-events:none;
+  background: linear-gradient(to left, rgba(239,231,220,0) 0%, rgba(239,231,220,0.55) 100%);
 }
 
 /* ======= DECKS ======= */
