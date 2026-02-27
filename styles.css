@@ -612,22 +612,21 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   height: 100%;
   z-index: 90;
   pointer-events: none;
+  display: flex;
 }
 
 /* Left label: align to TOP-LEFT of viewport */
 #frameLeftBay{
   left: 0;
-  display:flex;
   align-items:flex-start;
-  transform: translateX(-100%); /* push fully outside */
+  transform: translateX(-18px); /* small offset */
 }
 
 /* Right label: align to BOTTOM-RIGHT of viewport */
 #frameRightBay{
   right: 0;
-  display:flex;
   align-items:flex-end;
-  transform: translateX(100%); /* push fully outside */
+  transform: translateX(18px); /* small offset */
 }
 
 #frameLeftBay .bay-action,
@@ -928,8 +927,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 @media (max-width: 760px){
   :root{ --maxFilmH: 74vh; }
   .layer-bay-2{ display:none; }
-  #frameLeftBay{ transform: translateX(-92%); left: 0; }
-  #frameRightBay{ transform: translateX(92%); right: 0; }
+  #frameLeftBay{ transform: translateX(-10px); left: 0; }
+  #frameRightBay{ transform: translateX(10px); right: 0; }
 
   #frameLeftBay .bay-action,
   #frameRightBay .bay-action{
