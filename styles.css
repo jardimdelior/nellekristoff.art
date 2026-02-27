@@ -453,6 +453,11 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 /* Digital Art: bottom-right -> up */
 .edgeTab--digital{
+  display:flex;
+  justify-content:flex-start;  /* start at top */
+  align-items:center;
+  padding-top: 6px;            /* small gap from top border */
+  padding-bottom: 42px;        /* keep space for bottom arrow */
   position:absolute;
   right: 0;
   bottom: 0;
@@ -461,19 +466,16 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   
   -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
   mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
-  display:flex;
-  align-items:flex-start;   /* push text to top */
-  padding-bottom: 42px;     /* match arrow size */
 }
 
 /* Photography: add a similar 3D tilt */
 .edgeTab--photo:hover{
-  transform: perspective(700px) rotateY(-10deg) translateY(-1px);
+  transform: rotate(180deg) perspective(900px) rotateY(180deg);
 }
 
 /* Digital Art keeps its rotate(180deg) but also gets the same tilt */
 .edgeTab--digital:hover{
-  transform: rotate(180deg) perspective(700px) rotateY(-10deg) translateY(-1px);
+  transform: rotate(180deg) perspective(900px) rotateY(180deg);
 }
 
 /* ======= DECKS ======= */
@@ -636,24 +638,20 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* arrows */
 .arrow-slot{
   position:absolute;
-  z-index: 1200;    /* higher than .edge-bay (999) so arrow wins the click */
+  z-index: 1500;    /* higher than .edge-bay (999) so arrow wins the click */
   pointer-events:none;
 }
 .arrow-slot--top-left{
   left:6px;
   top:6px;
-  z-index: 1400;    /* higher than .edge-bay (999) so arrow wins the click */
 }
 .arrow-slot--bottom-right{
   right:6px;
   bottom:6px;
-  z-index: 1500;    /* higher than .edge-bay (999) so arrow wins the click */
 }
 
 /* prevent label hover from “peeking” under arrow */
-.arrow-slot .film-arrow{ position: relative; z-index: 1300; }
-
-.tabIcon{ pointer-events:auto; }
+.arrow-slot .film-arrow{ position: relative; z-index: 1501; pointer-events:auto; }
 .film-arrow svg{ width:18px; height:18px; }
 
 /* active UI follows active panel */
