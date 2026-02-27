@@ -11,8 +11,8 @@
 
   /* HEADER == burger height */
   --headerH: 44px;
-  --brandSubtitleGap: 10px;      /* increase more space between */
-  --headerRightInset: 18px;      /* distance from burger to brand/subtitle block */
+  --brandSubtitleGap: 14px;      /* increase more space between */
+  --headerRightInset: 24px;      /* distance from burger to brand/subtitle block */
 
   --footerGap: clamp(4px, 1.2vh, 10px);
 
@@ -412,6 +412,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   height: 50%;
   padding: 10px 8px;
   writing-mode: vertical-rl;
+  transition: transform .28s cubic-bezier(.18,.9,.2,1), background .22s ease;
+  transform-style: preserve-3d;
 }
 
 /* Photography: top-left -> down */
@@ -422,6 +424,10 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   transform: none;
   -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
   mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
+  display:flex;
+  align-items:flex-end;      /* push text to bottom */
+  justify-content:center;    /* keep horizontal centering */
+  padding-top: 42px;         /* match arrow size */
 }
 
 /* Digital Art: bottom-right -> up */
@@ -433,6 +439,20 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   transform-origin:center;
   -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
   mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
+  display:flex;
+  align-items:flex-start;   /* push text to top */
+  justify-content:center;
+  padding-bottom: 42px;     /* match arrow size */
+}
+
+/* Photography: add a similar 3D tilt */
+.edgeTab--photo:hover{
+  transform: perspective(700px) rotateY(-10deg) translateY(-1px);
+}
+
+/* Digital Art keeps its rotate(180deg) but also gets the same tilt */
+.edgeTab--digital:hover{
+  transform: rotate(180deg) perspective(700px) rotateY(-10deg) translateY(-1px);
 }
 
 /* ======= DECKS ======= */
@@ -595,17 +615,21 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* arrows */
 .arrow-slot{
   position:absolute;
-  z-index: 20;
+  z-index: 1200;    /* higher than .edge-bay (999) so arrow wins the click */
   pointer-events:none;
 }
 .arrow-slot--top-left{
-  left:12px;
-  top:12px;
+  left:6px;
+  top:6px;
 }
 .arrow-slot--bottom-right{
-  right:12px;
-  bottom:12px;
+  right:6px;
+  bottom:6px;
 }
+
+/* prevent label hover from “peeking” under arrow */
+.arrow-slot .film-arrow{ position: relative; z-index: 1300; }
+
 .tabIcon{ pointer-events:auto; }
 .film-arrow svg{ width:18px; height:18px; }
 
