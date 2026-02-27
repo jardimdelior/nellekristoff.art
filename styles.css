@@ -1,3 +1,5 @@
+/* styles.css (FULL, based on your file + only requested adjustments) */
+
 :root{
   --bg:#EFE7DC;
   --ink:#2F2A26;
@@ -12,7 +14,7 @@
   --headerH: 52px;
   --footerGap: clamp(4px, 1.2vh, 10px);
 
-  /* side bays (empty for now) */
+  /* side bays */
   --leftBayW: 0px;
   --rightBayW: 0px;
 
@@ -28,8 +30,8 @@
   --panelToButtonsGap: 12px;
   --metaLift: calc(-1 * (var(--pillH) + 8px));
 
-  /* PANELS */
-  --panelW: clamp(180px, 42vw, 560px);
+  /* PANELS (adjusted to fill viewport better) */
+  --panelW: clamp(220px, 72vmin, 980px);
   --panelH: calc(var(--panelW) * (297 / 420));
 
   --angleStep: 18deg;
@@ -115,7 +117,7 @@ html.ready body{
   align-items:center;
 
   position:relative;
-  z-index: 80; /* always above viewport */
+  z-index: 80;
 }
 
 /* header-inner lives in the viewport column */
@@ -128,6 +130,8 @@ html.ready body{
   align-items:center;
   justify-content:space-between;
   gap: 12px;
+
+  padding:0; /* tightened edge alignment */
 }
 
 /* left = aligned to viewport left edge */
@@ -160,7 +164,6 @@ html.ready body{
   text-transform: uppercase;
   line-height: 1;
 
-  /* collapsed by default */
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
@@ -220,18 +223,12 @@ html.ready body{
 }
 .menu a, .abtn{ padding: 0 8px; }
 
-/* ======= HEADER RIGHT: stable slot + burger =======
-   DO NOT rely on absolute children to size the parent.
-   header-layer-stack gets an explicit width:
-   [slot (brand/subtitle/monogram)] + [gap] + [burger]
-*/
+/* ======= HEADER RIGHT ======= */
 .header-layer-stack{
   position: relative;
   height: 100%;
   width: calc(var(--headerRightSlotW) + var(--headerRightGap) + var(--headerH));
 }
-
-/* make all layers same height as header */
 .layer-bay{
   position: absolute;
   top:0;
@@ -240,8 +237,6 @@ html.ready body{
   align-items:center;
   pointer-events:none;
 }
-
-/* burger at far right */
 .layer-bay-4{
   right: 0;
   width: var(--headerH);
@@ -249,8 +244,6 @@ html.ready body{
   pointer-events:auto;
   z-index: 10;
 }
-
-/* shared slot (everything left of burger) */
 .layer-bay-1,
 .layer-bay-2,
 .layer-bay-3{
@@ -258,22 +251,19 @@ html.ready body{
   width: var(--headerRightSlotW);
   justify-content:flex-end;
 }
-
-/* Brand + subtitle stacked */
 .layer-bay-1{ z-index: 3; }
 .layer-bay-2{ z-index: 3; }
 
-/* brand in top half */
+/* brand (gap tied to burger height) */
 .brand-text{
   opacity:1;
   font-size: clamp(22px, 2.8vw, 28px);
   letter-spacing: .08em;
   text-transform: uppercase;
 
-  /* stack position */
   position: relative;
-  top: -10%;
-
+  top: 0;
+  transform: translateY(calc(var(--headerH) * -0.5 + 2px));
   transform-origin: 100% 50%;
   transition:
     opacity .22s ease,
@@ -281,7 +271,7 @@ html.ready body{
     filter .22s ease;
 }
 
-/* subtitle in bottom half */
+/* subtitle (gap tied to burger height) */
 .subtitle-inline{
   font-size: var(--leftLabelSize);
   font-weight: var(--leftLabelWeight);
@@ -291,10 +281,9 @@ html.ready body{
   white-space:nowrap;
   line-height:1;
 
-  /* stack position */
   position: relative;
-  top: 18%;
-
+  top: 0;
+  transform: translateY(calc(var(--headerH) * 0.5 + 2px));
   transform-origin: 100% 50%;
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
 }
@@ -347,7 +336,7 @@ html.ready body{
   transform: scale(var(--burgerScale));
 }
 
-/* menu-open mapping (fold into monogram) */
+/* menu-open mapping */
 .film-header.menu-open .menu-btn{
   transform: translateX(calc(var(--burgerShift) * -1));
 }
@@ -368,7 +357,7 @@ html.ready body{
 
 /* ======= GRID MIDDLE ROW ======= */
 .frame-left-bay{ grid-column:1; grid-row:2; }
-.frame-viewportWrap{ grid-column:2; grid-row:2; min-height:0; }
+.frame-viewportWrap{ grid-column:2; grid-row:2; min-height:0; position:relative; }
 .frame-right-bay{ grid-column:3; grid-row:2; }
 
 /* ======= FOOTER ======= */
@@ -546,6 +535,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   pointer-events:none;
 }
 
+/* fullview */
 .fullview{
   position: fixed;
   inset: 0;
@@ -558,18 +548,14 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display: block;
   pointer-events: auto;
 }
-
 .fullview-inner{
   position: absolute;
   inset: clamp(14px, 3vw, 34px);
   border-radius: var(--radius, 2px);
   overflow: hidden;
-
-  /* Optional subtle plate so UI is readable, keep transparent */
   background: rgba(239, 231, 220, 0.92);
   box-shadow: var(--shadow, 0 14px 50px rgba(0,0,0,.32));
 }
-
 .fullview-close{
   position: fixed;
   top: clamp(10px, 2vw, 18px);
@@ -592,19 +578,13 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   transition: opacity .35s ease;
 }
 
-.frame-viewportWrap{
-  position: relative;
-}
-
-/* Side-label bays on top of the layout, but outside the viewport edge */
+/* Side-label bays */
 .frame-left-bay,
 .frame-right-bay{
   position: relative;
   z-index: 50;
-  pointer-events: none; /* bay itself doesn't block anything */
+  pointer-events: none;
 }
-
-/* position the actual button relative to the viewport wrap */
 #frameLeftBay,
 #frameRightBay{
   position: absolute;
@@ -616,115 +596,73 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   overflow: visible;
 }
 
-/* Left label: align to TOP-LEFT of viewport */
+/* Left label: TOP-LEFT */
 #frameLeftBay{
   left: 0;
   align-items:flex-start;
-  transform: translateX(-14px); /* small offset */
+  transform: translateX(-14px);
 }
 
-/* Right label: align to BOTTOM-RIGHT of viewport */
+/* Right label: BOTTOM-RIGHT */
 #frameRightBay{
   right: 0;
-  position: absolute;
-  top: 0;
-  height: 100%;
-  display: flex;
-  align-items: flex-end;     /* keep it at the bottom */
-  justify-content: flex-end; /* bottom of the column */
-  pointer-events: none;
-  z-index: 90;
-
-  /* small offset OUTSIDE the viewport edge (not 100%) */
+  align-items: flex-end;
+  justify-content: flex-end;
   transform: translateX(14px);
-  overflow: visible;
 }
 
+/* Shared look (gradient glass + square) */
 #frameLeftBay .bay-action,
 #frameRightBay .bay-action{
-  pointer-events: auto;         /* button clickable */
+  pointer-events: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  /* Tight label look */
-  padding: 10px 8px;
-  border-radius: 2px;           /* squared */
-  border: 1px solid currentColor;
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,.35);
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
+  box-shadow: 0 12px 26px rgba(0,0,0,.12);
 
-  background: transparent;      /* or card color */
   color: var(--ink, #2F2A26);
-
   font: inherit;
   font-size: clamp(10px, 1.1vw, 14px);
   padding: clamp(6px, 1.0vw, 10px) clamp(6px, 0.9vw, 9px);
-  letter-spacing: clamp(.05em, .25vw, .10em);
-  border-width: 1px;
   line-height: 1;
   font-weight: 600;
   letter-spacing: .08em;
   text-transform: uppercase;
 
-  /* match “arrow” vibe */
-  box-shadow: none;
   cursor: pointer;
   user-select: none;
-}
 
-/* Photography: bottom -> top */
-#frameLeftBay .bay-action{
   writing-mode: vertical-rl;
-  transform: rotate(180deg); /* reads bottom-to-top */
-  transform-origin: center;
   position: relative;
   overflow: hidden;
 }
 
-#frameLeftBay .bay-action::after{
-  content: "";
-  position: absolute;
-  top: 0;
-  right: -1px;
-  width: 10px; /* adjust softness */
-  height: 100%;
-  pointer-events: none;
+/* Photography: TOP -> DOWN */
+#frameLeftBay .bay-action{ transform: none; }
 
-  background: linear-gradient(
-    to right,
-    rgba(239,231,220,0) 0%,
-    rgba(239,231,220,0.4) 100%
-  );
-}
-
-/* Digital Art: top -> bottom */
+/* Digital Art: BOTTOM -> UP */
 #frameRightBay .bay-action{
-  position: relative;
-  overflow: hidden;
-  writing-mode: vertical-rl;
-  pointer-events: auto;
-  transform: rotate(180deg);  /* <-- key change */
+  transform: rotate(180deg);
   transform-origin: center;
 }
 
-#frameRightBay .bay-action::after{
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -1px;
-  width: 10px;
-  height: 100%;
-  pointer-events: none;
-
-  background: linear-gradient(
-    to left,
-    rgba(239,231,220,0) 0%,
-    rgba(239,231,220,0.4) 100%
-  );
+/* true edge melt (fades outline too) */
+#frameLeftBay .bay-action{
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 26px);
+  mask-image: linear-gradient(90deg, transparent 0, #000 26px);
+}
+#frameRightBay .bay-action{
+  -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 26px);
+  mask-image: linear-gradient(270deg, transparent 0, #000 26px);
 }
 
 #frameLeftBay .bay-action:hover,
 #frameRightBay .bay-action:hover{
-  background: rgba(255,255,255,.35);
+  background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.10));
 }
 
 /* pan + zoom wrappers */
@@ -766,7 +704,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   position:relative;
   z-index:3;
 }
-
 .leporello{
   position:absolute;
   inset: 0;
@@ -800,7 +737,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   position:relative;
   clip-path: inset(0 round var(--radius));
 }
-
 .print img{
   width:100%;
   height:100%;
@@ -896,6 +832,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .am-title{ font-size:13px; opacity:.92; }
 .am-status{ font-size:12px; opacity:.68; }
 
+/* ONLY SELECT centered */
 .active-actions{
   position:absolute;
   left:50%;
@@ -904,12 +841,24 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   width: min(520px, 92%);
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:center;
   min-height:44px;
   pointer-events:auto;
 }
 
-/* fullscreen */
+/* Select button matches side-tab look */
+.select-tab{
+  border-radius: 2px !important;
+  border: 1px solid rgba(0,0,0,.35) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06)) !important;
+  box-shadow: 0 12px 26px rgba(0,0,0,.12) !important;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 0 14px !important;
+}
+.select-tab::before{ display:none !important; }
+
+/* fullscreen (kept) */
 .fullscreen{
   position:fixed;
   top:0;
@@ -926,56 +875,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   overflow:auto;
 }
 .fullscreen.open{ display:flex; }
-
-.fs-inner{
-  width:100%;
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
-}
-.fs-meta{
-  position:absolute;
-  right:0;
-  top: calc(-1 * (var(--pillH) + 10px));
-  display:flex;
-  gap:6px;
-  align-items:baseline;
-  padding:4px 6px;
-  border-radius:14px;
-  background: rgba(255,255,255,.14);
-  backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid rgba(255,255,255,.35);
-  color: rgba(255,255,255,.92);
-}
-.fs-title{ font-size:13px; max-width:18ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.fs-status{ font-size:12px; opacity:.8; max-width:18ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-
-.fullscreen .abtn{
-  background: rgba(255,255,255,.18);
-  border: 1px solid rgba(255,255,255,.35);
-  color: rgba(255,255,255,.92);
-}
-.fs-frame{
-  flex: 1 1 auto;
-  min-height:0;
-  width:100%;
-  max-height: calc(100dvh - 2 * clamp(14px, 3vw, 34px) - 88px);
-  margin: 0 auto;
-}
-.fullscreen .print{ padding: clamp(8px, 1.6vw, 16px); }
-.fullscreen .fs-frame img{ width:100%; height:100%; object-fit:contain; display:block; }
-.fs-actions{
-  flex:0 0 auto;
-  width: min(560px, 92%);
-  margin: 0 auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  min-height:44px;
-}
 
 /* responsive */
 @media (max-width: 760px){
@@ -1010,9 +909,10 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   }
   .fullscreen{ left:0 !important; width:100vw !important; }
   .brand-text{ font-size: clamp(16px, 5vw, 20px); letter-spacing:.6px; }
-  
-  #frameLeftBay{ transform: translateX(-92%); left: 0; }
-  #frameRightBay{ transform: translateX(92%); right: 0; }
+
+  /* keep tabs close to the edge (do NOT fling them offscreen) */
+  #frameLeftBay{ transform: translateX(-10px); left: 0; }
+  #frameRightBay{ transform: translateX(10px); right: 0; }
 
   #frameLeftBay .bay-action,
   #frameRightBay .bay-action{
