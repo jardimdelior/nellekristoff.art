@@ -343,9 +343,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* background drift plate */
 #spaceBg{
   position:absolute;
-  /* plate smaller */
-  inset: clamp(10px, 1.8vw, 22px);
-  border-radius: calc(var(--cornerRadius);
+  inset: 0;
+  border-radius: var(--cornerRadius);
   pointer-events:none !important;
   z-index:0;
   background:
