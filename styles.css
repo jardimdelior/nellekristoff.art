@@ -684,8 +684,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* ===== Untitled + status: bottom-left of active panel ===== */
 .active-meta{
   position: absolute;
-  left: -1px;
-  bottom: -1px;
+  left: var(--printPad);
+  bottom: calc(var(--printPad) - 1px);
   right: auto;
   top: auto;
   height: auto;
@@ -745,8 +745,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* ===== Select: bottom-right of active panel ===== */
 .active-actions{
   position: absolute;
-  right: -1px;
-  bottom: -1px;
+  right: var(--printPad);
+  bottom: calc(var(--printPad) - 1px);
   left: auto;
   top: auto;
 
