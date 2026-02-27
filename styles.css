@@ -41,10 +41,10 @@
   --printPad: 16px;
 
   /* Layout tuning */
-  --angleStep: 18deg;
-  --maxAngle: 72deg;
-  --zStep: 95px;
-  --xStep: 78%;
+  --angleStep: 26deg;
+  --maxAngle: 86deg;
+  --zStep: 170px;
+  --xStep: 84%;
 
   --zoomMin: .65;
   --zoomMax: 1.35;
