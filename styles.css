@@ -11,6 +11,8 @@
 
   /* HEADER == burger height */
   --headerH: 44px;
+  --brandSubtitleGap: 10px;      /* increase more space between */
+  --headerRightInset: 18px;      /* distance from burger to brand/subtitle block */
 
   --footerGap: clamp(4px, 1.2vh, 10px);
 
@@ -220,11 +222,18 @@ html.ready body{
 
 .layer-bay-4{ pointer-events:auto; }
 
+/* Brand / subtitle / monogram all sit LEFT of burger by the same inset */
+.layer-bay-1,
+.layer-bay-2,
+.layer-bay-3{
+  right: var(--headerRightInset);
+}
+
 .brand-text{
   font-size: clamp(18px, 2.4vw, 26px);
   letter-spacing: .08em;
   text-transform: uppercase;
-  transform: translateY(-7px);
+  transform: translateY(calc(-1 * var(--brandSubtitleGap)));
   transition: opacity .22s ease, transform .32s cubic-bezier(.18,.9,.2,1), filter .22s ease;
 }
 .subtitle-inline{
@@ -233,7 +242,7 @@ html.ready body{
   letter-spacing: var(--leftLabelTrack);
   text-transform: uppercase;
   opacity:.82;
-  transform: translateY(10px);
+  transform: translateY(var(--brandSubtitleGap));
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
 }
 
