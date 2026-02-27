@@ -546,6 +546,19 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   pointer-events:none;
 }
 
+.fullview{
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: none;
+  pointer-events: none;
+  background: transparent;
+}
+.fullview.is-open{
+  display: block;
+  pointer-events: auto;
+}
+
 .fullview-inner{
   position: absolute;
   inset: clamp(14px, 3vw, 34px);
@@ -584,24 +597,38 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 }
 
 /* Side-label bays on top of the layout, but outside the viewport edge */
-#frameLeftBay,
-#frameRightBay{
-  position: absolute;
+.frame-left-bay,
+.frame-right-bay{
+  position: relative;
   z-index: 50;
   pointer-events: none; /* bay itself doesn't block anything */
 }
 
+/* position the actual button relative to the viewport wrap */
+#frameLeftBay,
+#frameRightBay{
+  position: absolute;
+  z-index: 90;
+  pointer-events: none;
+}
+
 /* Left label: align to TOP-LEFT of viewport */
 #frameLeftBay{
-  left: 0;
+  left: calc(var(--frameGap) * -1);
   top: 0;
+  height: var(--maxFilmH);
+  display:flex;
+  align-items:flex-start;
   transform: translateX(-100%); /* push fully outside */
 }
 
 /* Right label: align to BOTTOM-RIGHT of viewport */
 #frameRightBay{
-  right: 0;
-  bottom: 0;
+  right: calc(var(--frameGap) * -1);
+  top: 0;
+  height: var(--maxFilmH);
+  display:flex;
+  align-items:flex-end;
   transform: translateX(100%); /* push fully outside */
 }
 
@@ -903,8 +930,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 @media (max-width: 760px){
   :root{ --maxFilmH: 74vh; }
   .layer-bay-2{ display:none; }
-  #frameLeftBay{ transform: translateX(-92%); }
-  #frameRightBay{ transform: translateX(92%); }
+  #frameLeftBay{ transform: translateX(-92%); left: 0; }
+  #frameRightBay{ transform: translateX(92%); right: 0; }
 
   #frameLeftBay .bay-action,
   #frameRightBay .bay-action{
@@ -933,8 +960,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   .fullscreen{ left:0 !important; width:100vw !important; }
   .brand-text{ font-size: clamp(16px, 5vw, 20px); letter-spacing:.6px; }
   
-  #frameLeftBay{ transform: translateX(-92%); }
-  #frameRightBay{ transform: translateX(92%); }
+  #frameLeftBay{ transform: translateX(-92%); left: 0; }
+  #frameRightBay{ transform: translateX(92%); right: 0; }
 
   #frameLeftBay .bay-action,
   #frameRightBay .bay-action{
