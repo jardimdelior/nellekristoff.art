@@ -1,4 +1,3 @@
-<!-- index.html (FULL) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,8 +17,8 @@
     <header class="film-header frame-header" id="siteHeader" aria-label="Header">
       <div class="header-inner">
 
-        <!-- HeaderBayLeft -->
-        <div class="header-bay header-bay-left" id="headerBayLeft" aria-label="Header bay left">
+        <!-- LEFT HEADER -->
+        <div class="header-bay header-bay-left" aria-label="Header bay left">
           <nav class="menu" id="menu" aria-label="Site menu">
             <a href="about.html">About</a>
             <a href="#" onclick="contact(event)">Contact</a>
@@ -27,21 +26,18 @@
           </nav>
         </div>
 
-        <!-- HeaderBayRight -->
-        <div class="header-bay header-bay-right" id="headerBayRight" aria-label="Header bay right">
+        <!-- RIGHT HEADER -->
+        <div class="header-bay header-bay-right" aria-label="Header bay right">
           <div class="header-layer-stack">
 
-            <!-- LayerBay1: Brand name -->
             <div class="layer-bay layer-bay-1" aria-label="Layer 1 brand">
               <span class="brand-text">Nelle Kristoff</span>
             </div>
 
-            <!-- LayerBay2: Selected Works -->
             <div class="layer-bay layer-bay-2" aria-label="Layer 2 selected works">
               <span class="subtitle-inline">Selected Works</span>
             </div>
 
-            <!-- LayerBay3: Monogram -->
             <div class="layer-bay layer-bay-3" aria-label="Layer 3 monogram">
               <span class="brand-mark" aria-hidden="true">
                 <svg class="icon-monogram"
@@ -54,7 +50,6 @@
               </span>
             </div>
 
-            <!-- LayerBay4: Burger -->
             <div class="layer-bay layer-bay-4" aria-label="Layer 4 burger">
               <button class="menu-btn" id="menuBtn"
                       aria-label="Open menu"
@@ -76,27 +71,39 @@
           </div>
         </div>
 
-      </div><!-- /.header-inner -->
+      </div>
     </header>
-
-    <!-- FRAME BAYS (single instance only: no duplicate IDs) -->
-    <aside class="frame-bay frame-left-bay" id="frameLeftBay" aria-label="Left bay">
-      <button class="bay-action" id="openTopDeck" type="button" aria-controls="topDeckFullview">
-        Photography
-      </button>
-    </aside>
 
     <!-- VIEWPORT WRAP -->
     <section class="frame-viewportWrap" aria-label="Viewport area">
+
+      <!-- Photography label (left edge / top -> down) -->
+      <aside class="edge-bay edge-bay-left" aria-label="Photography label">
+        <button class="edgeTab edgeTab--photo" id="openTopDeck" type="button">
+          Photography
+        </button>
+      </aside>
+
+      <!-- Digital Art label (right edge / bottom -> up) -->
+      <aside class="edge-bay edge-bay-right" aria-label="Digital Art label">
+        <button class="edgeTab edgeTab--digital" id="openBottomDeck" type="button">
+          Digital Art
+        </button>
+      </aside>
+
+      <!-- VIEWPORT -->
       <div class="space-viewport" id="viewport" aria-label="Artwork space">
         <div class="space-bg" id="spaceBg" aria-hidden="true"></div>
 
-        <!-- WEBGL OVERLAY LAYER -->
-        <div class="viewport-layer viewport-webgl" id="viewportWebgl" aria-label="WebGL overlay layer" aria-hidden="true">
+        <!-- WEBGL BACK LAYER -->
+        <div class="viewport-layer viewport-webgl" id="viewportWebgl" aria-hidden="true">
           <canvas id="webglCanvas" class="gl-canvas gl-overlay" aria-hidden="true"></canvas>
         </div>
 
-        <!-- TOP DECK LAYER -->
+        <!-- GLASS / GRADIENT OVERLAY -->
+        <div class="viewport-layer viewport-glass" aria-hidden="true"></div>
+
+        <!-- TOP DECK -->
         <div class="deck-layer deck-layer-top" id="deckLayerTop" aria-label="Top deck layer">
           <div class="deck-viewport" id="deckTop" aria-label="Top deck area">
             <div class="space-pan" id="spacePanTop">
@@ -109,9 +116,8 @@
                     <span class="am-status" id="amStatusTop">Unveiling soon</span>
                   </div>
 
-                  <!-- ONLY SELECT -->
                   <div class="active-actions">
-                    <button class="abtn abtn-primary select-tab" id="selectBtnTop" type="button">Select</button>
+                    <button class="tabBtn" id="selectBtnTop" type="button">Select</button>
                   </div>
                 </div>
 
@@ -119,7 +125,7 @@
             </div>
 
             <div class="arrow-slot arrow-slot--top-left">
-              <button class="film-arrow" id="arrowTopLeft" aria-label="Top deck slide left" type="button">
+              <button class="film-arrow tabIcon" id="arrowTopLeft" aria-label="Top deck slide left" type="button">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path d="M15 6l-6 6 6 6"/>
                 </svg>
@@ -128,7 +134,7 @@
           </div>
         </div>
 
-        <!-- BOTTOM DECK LAYER -->
+        <!-- BOTTOM DECK -->
         <div class="deck-layer deck-layer-bottom" id="deckLayerBottom" aria-label="Bottom deck layer">
           <div class="deck-viewport" id="deckBottom" aria-label="Bottom deck area">
             <div class="space-pan" id="spacePanBottom">
@@ -141,17 +147,16 @@
                     <span class="am-status" id="amStatusBottom">Unveiling soon</span>
                   </div>
 
-                  <!-- ONLY SELECT -->
                   <div class="active-actions">
-                    <button class="abtn abtn-primary select-tab" id="selectBtnBottom" type="button">Select</button>
+                    <button class="tabBtn" id="selectBtnBottom" type="button">Select</button>
                   </div>
                 </div>
 
               </div>
             </div>
 
-            <div class="arrow-slot">
-              <button class="film-arrow" id="arrowBottomRight" aria-label="Bottom deck slide right" type="button">
+            <div class="arrow-slot arrow-slot--bottom-right">
+              <button class="film-arrow tabIcon" id="arrowBottomRight" aria-label="Bottom deck slide right" type="button">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path d="M9 6l6 6-6 6"/>
                 </svg>
@@ -161,24 +166,6 @@
         </div>
 
       </div>
-    </section>
-
-    <aside class="frame-bay frame-right-bay" id="frameRightBay" aria-label="Right bay">
-      <button class="bay-action" id="openBottomDeck" type="button" aria-controls="bottomDeckFullview">
-        Digital Art
-      </button>
-    </aside>
-
-    <!-- FULLVIEW SPACE VIEWPORT TOP DECK -->
-    <section class="fullview" id="topDeckFullview" aria-label="Top deck fullview" aria-hidden="true">
-      <button class="fullview-close" id="closeTopFullview" type="button" aria-label="Close top fullview">×</button>
-      <div class="fullview-inner" id="topFullviewInner"></div>
-    </section>
-
-    <!-- FULLVIEW SPACE VIEWPORT BOTTOM DECK -->
-    <section class="fullview" id="bottomDeckFullview" aria-label="Bottom deck fullview" aria-hidden="true">
-      <button class="fullview-close" id="closeBottomFullview" type="button" aria-label="Close bottom fullview">×</button>
-      <div class="fullview-inner" id="bottomFullviewInner"></div>
     </section>
 
     <!-- FOOTER -->
@@ -197,7 +184,7 @@
       </div>
     </footer>
 
-    <!-- FULLSCREEN (kept as-is) -->
+    <!-- FULLSCREEN -->
     <div class="fullscreen" id="fullscreen" aria-hidden="true">
       <div class="fs-inner">
         <div class="fs-meta">
@@ -211,9 +198,9 @@
         </div>
 
         <div class="fs-actions">
-          <a href="#" class="abtn fs-left" onclick="contact(event)">Inquire</a>
-          <a href="#" class="abtn" id="fsCollect" target="_blank" rel="noopener">Collect</a>
-          <button class="abtn fs-right" id="closeBtn" type="button" aria-label="Close fullscreen">Close</button>
+          <a href="#" class="tabBtn tabBtn--bg" onclick="contact(event)">Inquire</a>
+          <a href="#" class="tabBtn tabBtn--bg" id="fsCollect" target="_blank" rel="noopener">Collect</a>
+          <button class="tabBtn tabBtn--bg" id="closeBtn" type="button" aria-label="Close fullscreen">Close</button>
         </div>
       </div>
     </div>
