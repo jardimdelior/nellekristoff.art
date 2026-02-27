@@ -343,8 +343,9 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* background drift plate */
 #spaceBg{
   position:absolute;
-  inset:0;
-  border-radius: var(--cornerRadius);
+  /* plate smaller */
+  inset: clamp(10px, 1.8vw, 22px);
+  border-radius: calc(var(--cornerRadius);
   pointer-events:none !important;
   z-index:0;
   background:
@@ -355,7 +356,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
     linear-gradient(180deg,
       rgba(255,255,255,.08),
       rgba(0,0,0,.12));
-  opacity:.95;
+  opacity:.80;
 }
 
 .viewport-layer{
