@@ -343,29 +343,36 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* background drift plate */
 #spaceBg{
   position:absolute;
-  inset: 0;
+  inset:0;
   border-radius: var(--cornerRadius);
   pointer-events:none !important;
   z-index:0;
-  background:
-    radial-gradient(140% 90% at 50% 55%,
-      rgba(255,255,255,.10) 0%,
-      rgba(0,0,0,.10) 62%,
-      rgba(0,0,0,.22) 100%),
+  overflow:hidden; /* needed so ::after clipped */
+}
+
+/* Fade only the background plate via an overlay, not via mask */
+#spaceBg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius: inherit;
+
+  /* This overlay makes edges disappear ~20% inward */
+  background: 
+    radial-gradient(circle at 50% 55%,
+      rgba(239,231,220,0) 0%,
+      rgba(239,231,220,0) 80%,
+      rgba(239,231,220,1) 100%
     linear-gradient(180deg,
       rgba(255,255,255,.08),
       rgba(0,0,0,.12));
-  opacity:.80;
-  -webkit-mask-image: radial-gradient(closest-side at 50% 55%,
-    #000 0%,
-    #000 80%,
-    transparent 100%
+  opacity:.80;                          
   );
-  mask-image: radial-gradient(closest-side at 50% 55%,
-    #000 0%,
-    #000 80%,
-    transparent 100%
-  );
+
+  /* Multiply works nicely with your existing gradients */
+  mix-blend-mode: multiply;
+  opacity: 1;
 }
 
 .viewport-layer{
