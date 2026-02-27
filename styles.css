@@ -356,6 +356,16 @@ html.ready .space-viewport{ opacity:1; transform:none; }
       rgba(255,255,255,.08),
       rgba(0,0,0,.12));
   opacity:.80;
+  -webkit-mask-image: radial-gradient(closest-side at 50% 55%,
+    #000 0%,
+    #000 80%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(closest-side at 50% 55%,
+    #000 0%,
+    #000 80%,
+    transparent 100%
+  );
 }
 
 .viewport-layer{
