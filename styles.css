@@ -626,8 +626,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   top: 0;
   left:auto;    /* reset previous */
   transform-origin:center;
-  -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeArrowFade));
-  mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeArrowFade));
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--edgeArrowFade));
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--edgeArrowFade));
 }
 .arrow-slot--bottom-right{
   left: 0;
