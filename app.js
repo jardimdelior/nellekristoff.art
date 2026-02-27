@@ -582,8 +582,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let t = 0;
     const tick = () => {
       t += 0.008;
-      const bx = Math.sin(t) * 8;
-      const by = Math.cos(t * 0.8) * 6;
+      const bx = Math.sin(t) * 14;
+      const by = Math.cos(t * 0.8) * 10;
       spaceBg.style.transform = `translate3d(${bx.toFixed(1)}px, ${by.toFixed(1)}px, 0)`;
       requestAnimationFrame(tick);
     };
