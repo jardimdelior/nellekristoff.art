@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewport = document.getElementById('viewport');
   const spaceBg  = document.getElementById('spaceBg');
 
-  /* ===== Menu toggle (RESTORED) ===== */
+  /* ===== Menu toggle ===== */
   const menuBtn = document.getElementById('menuBtn');
   const menu = document.getElementById('menu');
   const header = document.getElementById('siteHeader');
@@ -125,12 +125,14 @@ document.addEventListener("DOMContentLoaded", () => {
       activeUIEl,
       titleEl,
       statusEl,
-      collectEl,
       selectBtn,
       arrowBtn,
       works,
-      direction
+      direction,
+      focusClass
     } = opts;
+
+    if (!deckEl || !lepEl || !works || !works.length) return null;
 
     // per deck pan/zoom
     let zoom = 1, panX = 0, panY = 0;
@@ -190,8 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
           raf = null;
 
           // if zoomed out: show both decks
-          if (Math.abs(zoom - zoomMin()) < 0.002){
-            if (viewport) viewport.classList.remove('focus-top', 'focus-bottom');
+          if (viewport && Math.abs(zoom - zoomMin()) < 0.002){
+            viewport.classList.remove('focus-top', 'focus-bottom');
           }
           return;
         }
@@ -243,7 +245,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!w) return;
       if (titleEl) titleEl.textContent = w.title || "Untitled";
       if (statusEl) statusEl.textContent = w.status || "Unveiling soon";
-      if (collectEl) collectEl.href = w.collect || "https://collect.nellekristoff.art";
     }
 
     function setActiveUITransformFromPanel(panelEl){
@@ -270,7 +271,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const d  = iV - targetPos;
         const ad = Math.abs(d);
 
-        // active stays flat
         const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
         const x   = (d === 0) ? 0 : d * stepX;
         const z   = (d === 0) ? 0 : (-ad * zStep);
@@ -315,7 +315,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { duration: DURATION, easing: EASING, fill: 'forwards' }
       ));
 
-      // UI follows active panel
       const uiAnim = activeUIEl ? activeUIEl.animate(
         [
           { transform: from[mod(fromPos, panels.length)].transform },
@@ -337,14 +336,14 @@ document.addEventListener("DOMContentLoaded", () => {
       animateTo(activePos + direction);
     }
 
-    // Build panels (DOM)
+    // Build panels
     works.forEach((w, idx) => {
       const el = document.createElement('div');
       el.className = 'panel';
       el.tabIndex = 0;
       el.innerHTML = `
         <div class="print">
-          <img src="${w.src}" alt="${w.title}" draggable="false">
+          <img src="${w.src}" alt="${w.title || ''}" draggable="false">
           <div class="noise"></div>
         </div>
       `;
@@ -379,14 +378,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Focus on pointerdown in deck (ignore UI/buttons)
+    function isInteractiveTarget(target){
+      return !!target.closest('button, a, .tabBtn, .film-arrow, .arrow-slot, .menu, .menu-btn, .edgeTab');
+    }
+
     deckEl.addEventListener('pointerdown', (e) => {
       if (isFullscreenOpen()) return;
-      const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
-      if (interactive) return;
+      if (isInteractiveTarget(e.target)) return;
 
       if (viewport){
         viewport.classList.remove('focus-top', 'focus-bottom');
-        viewport.classList.add(deckEl.id === 'deckTop' ? 'focus-top' : 'focus-bottom');
+        viewport.classList.add(focusClass);
       }
     });
 
@@ -410,8 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     deckEl.addEventListener('pointerdown', (e) => {
       if (isFullscreenOpen()) return;
-      const interactive = e.target.closest('button, a, .abtn, .film-arrow, .arrow-slot, .menu, .menu-btn');
-      if (interactive) return;
+      if (isInteractiveTarget(e.target)) return;
 
       deckEl.setPointerCapture(e.pointerId);
       setPointer(e);
@@ -498,6 +499,18 @@ document.addEventListener("DOMContentLoaded", () => {
       deckEl.style.setProperty('--tiltY', '0deg');
     });
 
+    function focus(){
+      if (!viewport) return;
+      viewport.classList.remove('focus-top', 'focus-bottom');
+      viewport.classList.add(focusClass);
+
+      // keep zoom min behavior (zoom-out returns overview)
+      tZoom = Math.max(1.0, zoomMin());
+      tPanX = 0; tPanY = 0;
+      clampPanTarget();
+      ensureAnim();
+    }
+
     // Init
     function init(){
       zoom = tZoom = zoomMin();
@@ -515,35 +528,54 @@ document.addEventListener("DOMContentLoaded", () => {
       requestAnimationFrame(() => applyInstant(activePos));
     });
 
-    return { next, applyInstant };
+    return { focus };
   }
 
-  // Create decks
-  createDeck({
+  const topDeck = createDeck({
     deckEl: document.getElementById('deckTop'),
     lepEl: document.getElementById('leporelloTop'),
     activeUIEl: document.getElementById('activeUITop'),
     titleEl: document.getElementById('amTitleTop'),
     statusEl: document.getElementById('amStatusTop'),
-    collectEl: document.getElementById('activeCollectTop'),
     selectBtn: document.getElementById('selectBtnTop'),
     arrowBtn: document.getElementById('arrowTopLeft'),
     works: worksTop,
     direction: +1,
+    focusClass: 'focus-top',
   });
 
-  createDeck({
+  const bottomDeck = createDeck({
     deckEl: document.getElementById('deckBottom'),
     lepEl: document.getElementById('leporelloBottom'),
     activeUIEl: document.getElementById('activeUIBottom'),
     titleEl: document.getElementById('amTitleBottom'),
     statusEl: document.getElementById('amStatusBottom'),
-    collectEl: document.getElementById('activeCollectBottom'),
     selectBtn: document.getElementById('selectBtnBottom'),
     arrowBtn: document.getElementById('arrowBottomRight'),
     works: worksBottom,
     direction: +1,
+    focusClass: 'focus-bottom',
   });
+
+  // Edge label clicks => focus deck
+  const openTopDeck = document.getElementById('openTopDeck');
+  const openBottomDeck = document.getElementById('openBottomDeck');
+
+  if (openTopDeck && topDeck){
+    openTopDeck.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      topDeck.focus();
+    });
+  }
+
+  if (openBottomDeck && bottomDeck){
+    openBottomDeck.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      bottomDeck.focus();
+    });
+  }
 
   // subtle background drift
   if (spaceBg){
