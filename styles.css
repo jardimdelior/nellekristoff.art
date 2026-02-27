@@ -618,25 +618,32 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* arrows */
 .arrow-slot{
   position:absolute;
-  z-index: 20;
-  pointer-events:auto;
-  overflow:hidden;
+  z-index: 1400;       /* ABOVE .edge-bay (999) */
+  pointer-events:none; /* slot never blocks */
+  overflow: visible;   /* avoid mask clipping weirdness */
 }
+
 .arrow-slot--top-left{
   right: 0;
   top: 0;
-  left:auto;    /* reset previous */
+  left: auto;
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--edgeArrowFade));
   mask-image: linear-gradient(90deg, transparent 0, #000 var(--edgeArrowFade));
 }
+
 .arrow-slot--bottom-right{
   left: 0;
   bottom: 0;
-  right:auto;   /* reset previous */
+  right: auto;
   -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeArrowFade));
   mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeArrowFade));
 }
-.tabIcon{ pointer-events:auto; }
+
+/* the actual arrow button is clickable */
+.arrow-slot .film-arrow{
+  pointer-events:auto;
+}
+
 .film-arrow svg{ width:18px; height:18px; }
 
 /* ===== Active UI follows active (middle) panel ===== */
@@ -724,6 +731,12 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   transform: none;
 
   pointer-events: none; /* container doesn't catch clicks */
+}
+
+/* make Select clickable */
+.active-actions button,
+.active-actions .abtn{
+  pointer-events: auto;
 }
 
 /* ======= FOOTER ======= */
