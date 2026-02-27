@@ -685,17 +685,18 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   bottom: -1px;
   right: auto;
   top: auto;
-
+  height: auto;
+  min-height: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
 
   /* responsive */
-  font-size: clamp(10px, 1.05vw, 13px);
+  font-size: clamp(10px, 1.0vw, 12px);
   line-height: 1;
 
   /* label-tab styling (keep vibe) */
-  padding: 8px 10px;
+  padding: 2px 4px;
   border-radius: 2px;
   border: 1px solid rgba(0,0,0,.35);
   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
