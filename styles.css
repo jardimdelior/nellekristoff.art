@@ -433,6 +433,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   writing-mode: vertical-rl;
   transition: transform .28s cubic-bezier(.18,.9,.2,1), background .22s ease;
   transform-style: preserve-3d;
+  backface-visibility: hidden !important;
 }
 
 /* Photography: top-left -> down */
@@ -440,12 +441,13 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   position:absolute;
   left: 0;
   top: 0;
-  transform: none;
+  transform: rotate(180deg) !important;
+  transform-origin: center !important;
+
   -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
   mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
   display:flex;
   align-items:flex-end;      /* push text to bottom */
-  justify-content:center;    /* keep horizontal centering */
   padding-top: 42px;         /* match arrow size */
 }
 
@@ -456,11 +458,11 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   bottom: 0;
   transform: rotate(180deg);
   transform-origin:center;
+  
   -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
   mask-image: linear-gradient(270deg, transparent 0, #000 var(--edgeTabFade));
   display:flex;
   align-items:flex-start;   /* push text to top */
-  justify-content:center;
   padding-bottom: 42px;     /* match arrow size */
 }
 
