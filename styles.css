@@ -626,8 +626,18 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* Right label: align to BOTTOM-RIGHT of viewport */
 #frameRightBay{
   right: 0;
-  align-items:flex-end;
-  transform: translateX(14px); /* small offset */
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;     /* keep it at the bottom */
+  justify-content: flex-end; /* bottom of the column */
+  pointer-events: none;
+  z-index: 90;
+
+  /* small offset OUTSIDE the viewport edge (not 100%) */
+  transform: translateX(14px);
+  overflow: visible;
 }
 
 #frameLeftBay .bay-action,
@@ -671,7 +681,9 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* Digital Art: top -> bottom */
 #frameRightBay .bay-action{
   writing-mode: vertical-rl;
-  transform: none; /* reads top-to-bottom */
+  pointer-events: auto;
+  transform: rotate(180deg);  /* <-- key change */
+  transform-origin: center;
 }
 
 #frameLeftBay .bay-action:hover,
