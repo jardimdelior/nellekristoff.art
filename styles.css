@@ -37,6 +37,9 @@
   --panelH: clamp(180px, 36vh, 520px);
   --panelW: calc(var(--panelH) * (420 / 297));
 
+  /* PRINT */
+  --printPad: 16px;
+
   /* Layout tuning */
   --angleStep: 18deg;
   --maxAngle: 72deg;
@@ -597,7 +600,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   width:100%;
   height:100%;
   background:var(--card);
-  padding: 16px;
+  padding: var(--printPad);
   border-radius: var(--radius);
   box-shadow: var(--inset), var(--shadow);
   overflow:hidden;
