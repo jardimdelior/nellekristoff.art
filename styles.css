@@ -684,10 +684,10 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* ===== Untitled + status: bottom-left of active panel ===== */
 .active-meta{
   position: absolute;
-  left: var(--printPad);
-  bottom: calc(var(--printPad) - 1px);
+  left: var(--printPad, 16px);
+  top: calc(100% - var(--printPad, 16px));
   right: auto;
-  top: auto;
+  bottom: auto;
   height: auto;
   min-height: 0;
   display: inline-flex;
@@ -745,10 +745,10 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* ===== Select: bottom-right of active panel ===== */
 .active-actions{
   position: absolute;
-  right: var(--printPad);
-  bottom: calc(var(--printPad) - 1px);
+  right: var(--printPad, 16px);
+  top: calc(100% - var(--printPad, 16px));
   left: auto;
-  top: auto;
+  bottom: auto;
 
   display: flex;
   align-items: center;
