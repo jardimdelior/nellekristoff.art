@@ -889,7 +889,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 @media (max-width: 760px){
   :root{ 
     --maxFilmH: 72vh;
-    --panelW: 70vw;
+    --panelW: 86vw;
     --panelH: calc(var(--panelW) * (297 / 420));
     --pillH: 34px;
     --headerH: 40px;
@@ -901,7 +901,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 @media (max-width: 520px){
   :root{
     --maxFilmH: 72vh;
-    --panelW: 70vw;
+    --panelW: 88vw;
     --panelH: calc(var(--panelW) * (297 / 420));
     --pillH: 34px;
     --headerH: 40px;
@@ -909,7 +909,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
-    --pillH: 36px;
+    --pillH: 34px;
   }
   .brand-text{ font-size: clamp(16px, 5vw, 20px); }
   .layer-bay-2{ display:none; }
