@@ -307,7 +307,7 @@ html.ready body{
   transform-origin: 100% 50%;
   transition: opacity .22s ease, transform .32s cubic-bezier(.18,.9,.2,1), filter .22s ease;
 }
-.brand-mark svg{ width:100%; height:100%; display:block; }
+.brand-mark svg{ width:100%; height:100%; display:block; overflow:visible; }
 
 .menu-btn{
   width: var(--headerH);
@@ -323,7 +323,7 @@ html.ready body{
   color: var(--brand);
   transition: transform .28s cubic-bezier(.18,.9,.2,1);
 }
-.menu-btn svg{ width:100%; height:100%; display:block; }
+.menu-btn svg{ width:100%; height:100%; display:block; overflow:visible; }
 
 /* fold animation */
 .film-header.menu-open .brand-text{
@@ -340,19 +340,25 @@ html.ready body{
   transform: translateX(0) scaleX(1);
 }
 
+.icon-monogram,
+.icon-burger{
+  overflow: visible;
+  shape-rendering: geometricPrecision;  
+}
+
 /* Outline for BOTH icons (monogram + burger) */
 .icon-monogram path,
 .icon-burger path{
   stroke: rgba(0,0,0,.65);
-  stroke-width: 1.25;              /* tweak: 1.0–1.6 */
+  stroke-width: 1.1;              /* tweak: 1.0–1.6 */
   stroke-linejoin: round;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
   paint-order: stroke fill;         /* keeps fill clean */
 }
 
-.icon-monogram path{ stroke-width: 1.35; }
-.icon-burger  path{ stroke-width: 1.15; }
+.icon-monogram path{ stroke-width: .95; }
+.icon-burger path{ stroke-width: .75; }
 
 /* ======= VIEWPORT WRAP ======= */
 .frame-viewportWrap{
