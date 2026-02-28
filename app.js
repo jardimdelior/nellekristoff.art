@@ -276,14 +276,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const d  = iV - targetPos;
       const ad = Math.abs(d);
 
-       const rot = (d === 0) ? 0 : clamp(-d * angleStep * sideAngleMult, -maxAngle, maxAngle);
-       const x   = (d === 0) ? 0 : d * stepX * sideXMult;
-       const z   = (d === 0) ? 0 : (-ad * zStep * sideDepthMult);
+      const rot = (d === 0) ? 0 : clamp(-d * angleStep * sideAngleMult, -maxAngle, maxAngle);
+      const x   = (d === 0) ? 0 : d * stepX * sideXMult;
+      const z   = (d === 0) ? 0 : (-ad * zStep * sideDepthMult);
 
-       const op  = (d === 0) ? 1 : clamp(1 - ad * 0.08, 0.68, 1);
-       const zIndex = String(100 - Math.round(ad * 10));
+      const op  = (d === 0) ? 1 : clamp(1 - ad * 0.08, 0.68, 1);
+      const zIndex = String(100 - Math.round(ad * 10));
 
-       return { transform: buildT(x, z, rot), opacity: String(op), zIndex };
+      return { transform: buildT(x, z, rot), opacity: String(op), zIndex };
       });
     }
 
