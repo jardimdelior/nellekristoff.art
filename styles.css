@@ -362,7 +362,7 @@ html.ready body{
 }
 .film-header.menu-open .brand-mark{
   opacity:1;
-  transform: transform: translateX(var(--headerRightInset)) scaleX(1);
+  transform: translateX(var(--headerRightInset)) scaleX(1);
 }
 
 .icon-monogram,
