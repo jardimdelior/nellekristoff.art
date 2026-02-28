@@ -919,7 +919,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display:flex;
   flex-direction:column;
   gap:12px;
-  max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
+  max-height: calc(100dvh - 2 * clamp(14px, 3vw, 34px));
 }
 .fs-meta{
   position: sticky;
@@ -974,6 +974,61 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .fullscreen.open ~ .page .active-ui,
 .fullscreen.open .active-ui{
   display:none !important;
+}
+
+/* ===== FULLSCREEN OVERRIDES (paste BELOW your current fullscreen CSS) ===== */
+
+/* 1) Make fs-inner behave like a centered column that scales with your panel system */
+.fullscreen .fs-inner{
+  margin: 0 auto;
+  max-width: calc(var(--panelW) + (2 * var(--printPad)));
+}
+
+/* 2) Meta UNDER image: remove sticky/floating feel + match tab sizing */
+.fullscreen .fs-meta{
+  position: static;      /* overrides sticky */
+  top: auto;
+  right: auto;
+  margin: 0 auto;
+
+  width: 100%;           /* attach to the same column width */
+  border-radius: 2px;    /* match your tabs */
+  padding: 0 10px;       /* match tab padding */
+
+  height: var(--pillH);
+  min-height: var(--pillH);
+
+  justify-content: space-between;
+}
+
+/* 3) Title/status scale like in-deck meta */
+.fullscreen .fs-title,
+.fullscreen .fs-status{
+  font-size: clamp(10px, 1.05vw, 12px);
+  line-height: 1;
+}
+
+/* 4) Actions row attaches to column + keeps Collect compact and aligned right */
+.fullscreen .fs-actions{
+  width: 100%;                 /* override min(560px, 92%) */
+  justify-content: flex-end;   /* keep Collect out of the way */
+}
+
+/* 5) Collect matches tab sizing */
+.fullscreen #fsCollect{
+  height: var(--pillH);
+  min-height: var(--pillH);
+  padding: 0 10px;
+  font-size: clamp(10px, 1.05vw, 13px);
+  letter-spacing: .08em;
+  border-radius: 2px;
+}
+
+/* 6) Correctly hide deck Select UI when fullscreen is open (your current selector won't match DOM) */
+body.noscroll .active-ui,
+body.noscroll .active-actions,
+body.noscroll .active-meta{
+  display: none !important;
 }
 
 /* =========================
