@@ -77,18 +77,14 @@
     <!-- VIEWPORT WRAP -->
     <section class="frame-viewportWrap" aria-label="Viewport area">
 
-      <!-- Photography label (left edge / top -> down) -->
+      <!-- Photography label -->
       <aside class="edge-bay edge-bay-left" aria-label="Photography label">
-        <button class="edgeTab edgeTab--photo" id="openTopDeck" type="button">
-          Photography
-        </button>
+        <button class="edgeTab edgeTab--photo" id="openTopDeck" type="button">Photography</button>
       </aside>
 
-      <!-- Digital Art label (right edge / bottom -> up) -->
+      <!-- Digital Art label -->
       <aside class="edge-bay edge-bay-right" aria-label="Digital Art label">
-        <button class="edgeTab edgeTab--digital" id="openBottomDeck" type="button">
-          Digital Art
-        </button>
+        <button class="edgeTab edgeTab--digital" id="openBottomDeck" type="button">Digital Art</button>
       </aside>
 
       <!-- VIEWPORT -->
@@ -187,21 +183,22 @@
     <!-- FULLSCREEN -->
     <div class="fullscreen" id="fullscreen" aria-hidden="true">
       <div class="fs-inner">
-        <div class="fs-meta">
-          <span class="fs-title" id="fsTitle">Untitled</span>
-          <span class="fs-status" id="fsStatus">Unveiling soon</span>
-        </div>
 
         <div class="print fs-frame">
           <img id="fsImg" alt="" />
           <div class="noise" aria-hidden="true"></div>
+
+          <!-- meta + collect are ATTACHED to the print -->
+          <div class="fs-meta">
+            <span class="fs-title" id="fsTitle">Untitled</span>
+            <span class="fs-status" id="fsStatus">Unveiling soon</span>
+          </div>
+
+          <div class="fs-actions">
+            <a href="#" class="tabBtn tabBtn--bg" id="fsCollect" target="_blank" rel="noopener">Collect</a>
+          </div>
         </div>
 
-        <div class="fs-actions">
-          <a href="#" class="tabBtn tabBtn--bg" onclick="contact(event)">Inquire</a>
-          <a href="#" class="tabBtn tabBtn--bg" id="fsCollect" target="_blank" rel="noopener">Collect</a>
-          <button class="tabBtn tabBtn--bg" id="closeBtn" type="button" aria-label="Close fullscreen">Close</button>
-        </div>
       </div>
     </div>
 
