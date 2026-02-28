@@ -951,7 +951,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   align-items: center;
   justify-content: center;
 }
-
+.fullscreen .print{ padding: clamp(8px, 1.6vw, 16px); }
 .fullscreen .fs-frame img{ 
   width: auto;
   height: auto;
