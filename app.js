@@ -48,6 +48,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewport = document.getElementById('viewport');
   const spaceBg  = document.getElementById('spaceBg');
 
+  /* ===== Chrome fullscreen UI guard (tabs overlay) ===== */
+  function updateFsTopPad(){
+    const isFsLike = window.innerHeight >= screen.height * 0.92;
+    const ui = isFsLike ? Math.max(0, screen.height - window.innerHeight) : 0;
+    const pad = Math.min(Math.max(ui, 0), 120);
+    document.documentElement.style.setProperty('--fsTopPad', pad + 'px');
+  }
+  updateFsTopPad();
+  window.addEventListener('resize', updateFsTopPad, { passive:true });
+
   /* ===== Menu toggle ===== */
   const menuBtn = document.getElementById('menuBtn');
   const menu = document.getElementById('menu');
@@ -79,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const fsTitle = document.getElementById('fsTitle');
   const fsStatus = document.getElementById('fsStatus');
   const fsCollect = document.getElementById('fsCollect');
-  const closeBtn = document.getElementById('closeBtn');
 
   function isFullscreenOpen(){ return fullscreen && fullscreen.classList.contains('open'); }
 
@@ -102,17 +111,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove('noscroll');
   }
 
-  if (closeBtn){
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      closeFullscreen();
-    });
-  }
   if (fullscreen){
     fullscreen.addEventListener('click', (e) => {
-      if (e.target === fullscreen) closeFullscreen();
+      if (e.target.closest('#fsCollect')) return; // don't close on Collect
+      closeFullscreen(); // close on ANY click otherwise
     });
   }
+  if (fsCollect){
+    fsCollect.addEventListener('click', (e) => e.stopPropagation());
+  }
+
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isFullscreenOpen()) closeFullscreen();
   });
@@ -170,35 +178,48 @@ document.addEventListener("DOMContentLoaded", () => {
       tPanY = clamp(tPanY, -maxY, maxY);
     }
 
+    // Improved smoothing + early defocus (removes “pepper jump”)
     function ensureAnim(){
       if (raf) return;
-      const ease = 0.14;
 
-      const tick = () => {
-        zoom += (tZoom - zoom) * ease;
-        panX += (tPanX - panX) * ease;
-        panY += (tPanY - panY) * ease;
+      let lastT = performance.now();
+
+      const tick = (now) => {
+        const dt = Math.min(32, now - lastT);
+        lastT = now;
+
+        const k = 1 - Math.pow(1 - 0.22, dt / 16.67);
+
+        zoom += (tZoom - zoom) * k;
+        panX += (tPanX - panX) * k;
+        panY += (tPanY - panY) * k;
 
         applyView();
 
+        if (viewport){
+          const zMin = zoomMin();
+          const wantsOverview = (tZoom <= zMin + 0.002);
+          const closeEnough   = (zoom  <= zMin + 0.020);
+          if (wantsOverview && closeEnough){
+            viewport.classList.remove('focus-top', 'focus-bottom');
+          }
+        }
+
         const done =
-          Math.abs(tZoom - zoom) < 0.0008 &&
-          Math.abs(tPanX - panX) < 0.10 &&
-          Math.abs(tPanY - panY) < 0.10;
+          Math.abs(tZoom - zoom) < 0.0012 &&
+          Math.abs(tPanX - panX) < 0.18 &&
+          Math.abs(tPanY - panY) < 0.18;
 
         if (done){
           zoom = tZoom; panX = tPanX; panY = tPanY;
           applyView();
           raf = null;
-
-          // if zoomed out: show both decks
-          if (viewport && Math.abs(zoom - zoomMin()) < 0.002){
-            viewport.classList.remove('focus-top', 'focus-bottom');
-          }
           return;
         }
+
         raf = requestAnimationFrame(tick);
       };
+
       raf = requestAnimationFrame(tick);
     }
 
@@ -264,7 +285,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const xStepPct  = num(cssVar('--xStep')) / 100;
       const stepX     = panelW * xStepPct;
 
-    // multipliers (ONLY once per call)
       const sideAngleMult = num(cssVar('--sideAngleMult')) || 1;
       const sideDepthMult = num(cssVar('--sideDepthMult')) || 1;
       const sideXMult     = num(cssVar('--sideXMult'))     || 1;
@@ -486,7 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
 
-      const factor = Math.exp(-e.deltaY * 0.0018);
+      const factor = Math.exp(-e.deltaY * 0.0024);
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
 
@@ -509,11 +529,16 @@ document.addEventListener("DOMContentLoaded", () => {
       viewport.classList.remove('focus-top', 'focus-bottom');
       viewport.classList.add(focusClass);
 
-      // keep zoom min behavior (zoom-out returns overview)
       tZoom = Math.max(1.0, zoomMin());
       tPanX = 0; tPanY = 0;
       clampPanTarget();
       ensureAnim();
+
+      // IMPORTANT: resync active UI immediately (fixes “gap until arrow click”)
+      requestAnimationFrame(() => {
+        applyInstant(activePos);
+        requestAnimationFrame(() => applyInstant(activePos));
+      });
     }
 
     // Init
