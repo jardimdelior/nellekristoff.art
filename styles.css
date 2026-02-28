@@ -892,7 +892,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   line-height:1;
 }
 
-/* ======= FULLSCREEN ======= */
+/* ======= FULLSCREEN (CLEAN) ======= */
+
 .fullscreen{
   position:fixed;
   top:0;
@@ -907,10 +908,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   padding: clamp(14px, 3vw, 34px);
   overflow:auto;
 }
-.fullscreen.open{ 
+.fullscreen.open{
   display:flex;
-  align-items:center;
-  justify-content:center;
 }
 
 .fs-inner{
@@ -921,206 +920,120 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   gap:12px;
   max-height: calc(100dvh - 2 * clamp(14px, 3vw, 34px));
 }
-.fs-meta{
-  position: sticky;
-  top: 0;
-  right: 0;
-  z-index: 10;
-  margin-left: auto;
-  display:flex;
-  gap:6px;
-  align-items:baseline;
-  padding:4px 6px;
-  border-radius:14px;
-  background: rgba(255,255,255,.14);
-  backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid rgba(255,255,255,.35);
-  color: rgba(255,255,255,.92);
-}
-.fs-title{ font-size:13px; max-width:18ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.fs-status{ font-size:12px; opacity:.8; max-width:18ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-.fs-frame{
+/* The print card is the anchor for the attached UI */
+.fullscreen .print.fs-frame{
+  position: relative; /* critical: anchors absolute meta/actions */
   flex: 1 1 auto;
-  min-height:0;
+  min-height: 0;
   width:100%;
   max-height: calc(100dvh - 2 * clamp(14px, 3vw, 34px) - 88px);
   margin: 0 auto;
+
+  /* keep image fully visible */
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  /* fullscreen print padding can be a bit smaller */
+  padding: clamp(8px, 1.6vw, 16px);
 }
-.fullscreen .print{ padding: clamp(8px, 1.6vw, 16px); }
-.fullscreen .fs-frame img{ 
+
+/* image sizing inside fullscreen */
+.fullscreen .fs-frame img{
   width: auto;
   height: auto;
-  max-width:100%; 
-  max-height:100%; 
-  object-fit:contain; 
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
   display:block;
 }
-.fs-actions{
-  flex: 0 0 auto;
-  width: min(560px, 92%);
-  margin: 0 auto;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
 
-/* prevent in-viewport "active" UI from showing over fullscreen */
-.fullscreen.open ~ .page .active-ui,
-.fullscreen.open .active-ui{
-  display:none !important;
-}
-
-/* ===== FULLSCREEN OVERRIDES ===== */
-
-/* 1) Fs-inner behaves like a centered column that scales with your panel system */
-.fullscreen .fs-inner{
-  margin: 0 auto;
-  max-width: calc(var(--panelW) + (2 * var(--printPad)));
-}
-
-/* 2) Meta UNDER image: remove sticky/floating feel + match tab sizing */
+/* ===== Attached meta (bottom-left) ===== */
 .fullscreen .fs-meta{
-  position: static;      /* overrides sticky */
-  top: auto;
-  right: auto;
-  margin: 0 auto;
+  position:absolute;
+  left: var(--printPad, 16px);
+  top: calc(100% - var(--printPad, 16px));
+  right:auto;
+  bottom:auto;
 
-  width: 100%;           /* attach to the same column width */
-  border-radius: 2px;    /* match your tabs */
-  padding: 0 10px;       /* match tab padding */
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
 
   height: var(--pillH);
   min-height: var(--pillH);
+  padding: 0 10px;
 
-  justify-content: space-between;
+  border-radius: 2px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.07);
+  box-shadow: 0 12px 26px rgba(0,0,0,.22);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+  text-transform: uppercase;
+  letter-spacing: .08em;
+
+  overflow:hidden;
+  pointer-events:none;
+
+  /* leave space for Collect on the right */
+  max-width: calc(100% - 120px);
 }
 
-/* 3) Title/status scale like in-deck meta */
 .fullscreen .fs-title,
 .fullscreen .fs-status{
-  font-size: clamp(10px, 1.05vw, 12px);
+  color: rgba(255,255,255,.92);
   line-height: 1;
+  max-width: 18ch;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
+.fullscreen .fs-title{ font-size: clamp(11px, 1.1vw, 13px); opacity:.92; }
+.fullscreen .fs-status{ font-size: clamp(10px, 1.05vw, 12px); opacity:.78; }
 
-/* 4) Actions row attaches to column + keeps Collect compact and aligned right */
+/* ===== Attached collect (bottom-right) ===== */
 .fullscreen .fs-actions{
-  width: 100%;                 /* override min(560px, 92%) */
-  justify-content: flex-end;   /* keep Collect out of the way */
+  position:absolute;
+  right: var(--printPad, 16px);
+  top: calc(100% - var(--printPad, 16px));
+  left:auto;
+  bottom:auto;
+
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+
+  pointer-events:none; /* wrapper doesn’t steal clicks */
 }
 
-/* 5) Collect matches tab sizing */
 .fullscreen #fsCollect{
+  pointer-events:auto;
+
   height: var(--pillH);
   min-height: var(--pillH);
   padding: 0 10px;
   font-size: clamp(10px, 1.05vw, 13px);
   letter-spacing: .08em;
   border-radius: 2px;
-}
 
-/* 6) Correctly hide deck Select UI when fullscreen is open (your current selector won't match DOM) */
-body.noscroll .active-ui,
-body.noscroll .active-actions,
-body.noscroll .active-meta{
-  display: none !important;
-}
-
-/* =========================
-   SMOKE PLATE FOR ALL TABS
-   ========================= */
-
-/* Apply to all your button-like UI */
-.tabBtn,
-.menu a,
-.edgeTab,
-.film-arrow,
-.active-meta,
-.fs-meta,
-#fsCollect{
-  position: relative;
-  overflow: hidden;             /* required for smoke layer */
-  isolation: isolate;           /* keeps blend inside the pill */
-}
-
-/* base plate (super transparent) */
-.tabBtn,
-.menu a,
-.edgeTab,
-.film-arrow,
-.active-meta{
-  background: rgba(255,255,255,.06);          /* ~ “20% smoke” look, but subtle */
-  border: 1px solid rgba(0,0,0,.35);
-  box-shadow: 0 12px 26px rgba(0,0,0,.12);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-}
-
-/* the smoke itself (behind text) */
-.tabBtn::before,
-.menu a::before,
-.edgeTab::before,
-.film-arrow::before,
-.active-meta::before{
-  content:"";
-  position:absolute;
-  inset:-30%;
-  z-index: 0;
-
-  /* smoky “mist” */
-  background:
-    radial-gradient(40% 32% at 30% 35%, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 60%),
-    radial-gradient(44% 36% at 70% 55%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 62%),
-    radial-gradient(38% 28% at 55% 25%, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 58%),
-    radial-gradient(46% 40% at 45% 75%, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 62%);
-
-  opacity: .55;                 /* overall smoke strength */
-  filter: blur(10px);
-  transform: translate3d(0,0,0);
-  pointer-events:none;
-}
-
-/* keep text/icons above smoke */
-.tabBtn > *,
-.menu a > *,
-.edgeTab > *,
-.film-arrow > *,
-.active-meta > *{
-  position: relative;
-  z-index: 1;
-  color: rgba(47,42,38,.92);    /* black-ish */
-}
-
-/* hover keeps your vibe but stays smoky */
-.tabBtn:hover,
-.menu a:hover,
-.edgeTab:hover,
-.film-arrow:hover{
-  background: rgba(255,255,255,.09);
-}
-
-/* =========================
-   FULLSCREEN: SAME STYLE BUT WHITE STYLE NOT ONLY DARK STYLE
-   ========================= */
-
-/* Fullscreen meta + collect match the same “tab” style */
-.fullscreen .fs-meta.fs-meta--under,
-.fullscreen #fsCollect{
-  border-radius: 2px; /* match tabs */
-  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.92);
   border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.07);
   box-shadow: 0 12px 26px rgba(0,0,0,.22);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
+
+  text-decoration: none;
 }
 
-/* smoke layer inside fullscreen meta + collect */
-.fullscreen .fs-meta.fs-meta--under::before,
+/* ===== Smoke layer in fullscreen ONLY (won’t affect rest of site) ===== */
+.fullscreen .fs-meta,
+.fullscreen #fsCollect{
+  isolation: isolate;
+}
+.fullscreen .fs-meta::before,
 .fullscreen #fsCollect::before{
   content:"";
   position:absolute;
@@ -1135,19 +1048,17 @@ body.noscroll .active-meta{
   filter: blur(10px);
   pointer-events:none;
 }
-
-/* White text in fullscreen meta + collect */
-.fullscreen .fs-meta.fs-meta--under .fs-title,
-.fullscreen .fs-meta.fs-meta--under .fs-status,
+.fullscreen .fs-meta > *,
 .fullscreen #fsCollect{
   position: relative;
   z-index: 1;
-  color: rgba(255,255,255,.92);
 }
 
-/* status slightly softer */
-.fullscreen .fs-meta.fs-meta--under .fs-status{
-  opacity: .80;
+/* Hide deck UI while fullscreen is open (your working method) */
+body.noscroll .active-ui,
+body.noscroll .active-actions,
+body.noscroll .active-meta{
+  display:none !important;
 }
 
 /* ======= RESPONSIVE ======= */
