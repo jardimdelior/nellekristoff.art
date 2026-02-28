@@ -67,7 +67,25 @@
   --edgeArrowFade: 18px;
 }
 
-html, body{ height:100%; }
+html, body{
+  height:100%;
+  width:100%;
+  overflow-x: clip;
+@supports not (overflow: clip){
+  html, body{ overflow-x: hidden; }  /* fallback */
+}
+
+/* also protect the layout wrappers */
+.page,
+.frame,
+.frame-viewportWrap{
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip){
+  .page, .frame, .frame-viewportWrap{ overflow-x: hidden; }
+}
 *{ box-sizing:border-box; }
 
 body{
