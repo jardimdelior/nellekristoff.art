@@ -273,7 +273,7 @@ html.ready body{
 
 /* Brand / subtitle / monogram all sit LEFT of burger by the same inset */
 .layer-bay-1,
-.layer-bay-2,{
+.layer-bay-2{
   right: var(--headerRightInset);
   position:absolute;
   top:0;
@@ -291,7 +291,7 @@ html.ready body{
   right: calc(var(--headerRightInset) + 12px);
 }
 .layer-bay-4,
-.layer-bay-3,{ 
+.layer-bay-3{ 
   position:absolute;
   top:0;
   right:0;
