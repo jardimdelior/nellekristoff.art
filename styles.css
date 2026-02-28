@@ -976,6 +976,125 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display:none !important;
 }
 
+/* =========================
+   SMOKE PLATE FOR ALL TABS
+   ========================= */
+
+/* Apply to all your button-like UI */
+.tabBtn,
+.menu a,
+.edgeTab,
+.film-arrow,
+.active-meta,
+.fs-meta,
+#fsCollect{
+  position: relative;
+  overflow: hidden;             /* required for smoke layer */
+  isolation: isolate;           /* keeps blend inside the pill */
+}
+
+/* base plate (super transparent) */
+.tabBtn,
+.menu a,
+.edgeTab,
+.film-arrow,
+.active-meta{
+  background: rgba(255,255,255,.06);          /* ~ “20% smoke” look, but subtle */
+  border: 1px solid rgba(0,0,0,.35);
+  box-shadow: 0 12px 26px rgba(0,0,0,.12);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* the smoke itself (behind text) */
+.tabBtn::before,
+.menu a::before,
+.edgeTab::before,
+.film-arrow::before,
+.active-meta::before{
+  content:"";
+  position:absolute;
+  inset:-30%;
+  z-index: 0;
+
+  /* smoky “mist” */
+  background:
+    radial-gradient(40% 32% at 30% 35%, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(44% 36% at 70% 55%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 62%),
+    radial-gradient(38% 28% at 55% 25%, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 58%),
+    radial-gradient(46% 40% at 45% 75%, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 62%);
+
+  opacity: .55;                 /* overall smoke strength */
+  filter: blur(10px);
+  transform: translate3d(0,0,0);
+  pointer-events:none;
+}
+
+/* keep text/icons above smoke */
+.tabBtn > *,
+.menu a > *,
+.edgeTab > *,
+.film-arrow > *,
+.active-meta > *{
+  position: relative;
+  z-index: 1;
+  color: rgba(47,42,38,.92);    /* black-ish */
+}
+
+/* hover keeps your vibe but stays smoky */
+.tabBtn:hover,
+.menu a:hover,
+.edgeTab:hover,
+.film-arrow:hover{
+  background: rgba(255,255,255,.09);
+}
+
+/* =========================
+   FULLSCREEN: SAME STYLE BUT WHITE STYLE NOT ONLY DARK STYLE
+   ========================= */
+
+/* Fullscreen meta + collect match the same “tab” style */
+.fullscreen .fs-meta.fs-meta--under,
+.fullscreen #fsCollect{
+  border-radius: 2px; /* match tabs */
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow: 0 12px 26px rgba(0,0,0,.22);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* smoke layer inside fullscreen meta + collect */
+.fullscreen .fs-meta.fs-meta--under::before,
+.fullscreen #fsCollect::before{
+  content:"";
+  position:absolute;
+  inset:-30%;
+  z-index:0;
+  background:
+    radial-gradient(40% 32% at 30% 35%, rgba(255,255,255,.24) 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(44% 36% at 70% 55%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 62%),
+    radial-gradient(38% 28% at 55% 25%, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 58%),
+    radial-gradient(46% 40% at 45% 75%, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 62%);
+  opacity: .55;
+  filter: blur(10px);
+  pointer-events:none;
+}
+
+/* White text in fullscreen meta + collect */
+.fullscreen .fs-meta.fs-meta--under .fs-title,
+.fullscreen .fs-meta.fs-meta--under .fs-status,
+.fullscreen #fsCollect{
+  position: relative;
+  z-index: 1;
+  color: rgba(255,255,255,.92);
+}
+
+/* status slightly softer */
+.fullscreen .fs-meta.fs-meta--under .fs-status{
+  opacity: .80;
+}
+
 /* ======= RESPONSIVE ======= */
 @media (max-width: 760px){
   :root{ 
