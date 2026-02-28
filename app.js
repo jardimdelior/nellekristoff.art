@@ -271,9 +271,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const d  = iV - targetPos;
         const ad = Math.abs(d);
 
-        const rot = (d === 0) ? 0 : clamp(-d * angleStep, -maxAngle, maxAngle);
-        const x   = (d === 0) ? 0 : d * stepX;
-        const z   = (d === 0) ? 0 : (-ad * zStep);
+        const sideAngleMult = num(cssVar('--sideAngleMult')) || 1;
+        const sideDepthMult = num(cssVar('--sideDepthMult')) || 1;
+        const sideXMult     = num(cssVar('--sideXMult'))     || 1;
+
+        const rot = (d === 0)
+          ? 0
+          : clamp(-d * angleStep * sideAngleMult, -maxAngle, maxAngle);
+
+        const x = (d === 0)
+          ? 0
+          : d * stepX * sideXMult;
+
+        const z = (d === 0)
+          ? 0
+          : (-ad * zStep * sideDepthMult);
 
         const op  = (d === 0) ? 1 : clamp(1 - ad * 0.08, 0.68, 1);
         const zIndex = String(100 - Math.round(ad * 10));
