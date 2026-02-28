@@ -13,17 +13,27 @@ function makeRenderer(canvas){
   return renderer;
 }
 
-function makeNoiseMaterial(noiseTex){
+// Noise shader with tunable intensity/scale/drift
+function makeNoiseMaterial(noiseTex, opts = {}){
+  const {
+    amt = 0.22,     // strength / opacity of the “air”
+    scale = 2.2,    // UV scale
+    sx = 0.015,     // drift speed X
+    sy = -0.010     // drift speed Y
+  } = opts;
+
   noiseTex.wrapS = noiseTex.wrapT = THREE.RepeatWrapping;
-  noiseTex.repeat.set(1.0, 1.0);
 
   return new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
+    depthTest: false,
     uniforms: {
       uNoise: { value: noiseTex },
       uTime:  { value: 0 },
-      uAmt:   { value: 0.22 },
+      uAmt:   { value: amt },
+      uScale: { value: scale },
+      uSpd:   { value: new THREE.Vector2(sx, sy) },
     },
     vertexShader: `
       varying vec2 vUv;
@@ -36,6 +46,8 @@ function makeNoiseMaterial(noiseTex){
       uniform sampler2D uNoise;
       uniform float uTime;
       uniform float uAmt;
+      uniform float uScale;
+      uniform vec2  uSpd;
       varying vec2 vUv;
 
       float softCircle(vec2 p, vec2 c, float r){
@@ -47,7 +59,7 @@ function makeNoiseMaterial(noiseTex){
         vec2 uv = vUv;
 
         // drifting noise
-        vec2 nUv = uv * 2.2 + vec2(uTime * 0.015, -uTime * 0.010);
+        vec2 nUv = uv * uScale + vec2(uTime * uSpd.x, uTime * uSpd.y);
         float n  = texture2D(uNoise, nUv).r;
 
         float air = (n * 0.65 + 0.35) * uAmt;
@@ -58,7 +70,7 @@ function makeNoiseMaterial(noiseTex){
         float b3 = softCircle(uv, vec2(0.52 + 0.02*sin(uTime*0.18), 0.78), 0.08);
         float bubbles = (b1*0.45 + b2*0.35 + b3*0.25) * 0.35;
 
-        // soft vignette
+        // vignette
         float vx = smoothstep(0.0, 0.22, uv.x) * smoothstep(0.0, 0.22, 1.0-uv.x);
         float vy = smoothstep(0.0, 0.22, uv.y) * smoothstep(0.0, 0.22, 1.0-uv.y);
         float vign = vx * vy;
@@ -86,12 +98,37 @@ window.addEventListener("DOMContentLoaded", async () => {
   );
 
   const planeGeo = new THREE.PlaneGeometry(3.2, 2.0, 1, 1);
-  const planeMat = makeNoiseMaterial(noiseTex);
-  const plane = new THREE.Mesh(planeGeo, planeMat);
-  plane.position.z = 0;
-  scene.add(plane);
 
-  // extra bubble meshes (subtle parallax)
+  // Layer A (your original)
+  const planeMatA = makeNoiseMaterial(noiseTex, {
+    amt: 0.22,
+    scale: 2.2,
+    sx: 0.015,
+    sy: -0.010
+  });
+
+  const planeA = new THREE.Mesh(planeGeo, planeMatA);
+  planeA.position.z = 0.0;
+  planeA.renderOrder = 0;
+  scene.add(planeA);
+
+  // Layer B (NEW): “dusty-water” plate — smooth, dimensional, not distracting
+  const planeMatB = makeNoiseMaterial(noiseTex.clone(), {
+    amt: 0.34,    // visible but calm (tune 0.28–0.38)
+    scale: 3.0,   // larger structures than A
+    sx: -0.008,   // slower drift
+    sy:  0.011
+  });
+  // Keep NORMAL blending to avoid “sparkle” distraction
+  // planeMatB.blending = THREE.NormalBlending;
+
+  const planeB = new THREE.Mesh(planeGeo, planeMatB);
+  planeB.position.z = -0.14;        // behind A for depth
+  planeB.scale.set(1.06, 1.06, 1);  // slightly larger so edges never show
+  planeB.renderOrder = -1;
+  scene.add(planeB);
+
+  // Bubble meshes (subtle parallax) — unchanged
   const bubbleMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
@@ -117,23 +154,45 @@ window.addEventListener("DOMContentLoaded", async () => {
     const rect = canvas.parentElement.getBoundingClientRect();
     const w = Math.max(1, Math.floor(rect.width));
     const h = Math.max(1, Math.floor(rect.height));
+
+    // keep crisp when devicePixelRatio changes (zoom / display changes)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
   }
+
   resize();
+
+  // window resize
   window.addEventListener("resize", resize);
+
+  // resize on layout changes (focus transitions, etc.)
+  const parent = canvas.parentElement;
+  if (parent && "ResizeObserver" in window){
+    const ro = new ResizeObserver(() => resize());
+    ro.observe(parent);
+  } else {
+    window.addEventListener("orientationchange", () => setTimeout(resize, 60));
+  }
 
   let t0 = performance.now();
   function tick(now){
     const t = (now - t0) * 0.001;
 
-    planeMat.uniforms.uTime.value = t;
+    planeMatA.uniforms.uTime.value = t;
+    planeMatB.uniforms.uTime.value = t;
 
-    // “breathing” drift
-    plane.rotation.z = Math.sin(t * 0.06) * 0.02;
-    plane.position.x = Math.sin(t * 0.10) * 0.03;
-    plane.position.y = Math.cos(t * 0.08) * 0.02;
+    // “breathing” drift — A (slightly more present)
+    planeA.rotation.z = Math.sin(t * 0.06) * 0.02;
+    planeA.position.x = Math.sin(t * 0.10) * 0.03;
+    planeA.position.y = Math.cos(t * 0.08) * 0.02;
+
+    // “breathing” drift — B (slower + smoother)
+    planeB.rotation.z = Math.sin(t * 0.040) * 0.020;
+    planeB.position.x = Math.sin(t * 0.060) * 0.030;
+    planeB.position.y = Math.cos(t * 0.052) * 0.022;
 
     bubbles.forEach((b, i) => {
       const tt = t + i * 0.8;
