@@ -244,14 +244,16 @@ html.ready body{
   pointer-events:none;
 }
 
-.layer-bay-4{ pointer-events:auto; }
-
 /* Brand / subtitle / monogram all sit LEFT of burger by the same inset */
 .layer-bay-1,
-.layer-bay-2,
-.layer-bay-3{
+.layer-bay-2,{
   right: var(--headerRightInset);
 }
+
+.layer-bay-3{
+  right: calc(var(--headerRightInset) + 12px);
+}
+.layer-bay-4{ pointer-events:auto; }
 
 .brand-text{
   font-size: clamp(18px, 2.4vw, 26px);
@@ -885,22 +887,32 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 /* ======= RESPONSIVE ======= */
 @media (max-width: 760px){
-  :root{ --maxFilmH: 74vh; }
+  :root{ 
+    --maxFilmH: 72vh;
+    --panelW: 70vw;
+    --panelH: calc(var(--panelW) * (297 / 420));
+    --pillH: 34px;
+    --headerH: 40px;
+  }
+  .brand-text{ font-size: clamp(16px, 5vw, 20px); }
   .layer-bay-2{ display:none; }
-  .fullscreen{ left:0; width:100vw; }
 }
 
 @media (max-width: 520px){
   :root{
-    --maxFilmH: 70vh;
+    --maxFilmH: 72vh;
+    --panelW: 70vw;
+    --panelH: calc(var(--panelW) * (297 / 420));
+    --pillH: 34px;
+    --headerH: 40px;
     --persp: 3200px;
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
     --pillH: 36px;
-    --panelH: clamp(180px, 34vh, 460px);
   }
   .brand-text{ font-size: clamp(16px, 5vw, 20px); }
+  .layer-bay-2{ display:none; }
 }
 
 @media (prefers-reduced-motion: reduce){
