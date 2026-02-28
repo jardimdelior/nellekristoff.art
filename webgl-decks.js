@@ -99,7 +99,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const planeGeo = new THREE.PlaneGeometry(3.2, 2.0, 1, 1);
 
-  // Layer A (your original)
+  // Layer A
   const planeMatA = makeNoiseMaterial(noiseTex, {
     amt: 0.22,
     scale: 2.2,
@@ -112,14 +112,14 @@ window.addEventListener("DOMContentLoaded", async () => {
   planeA.renderOrder = 0;
   scene.add(planeA);
 
-  // Layer B (NEW): “dusty-water” plate — smooth, dimensional, not distracting
+  // Layer B
   const planeMatB = makeNoiseMaterial(noiseTex.clone(), {
     amt: 0.34,    // visible but calm (tune 0.28–0.38)
     scale: 3.0,   // larger structures than A
     sx: -0.008,   // slower drift
     sy:  0.011
   });
-  // Keep NORMAL blending to avoid “sparkle” distraction
+  // NORMAL blending to avoid “sparkle” distraction
   // planeMatB.blending = THREE.NormalBlending;
 
   const planeB = new THREE.Mesh(planeGeo, planeMatB);
@@ -128,7 +128,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   planeB.renderOrder = -1;
   scene.add(planeB);
 
-  // Bubble meshes (subtle parallax) — unchanged
+  // Bubble meshes (subtle parallax)
   const bubbleMat = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
@@ -155,7 +155,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     const w = Math.max(1, Math.floor(rect.width));
     const h = Math.max(1, Math.floor(rect.height));
 
-    // keep crisp when devicePixelRatio changes (zoom / display changes)
+    // the crisp when devicePixelRatio changes (zoom / display changes)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
     renderer.setSize(w, h, false);
