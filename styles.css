@@ -23,7 +23,6 @@
 
   /* VIEWPORT */
   --maxFilmH: 83vh;
-  --persp: 2800px;
   --cornerRadius: 14px;
 
   /* DECK SPLIT */
@@ -45,7 +44,7 @@
   --maxAngle: 88deg;
   --zStep: 260px;
   --xStep: 110%;
-  --persp: 2200px;
+  --persp: 2800px;
 
   --sideAngleMult: 1.35;
   --sideDepthMult: 1.55;
