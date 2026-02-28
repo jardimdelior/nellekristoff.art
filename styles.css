@@ -68,23 +68,23 @@
 }
 
 html, body{
-  height:100%;
-  width:100%;
-  overflow-x: clip;
-@supports not (overflow: clip){
-  html, body{ overflow-x: hidden; }  /* fallback */
+  height: 100%;
+  margin: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
-
-/* also protect the layout wrappers */
 .page,
 .frame,
-.frame-viewportWrap{
+.frame-viewportWrap,
+.space-viewport{
   max-width: 100%;
   overflow-x: clip;
 }
 
 @supports not (overflow: clip){
-  .page, .frame, .frame-viewportWrap{ overflow-x: hidden; }
+  .page, .frame, .frame-viewportWrap, .space-viewport{
+    overflow-x: hidden;
+  }
 }
 *{ box-sizing:border-box; }
 
@@ -524,7 +524,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   left:0;
   width:100%;
   z-index: 4;         /* above webgl + glass */
-  overflow: visible;  /* don’t clip panels while rotating */
+  overflow: hidden;  /* don’t clip panels while rotating */
 }
 
 .deck-layer-top{
