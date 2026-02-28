@@ -12,7 +12,7 @@
   /* HEADER == burger height */
   --headerH: 44px;
   --brandSubtitleGap: 14px;      /* increase more space between */
-  --headerRightInset: 36px;      /* distance from burger to brand/subtitle block */
+  --headerRightInset: 48px;      /* distance from burger to brand/subtitle block */
 
   --footerGap: clamp(4px, 1.2vh, 10px);
 
@@ -255,7 +255,7 @@ html.ready body{
 .header-layer-stack{
   position: relative;
   height: 100%;
-  width: clamp(220px, 34vw, 520px);
+  width: 100%;
 }
 
 .layer-bay{
@@ -271,12 +271,33 @@ html.ready body{
 .layer-bay-1,
 .layer-bay-2,{
   right: var(--headerRightInset);
+  position:absolute;
+  top:0;
+  left: 0;
+  right: calc(var(--headerH) + 12px); /* reserve space for burger */
+  height: 100%;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;         /* LEFT aligned */
+  pointer-events:none;
+  padding-left: var(--menuInset, 2px);
 }
 
 .layer-bay-3{
   right: calc(var(--headerRightInset) + 12px);
 }
-.layer-bay-4{ pointer-events:auto; }
+.layer-bay-4,
+.layer-bay-3,{ 
+  position:absolute;
+  top:0;
+  right:0;
+  width: var(--headerH);
+  height: 100%;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  pointer-events:auto;
+}
 
 .brand-text{
   font-size: clamp(18px, 2.4vw, 26px);
@@ -337,7 +358,7 @@ html.ready body{
 }
 .film-header.menu-open .brand-mark{
   opacity:1;
-  transform: translateX(0) scaleX(1);
+  transform: transform: translateX(var(--headerRightInset)) scaleX(1);
 }
 
 .icon-monogram,
