@@ -850,6 +850,20 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   border-radius: 2px;
 }
 
+/* Fade TOP edge of the active tabs */
+.active-meta,
+#selectBtnTop,
+#selectBtnBottom{
+  -webkit-mask-image: linear-gradient(180deg,
+    transparent 0,
+    #000 var(--edgeTabFade)
+  );
+  mask-image: linear-gradient(180deg,
+    transparent 0,
+    #000 var(--edgeTabFade)
+  );
+}
+
 /* ======= FOOTER ======= */
 .frame-footer{
   grid-row: 3;
