@@ -907,7 +907,11 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   padding: clamp(14px, 3vw, 34px);
   overflow:auto;
 }
-.fullscreen.open{ display:flex; }
+.fullscreen.open{ 
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
 .fs-inner{
   width:100%;
@@ -918,9 +922,11 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   max-height: calc(100vh - 2 * clamp(14px, 3vw, 34px));
 }
 .fs-meta{
-  position:absolute;
-  right:0;
-  top: calc(-1 * (var(--pillH) + 10px));
+  position: sticky;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  margin-left: auto;
   display:flex;
   gap:6px;
   align-items:baseline;
@@ -940,7 +946,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   width:100%;
   max-height: calc(100dvh - 2 * clamp(14px, 3vw, 34px) - 88px);
   margin: 0 auto;
-  
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -955,13 +961,19 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display:block;
 }
 .fs-actions{
-  flex:0 0 auto;
+  flex: 0 0 auto;
   width: min(560px, 92%);
   margin: 0 auto;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
+}
+
+/* prevent in-viewport "active" UI from showing over fullscreen */
+.fullscreen.open ~ .page .active-ui,
+.fullscreen.open .active-ui{
+  display:none !important;
 }
 
 /* ======= RESPONSIVE ======= */
