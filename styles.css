@@ -560,7 +560,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   left:0;
   width:100%;
   z-index: 4;         /* above webgl + glass */
-  overflow: hidden;  /* don’t clip panels while rotating */
+  overflow: visible;  /* don’t clip panels while rotating */
 }
 
 .deck-layer-top{
