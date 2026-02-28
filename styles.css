@@ -831,7 +831,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 }
 .footer-inner{
   display:flex;
-  align-items: baseline;
+  align-items: center;
   justify-content:center;
   gap:6px;
   font-size:12.5px;
@@ -844,11 +844,12 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   flex: 0 0 auto;
   display:block;
   color: var(--brand);
+  transform:none;
 }
 
 .footer-inner .footer-mark{
   display:inline-flex;
-  align-items:baseline;
+  align-items:center;
   line-height:1;
 }
 
