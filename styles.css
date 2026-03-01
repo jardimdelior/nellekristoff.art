@@ -894,6 +894,30 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   line-height:1;
 }
 
+/* Footer text styled like edgeTab (horizontal, not a button) */
+.footer-inner span:last-child{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  height: var(--pillH);
+  min-height: var(--pillH);
+  padding: 0 14px;
+
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,.35);
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
+  box-shadow: 0 12px 26px rgba(0,0,0,.12);
+
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1;
+
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 var(--edgeTabFade));
+  mask-image: linear-gradient(180deg, transparent 0, #000 var(--edgeTabFade));
+}
+
 /* ======= FULLSCREEN (CLEAN) ======= */
 
 .fullscreen{
