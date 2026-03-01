@@ -289,6 +289,9 @@ html.ready body{
   justify-content:flex-start; /* stays on the LEFT */
   padding-left: var(--menuInset, 2px);
   z-index:1;
+  min-width: 0;
+  border-right: 1px solid rgba(0,0,0,.22);
+  padding-right: 4px;
 }
 
 /* Monogram — FAR RIGHT */
@@ -312,7 +315,7 @@ html.ready body{
 }
 
 .brand-text{
-  font-size: clamp(18px, 2.4vw, 26px);
+  font-size: clamp(14px, 2.4vw, 26px);
   letter-spacing: .08em;
   text-transform: uppercase;
   white-space: nowrap;
