@@ -61,8 +61,8 @@
   --leftLabelWeight: 200;
 
   /* overview tilt */
-  --overviewTopTilt: 0deg;
-  --overviewBottomTilt: 0deg;
+  --overviewTopTilt: -90deg;
+  --overviewBottomTilt: 90deg;
 
   /* edge label */
   --edgeTabW: 56px;
