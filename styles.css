@@ -271,39 +271,40 @@ html.ready body{
 
 .layer-bay{
   position:absolute;
-  inset:0;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
   display:flex;
   align-items:center;
   pointer-events:none;
 }
 
-/* Brand / subtitle */
+/* Brand / subtitle: constrained area LEFT of burger + gap */
 .layer-bay-1,
 .layer-bay-2{
-  position:absolute;
-  left:0;
-  height:100%;
-  /* IMPORTANT: stop before the burger/monogram slot + keep a gap */
   right: calc(var(--headerH) + var(--headerRightInset));
-  display:flex;
-  /* align the text block against the “stop line” (near burger) */
-  justify-content: flex-start;
-  pointer-events:none;
-  align-items:center;
+  justify-content: flex-end;  /* sits at the right edge of its own area (left of burger) */
+  z-index: 1;
   padding-left: var(--menuInset, 2px);
 }
 
-.layer-bay-4,
-.layer-bay-3{ 
-  position:absolute;
-  top:0;
-  right:0;
+/* Monogram slot */
+.layer-bay-3{
+  left: auto;
   width: var(--headerH);
-  height: 100%;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
+  justify-content: flex-end; /* flush right */
   pointer-events:auto;
+  z-index: 2;
+}
+
+/* Burger slot (topmost) */
+.layer-bay-4{
+  left: auto;
+  width: var(--headerH);
+  justify-content: flex-end; /* flush right */
+  pointer-events:auto;
+  z-index: 3;
 }
 
 .brand-text{
