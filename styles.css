@@ -15,7 +15,7 @@
   --headerRightInset: clamp(2px, 0.6vw, 8px);      /* distance from burger to brand/subtitle block */
   
   /* FOOTER */
-  --footerGap: clamp(4px, 1.2vh, 10px);
+  --footerGap: clamp(2px, 0.6vh, 6px);
   --footerPillH: clamp(26px, 3.6vw, 34px);
   --footerFont: clamp(9px, 1.05vw, 11px);
 
