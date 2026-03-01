@@ -131,11 +131,12 @@ html.ready body{
 
 /* ======= HEADER ======= */
 .frame-header{
+  position:relative;
+  z-index:5000;
   grid-row: 1;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  z-index: 80;
 }
 .header-inner{
   width:100%;
@@ -159,6 +160,7 @@ html.ready body{
   display:flex;
   align-items:center;
   position:relative;
+  width: clamp(240px, 46vw, 640px);
 }
 
 /* ======= UNIFIED TAB STYLE (menu/select/labels/arrows) ======= */
