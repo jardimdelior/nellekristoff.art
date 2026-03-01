@@ -618,6 +618,9 @@ document.addEventListener("DOMContentLoaded", () => {
       tgtTX = tgtTY = 0;
       tgtX = tgtY = tgtZ = 0;
     
+      curTX = curTY = 0;
+      curX = curY = curZ = 0;
+    
       deckEl.style.setProperty('--tiltX', '0deg');
       deckEl.style.setProperty('--tiltY', '0deg');
       deckEl.style.setProperty('--hoverX', '0px');
