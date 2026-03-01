@@ -12,7 +12,7 @@
   /* HEADER == burger height */
   --headerH: 36px;
   --brandSubtitleGap: 9px;      /* increase more space between */
-  --headerRightInset: clamp(6px, 1vw, 12px);      /* distance from burger to brand/subtitle block */
+  --headerRightInset: clamp(2px, 0.6vw, 8px);      /* distance from burger to brand/subtitle block */
 
   --footerGap: clamp(4px, 1.2vh, 10px);
 
