@@ -141,7 +141,8 @@ html.ready body{
 .header-inner{
   width:100%;
   height: var(--headerH);
-  display:flex;
+  display:grid;
+  grid-template-columns: auto 1fr auto;
   align-items:center;
   justify-content:space-between;
   gap: 12px;
