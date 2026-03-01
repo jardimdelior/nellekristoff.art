@@ -380,6 +380,7 @@ html.ready body{
   white-space: nowrap;
   transform: translateY(calc(-1 * var(--brandSubtitleGap)));
   transition: opacity .22s ease, transform .32s cubic-bezier(.18,.9,.2,1), filter .22s ease;
+  color: rgba(47,42,38,.78);   /* soft ash */
 }
 .subtitle-inline{
   font-size: var(--leftLabelSize);
@@ -390,6 +391,7 @@ html.ready body{
   opacity:.80;
   transform: translateY(var(--brandSubtitleGap));
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
+  color: rgba(47,42,38,.55);
 }
 
 .brand-mark{
