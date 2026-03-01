@@ -285,19 +285,20 @@ html.ready body{
 .layer-bay-1,
 .layer-bay-2{
   left:0;
+  height:100%;
   right: calc(var(--headerH) + var(--headerRightInset));
   justify-content:flex-start; /* stays on the LEFT */
   padding-left: var(--menuInset, 2px);
   z-index:1;
   min-width: 0;
   border-right: 1px solid rgba(0,0,0,.22);
-  padding-right: 4px;
 }
 
 /* Monogram — FAR RIGHT */
 .layer-bay-3{
   left:auto;
   right:0;
+  height:100%;
   width: var(--headerH);
   justify-content:flex-end;
   pointer-events:auto;
@@ -308,6 +309,7 @@ html.ready body{
 .layer-bay-4{
   left:auto;
   right:0;
+  height:100%;
   width: var(--headerH);
   justify-content:flex-end;
   pointer-events:auto;
