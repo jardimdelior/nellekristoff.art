@@ -298,9 +298,6 @@ html.ready body{
   padding-left: var(--menuInset, 2px);
 }
 
-.layer-bay-3{
-  right: calc(var(--headerRightInset) + 12px);
-}
 .layer-bay-4,
 .layer-bay-3{ 
   position:absolute;
