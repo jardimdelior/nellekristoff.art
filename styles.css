@@ -13,8 +13,11 @@
   --headerH: 36px;
   --brandSubtitleGap: 9px;      /* increase more space between */
   --headerRightInset: clamp(2px, 0.6vw, 8px);      /* distance from burger to brand/subtitle block */
-
+  
+  /* FOOTER */
   --footerGap: clamp(4px, 1.2vh, 10px);
+  --footerPillH: clamp(26px, 3.6vw, 34px);
+  --footerFont: clamp(9px, 1.05vw, 11px);
 
   /* MENU */
   --menuDrop: 10px;   /* increase = menu goes lower */
@@ -896,7 +899,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   gap: clamp(4px, 1vw, 8px);
   flex-wrap: wrap;
   padding: 0 clamp(6px, 2vw, 14px);
-  font-size: clamp(10px, 1.2vw, 12.5px);  /* responsive */
+  font-size: var(--footerFont);  /* responsive */
   opacity:.55;
 }
 
@@ -907,16 +910,16 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   justify-content:center;
   gap:6px;
 
-  height: var(--pillH);
-  min-height: var(--pillH);
-  padding: 0 clamp(10px, 2vw, 14px);      /* responsive */
+  height: var(--footerPillH);
+  min-height: var(--footerPillH);
+  padding: 0 clamp(8px, 1.6vw, 12px);      /* responsive */
 
   border-radius: 2px;
   border: 1px solid rgba(0,0,0,.35);
   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
   box-shadow: 0 12px 26px rgba(0,0,0,.12);
 
-  font-size: clamp(10px, 1.15vw, 12px);   /* responsive */
+  font-size: var(--footerFont);   /* responsive */
   letter-spacing: .08em;
   text-transform: uppercase;
   line-height: 1;
