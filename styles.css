@@ -315,6 +315,7 @@ html.ready body{
   font-size: clamp(18px, 2.4vw, 26px);
   letter-spacing: .08em;
   text-transform: uppercase;
+  white-space: nowrap;
   transform: translateY(calc(-1 * var(--brandSubtitleGap)));
   transition: opacity .22s ease, transform .32s cubic-bezier(.18,.9,.2,1), filter .22s ease;
 }
@@ -322,8 +323,9 @@ html.ready body{
   font-size: var(--leftLabelSize);
   font-weight: var(--leftLabelWeight);
   letter-spacing: var(--leftLabelTrack);
+  white-space: nowrap;
   text-transform: uppercase;
-  opacity:.82;
+  opacity:.80;
   transform: translateY(var(--brandSubtitleGap));
   transition: opacity .22s ease, transform .22s cubic-bezier(.18,.9,.2,1);
 }
