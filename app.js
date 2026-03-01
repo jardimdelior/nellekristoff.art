@@ -395,11 +395,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Arrow
     if (arrowBtn){
+    
+      function setTiltStraight(){
+        deckEl.style.setProperty('--tiltX', '0deg');
+        deckEl.style.setProperty('--tiltY', '0deg');
+      }
+    
       arrowBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        setTiltStraight();   // ensure straight before sliding
         next();
       });
+    
+      arrowBtn.addEventListener('mouseenter', setTiltStraight);
+      arrowBtn.addEventListener('pointerdown', setTiltStraight);
     }
 
     // Focus on pointerdown in deck (ignore UI/buttons)
