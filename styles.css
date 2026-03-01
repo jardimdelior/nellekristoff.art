@@ -878,27 +878,13 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   font-size:12.5px;
   opacity:.55;
 }
-.footer-inner .icon-monogram{
-  width: 1em;
-  height: 1em;
-  vertical-align: -0.12em;
-  flex: 0 0 auto;
-  display:block;
-  color: var(--brand);
-  transform:none;
-}
 
-.footer-inner .footer-mark{
-  display:inline-flex;
-  align-items:center;
-  line-height:1;
-}
-
-/* Footer text styled like edgeTab (horizontal, not a button) */
-.footer-inner span:last-child{
+/* Footer pill styled like edgeTab */
+.footer-pill{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  gap:6px;
 
   height: var(--pillH);
   min-height: var(--pillH);
@@ -916,6 +902,13 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 var(--edgeTabFade));
   mask-image: linear-gradient(180deg, transparent 0, #000 var(--edgeTabFade));
+}
+
+.footer-monogram{
+  height: 1em;
+  width: auto;
+  display:block;
+  color: var(--brand);
 }
 
 /* ======= FULLSCREEN (CLEAN) ======= */
