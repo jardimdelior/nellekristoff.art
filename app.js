@@ -511,17 +511,76 @@ document.addEventListener("DOMContentLoaded", () => {
     }, { passive:false });
 
     // Hover tilt
-    deckEl.addEventListener('mousemove', (e) => {
+    // ===== Smooth hover tilt (visible, cinematic, no twitch) =====
+    let hoverRAF = null;
+    let hoverTX = 0, hoverTY = 0;                 // current tilt
+    let hoverTargetX = 0, hoverTargetY = 0;       // target tilt
+    let hoverActive = false;
+    
+    function startHoverTilt(){
+      if (hoverRAF) return;
+      let lastT = performance.now();
+    
+      const tick = (now) => {
+        const dt = Math.min(32, now - lastT);
+        lastT = now;
+    
+        // smoothing (lower = slower / smoother)
+        const k = 1 - Math.pow(1 - 0.10, dt / 16.67);
+    
+        hoverTX += (hoverTargetX - hoverTX) * k;
+        hoverTY += (hoverTargetY - hoverTY) * k;
+    
+        deckEl.style.setProperty('--tiltX', hoverTX.toFixed(3) + 'deg');
+        deckEl.style.setProperty('--tiltY', hoverTY.toFixed(3) + 'deg');
+    
+        const done =
+          Math.abs(hoverTargetX - hoverTX) < 0.01 &&
+          Math.abs(hoverTargetY - hoverTY) < 0.01;
+    
+        if (!hoverActive && done){
+          hoverRAF = null;
+          return;
+        }
+        hoverRAF = requestAnimationFrame(tick);
+      };
+    
+      hoverRAF = requestAnimationFrame(tick);
+    }
+    
+    function setHoverTargetsFromEvent(e){
       const r = deckEl.getBoundingClientRect();
       const nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
       const ny = clamp(((e.clientY - r.top)  / r.height) * 2 - 1, -1, 1);
-
-      deckEl.style.setProperty('--tiltY', (nx * 5).toFixed(2) + 'deg');
-      deckEl.style.setProperty('--tiltX', (-ny * 4).toFixed(2) + 'deg');
+    
+      // deadzone kills micro jitter
+      const dz = 0.10;
+      const dx = Math.abs(nx) < dz ? 0 : (nx - Math.sign(nx) * dz) / (1 - dz);
+      const dy = Math.abs(ny) < dz ? 0 : (ny - Math.sign(ny) * dz) / (1 - dz);
+    
+      // BIG but smooth (cinematic drift)
+      hoverTargetY = dx * 7.5;    // rotateY strength
+      hoverTargetX = -dy * 6.0;   // rotateX strength
+    
+      hoverActive = true;
+      startHoverTilt();
+    }
+    
+    // Don't tilt while actively panning/zooming or fullscreen
+    function isInteracting(){
+      return pointers.size > 0 || isFullscreenOpen();
+    }
+    
+    deckEl.addEventListener('mousemove', (e) => {
+      if (isInteracting()) return;
+      setHoverTargetsFromEvent(e);
     });
+    
     deckEl.addEventListener('mouseleave', () => {
-      deckEl.style.setProperty('--tiltX', '0deg');
-      deckEl.style.setProperty('--tiltY', '0deg');
+      hoverActive = false;
+      hoverTargetX = 0;
+      hoverTargetY = 0;
+      startHoverTilt();
     });
 
     function focus(){
