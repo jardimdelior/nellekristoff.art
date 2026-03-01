@@ -668,6 +668,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   --hoverX: 0px;
   --hoverY: 0px;
   --hoverZ: 0px;
+  --rollZ: 0deg;
   
 
   transition: top .35s cubic-bezier(.18,.9,.2,1),
@@ -716,13 +717,14 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   z-index:2;
   transform:
     translate3d(
-      calc(var(--panX) + var(--hoverX, 0px)),
-      calc(var(--panY) + var(--hoverY, 0px)),
+      calc(var(--panX) + var(--hoverX)),
+      calc(var(--panY) + var(--hoverY)),
       0
     )
-    translateZ(var(--hoverZ, 0px))
-    rotateX(var(--tiltX, 0deg))
-    rotateY(var(--tiltY, 0deg));
+    translateZ(var(--hoverZ))
+    rotateX(var(--tiltX))
+    rotateY(var(--tiltY))
+    rotateZ(var(--rollZ, 0deg));
 }
 .space-zoom{
   position:absolute;
