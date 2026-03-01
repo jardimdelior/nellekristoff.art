@@ -289,12 +289,9 @@ html.ready body{
 
   display:flex;
   align-items:center;
-
   /* align the text block against the “stop line” (near burger) */
   justify-content:flex-end;
-
   pointer-events:none;
-  padding-right: 0;
   padding-left: var(--menuInset, 2px);
 }
 
