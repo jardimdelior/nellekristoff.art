@@ -154,11 +154,14 @@ html.ready body{
   display:flex;
   align-items:flex-start; /* allow vertical nudging */
 }
+
 .header-bay-right{
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
   height: 100%;
   display:flex;
   align-items:center;
+  justify-content:flex-end; /* pushes stack all the way right */
   position:relative;
   width: clamp(240px, 46vw, 640px);
 }
