@@ -380,7 +380,8 @@ html.ready body{
   white-space: nowrap;
   transform: translateY(calc(-1 * var(--brandSubtitleGap)));
   transition: opacity .22s ease, transform .32s cubic-bezier(.18,.9,.2,1), filter .22s ease;
-  color: rgba(47,42,38,.78);   /* soft ash */
+  color: rgba(47,42,38,.82);    /* soft ash */
+  text-shadow: 0 1px 0 rgba(255,255,255,.25);
 }
 .subtitle-inline{
   font-size: var(--leftLabelSize);
