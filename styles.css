@@ -163,7 +163,6 @@ html.ready body{
   align-items:center;
   justify-content:flex-end; /* pushes stack all the way right */
   position:relative;
-  width: clamp(240px, 46vw, 640px);
 }
 
 /* ======= UNIFIED TAB STYLE (menu/select/labels/arrows) ======= */
