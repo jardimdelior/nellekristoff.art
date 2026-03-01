@@ -721,8 +721,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
       0
     )
     translateZ(var(--hoverZ, 0px))
-    rotateX(var(--tiltX))
-    rotateY(var(--tiltY));
+    rotateX(var(--tiltX, 0deg))
+    rotateY(var(--tiltY, 0deg));
 }
 .space-zoom{
   position:absolute;
