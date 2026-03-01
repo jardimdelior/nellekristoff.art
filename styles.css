@@ -337,7 +337,7 @@ html.ready body{
   transform-origin: 100% 50%;
   transition: opacity .22s ease, transform .32s cubic-bezier(.18,.9,.2,1), filter .22s ease;
 }
-.brand-mark svg{ width:82%; height:82%; display:block; }
+.brand-mark svg{ width:99%; height:99%; display:block; }
 
 .menu-btn{
   width: var(--headerH);
