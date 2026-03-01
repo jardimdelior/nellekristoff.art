@@ -274,7 +274,6 @@ html.ready body{
   inset:0;
   display:flex;
   align-items:center;
-  justify-content:flex-end;
   pointer-events:none;
 }
 
@@ -282,18 +281,15 @@ html.ready body{
 .layer-bay-1,
 .layer-bay-2{
   position:absolute;
-  top:0;
   left:0;
   height:100%;
-
   /* IMPORTANT: stop before the burger/monogram slot + keep a gap */
   right: calc(var(--headerH) + var(--headerRightInset));
-
   display:flex;
-  align-items:center;
   /* align the text block against the “stop line” (near burger) */
   justify-content:flex-end;
   pointer-events:none;
+  align-items:center;
   padding-left: var(--menuInset, 2px);
 }
 
@@ -332,7 +328,7 @@ html.ready body{
   height: var(--headerH);
   display:flex;
   align-items:center;
-  justify-content:center;
+  justify-content:flex-end;
   opacity:0;
   color: var(--brand);
   transform: translateX(0px) scaleX(.25);
