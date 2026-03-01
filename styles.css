@@ -287,7 +287,7 @@ html.ready body{
   right: calc(var(--headerH) + var(--headerRightInset));
   display:flex;
   /* align the text block against the “stop line” (near burger) */
-  justify-content:flex-end;
+  justify-content: flex-start;
   pointer-events:none;
   align-items:center;
   padding-left: var(--menuInset, 2px);
