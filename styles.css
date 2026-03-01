@@ -56,13 +56,13 @@
   --brand: #C4A160;
 
   /* header type */
-  --leftLabelSize: clamp(12px, 1.4vw, 16px);
+  --leftLabelSize: clamp(9px, 1.2vw, 12px);
   --leftLabelTrack: 1.6px;
-  --leftLabelWeight: 500;
+  --leftLabelWeight: 200;
 
   /* overview tilt */
-  --overviewTopTilt: -20deg;
-  --overviewBottomTilt: 20deg;
+  --overviewTopTilt: 0deg;
+  --overviewBottomTilt: 0deg;
 
   /* edge label */
   --edgeTabW: 56px;
@@ -292,6 +292,7 @@ html.ready body{
   z-index:1;
   min-width: 0;
   border-right: 1px solid rgba(0,0,0,.22);
+  overflow:visible;
 }
 
 /* Monogram — FAR RIGHT */
@@ -317,7 +318,7 @@ html.ready body{
 }
 
 .brand-text{
-  font-size: clamp(14px, 2.4vw, 26px);
+  font-size: clamp(12px, 2.2vw, 26px);
   letter-spacing: .08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -1097,13 +1098,24 @@ body.noscroll .active-meta{
 @media (max-width: 760px){
   :root{ 
     --maxFilmH: 72vh;
-    --panelW: 86vw;
+    --panelW: 88vw;
     --panelH: calc(var(--panelW) * (297 / 420));
     --pillH: 34px;
     --headerH: 40px;
+    --persp: 3200px;
+    --angleStep: 16deg;
+    --zStep: 62px;
+    --xStep: 74%;
+    --pillH: 34px;
   }
-  .brand-text{ font-size: clamp(16px, 5vw, 20px); }
-  .layer-bay-2{ display:none; }
+  .brand-text{ 
+    font-size: clamp(11px, 4.2vw, 16px);
+    letter-spacing: .05em;
+  }
+  .subtitle-inline{ 
+    font-size: clamp(9px, 3.2vw, 11px);
+    letter-spacing: .08em;
+  }
 }
 
 @media (max-width: 520px){
@@ -1119,8 +1131,14 @@ body.noscroll .active-meta{
     --xStep: 74%;
     --pillH: 34px;
   }
-  .brand-text{ font-size: clamp(16px, 5vw, 20px); }
-  .layer-bay-2{ display:none; }
+  .brand-text{ 
+    font-size: clamp(11px, 4.2vw, 16px);
+    letter-spacing: .05em;
+  }
+  .subtitle-inline{ 
+    font-size: clamp(9px, 3.2vw, 11px);
+    letter-spacing: .08em;
+  }
 }
 
 @media (prefers-reduced-motion: reduce){
