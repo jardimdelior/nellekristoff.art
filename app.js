@@ -178,12 +178,11 @@ document.addEventListener("DOMContentLoaded", () => {
       tPanY = clamp(tPanY, -maxY, maxY);
     }
 
-    // Improved smoothing + early defocus (removes “pepper jump”)
+    // Improved smoothing + early defocus
     function ensureAnim(){
       if (raf) return;
 
       let lastT = performance.now();
-
       const tick = (now) => {
         const dt = Math.min(32, now - lastT);
         lastT = now;
@@ -219,7 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         raf = requestAnimationFrame(tick);
       };
-
       raf = requestAnimationFrame(tick);
     }
 
@@ -426,9 +424,168 @@ document.addEventListener("DOMContentLoaded", () => {
     function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
     function mid(a,b){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; }
 
+    // ===== Sphere drift (ball-like): tilt + orbit + dome Z + rollZ =====
+    let hoverRAF = null;
+    let hoverActive = false;
+
+    // current
+    let curTX = 0, curTY = 0;
+    let curX = 0, curY = 0, curZ = 0;
+    let curR = 0;
+
+    // targets
+    let tgtTX = 0, tgtTY = 0;
+    let tgtX = 0, tgtY = 0, tgtZ = 0;
+    let tgtR = 0;
+
+    function ensureSphereAnim(){
+      if (hoverRAF) return;
+
+      let lastT = performance.now();
+      const tick = (now) => {
+        const dt = Math.min(32, now - lastT);
+        lastT = now;
+
+        // slow + smooth easing
+        const k = 1 - Math.pow(1 - 0.06, dt / 16.67);
+
+        curTX += (tgtTX - curTX) * k;
+        curTY += (tgtTY - curTY) * k;
+
+        curX  += (tgtX  - curX ) * k;
+        curY  += (tgtY  - curY ) * k;
+        curZ  += (tgtZ  - curZ ) * k;
+
+        curR  += (tgtR  - curR ) * k;
+
+        deckEl.style.setProperty('--tiltX',  curTX.toFixed(3) + 'deg');
+        deckEl.style.setProperty('--tiltY',  curTY.toFixed(3) + 'deg');
+        deckEl.style.setProperty('--hoverX', curX.toFixed(2)  + 'px');
+        deckEl.style.setProperty('--hoverY', curY.toFixed(2)  + 'px');
+        deckEl.style.setProperty('--hoverZ', curZ.toFixed(2)  + 'px');
+        deckEl.style.setProperty('--rollZ',  curR.toFixed(3)  + 'deg');
+
+        const done =
+          Math.abs(tgtTX - curTX) < 0.01 &&
+          Math.abs(tgtTY - curTY) < 0.01 &&
+          Math.abs(tgtX  - curX ) < 0.20 &&
+          Math.abs(tgtY  - curY ) < 0.20 &&
+          Math.abs(tgtZ  - curZ ) < 0.40 &&
+          Math.abs(tgtR  - curR ) < 0.01;
+
+        if (!hoverActive && done){
+          hoverRAF = null;
+          return;
+        }
+        hoverRAF = requestAnimationFrame(tick);
+      };
+
+      hoverRAF = requestAnimationFrame(tick);
+    }
+
+    function resetSphere(){
+      hoverActive = false;
+      tgtTX = tgtTY = 0;
+      tgtX  = tgtY  = tgtZ = 0;
+      tgtR = 0;
+      ensureSphereAnim();
+    }
+
+    function freezeSphereHard(){
+      // stop targets + current instantly (used for pinch/arrow moments)
+      hoverActive = false;
+      tgtTX = tgtTY = 0;
+      tgtX = tgtY = tgtZ = 0;
+      tgtR = 0;
+
+      curTX = curTY = 0;
+      curX = curY = curZ = 0;
+      curR = 0;
+
+      deckEl.style.setProperty('--tiltX',  '0deg');
+      deckEl.style.setProperty('--tiltY',  '0deg');
+      deckEl.style.setProperty('--hoverX', '0px');
+      deckEl.style.setProperty('--hoverY', '0px');
+      deckEl.style.setProperty('--hoverZ', '0px');
+      deckEl.style.setProperty('--rollZ',  '0deg');
+    }
+
+    function setSphereTargetsFromEvent(e){
+      const r = deckEl.getBoundingClientRect();
+
+      // normalize -1..+1
+      let nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+      let ny = ((e.clientY - r.top)  / r.height) * 2 - 1;
+      nx = clamp(nx, -1, 1);
+      ny = clamp(ny, -1, 1);
+
+      // deadzone
+      const dz = 0.08;
+      const dx = Math.abs(nx) < dz ? 0 : (nx - Math.sign(nx) * dz) / (1 - dz);
+      const dy = Math.abs(ny) < dz ? 0 : (ny - Math.sign(ny) * dz) / (1 - dz);
+
+      // nonlinear bend (ball feel): cube keeps center calm, edges stronger
+      const bx = dx * dx * dx;
+      const by = dy * dy * dy;
+
+      // amplitudes (dimensional but still calm)
+      const rotY = 9.0;
+      const rotX = 7.0;
+      const orbX = 24;
+      const orbY = 18;
+      const depZ = 110;
+      const roll = 4.5;
+
+      // tilt
+      tgtTY = bx * rotY;
+      tgtTX = -by * rotX;
+
+      // orbit drift
+      tgtX = bx * orbX;
+      tgtY = by * orbY;
+
+      // dome depth (sphere)
+      const rr = Math.min(1, Math.hypot(dx, dy));
+      const dome = Math.cos(rr * Math.PI * 0.5); // 1 center -> 0 edge
+      tgtZ = dome * depZ;
+
+      // roll (diagonal)
+      tgtR = (bx * -by) * roll;
+
+      hoverActive = true;
+      ensureSphereAnim();
+    }
+
+    function isInteracting(){
+      return pointers.size > 0 || isFullscreenOpen();
+    }
+
+    deckEl.addEventListener('mousemove', (e) => {
+      if (isInteracting()) return;
+      setSphereTargetsFromEvent(e);
+    });
+
+    deckEl.addEventListener('mouseleave', resetSphere);
+
+    // Arrow (freeze drift during slide moments)
+    if (arrowBtn){
+      arrowBtn.addEventListener('mouseenter', freezeSphereHard);
+      arrowBtn.addEventListener('pointerdown', freezeSphereHard);
+
+      arrowBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        freezeSphereHard();
+        next();
+      });
+    }
+
+    // Pointer gestures (freeze drift when user touches/drags/pinches)
     deckEl.addEventListener('pointerdown', (e) => {
       if (isFullscreenOpen()) return;
       if (isInteractiveTarget(e.target)) return;
+
+      freezeSphereHard();
 
       deckEl.setPointerCapture(e.pointerId);
       setPointer(e);
@@ -493,6 +650,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isFullscreenOpen()) return;
       e.preventDefault();
 
+      freezeSphereHard();
+
       const rect = deckEl.getBoundingClientRect();
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
@@ -500,145 +659,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const factor = Math.exp(-e.deltaY * 0.0024);
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
-
-    
-    // ===== Smooth “sphere drift” hover (orbit XY + tilt + Z depth) =====
-    let hoverRAF = null;
-    let hoverActive = false;
-    
-    // current values
-    let curTX = 0, curTY = 0;
-    let curX = 0, curY = 0, curZ = 0;
-    
-    // targets
-    let tgtTX = 0, tgtTY = 0;
-    let tgtX = 0, tgtY = 0, tgtZ = 0;
-    
-    function setSphereTargetsFromEvent(e){
-      const r = deckEl.getBoundingClientRect();
-    
-      // normalize mouse to -1..+1
-      let nx = ((e.clientX - r.left) / r.width) * 2 - 1;
-      let ny = ((e.clientY - r.top)  / r.height) * 2 - 1;
-      nx = clamp(nx, -1, 1);
-      ny = clamp(ny, -1, 1);
-    
-      // deadzone removes micro jitter around center
-      const dz = 0.08;
-      const dx = Math.abs(nx) < dz ? 0 : (nx - Math.sign(nx) * dz) / (1 - dz);
-      const dy = Math.abs(ny) < dz ? 0 : (ny - Math.sign(ny) * dz) / (1 - dz);
-    
-      // ===== AMPLITUDES (tune these) =====
-      const rotY = 6.5;    // degrees
-      const rotX = 5.0;    // degrees
-      const orbX = 18;     // px (horizontal drift)
-      const orbY = 14;     // px (vertical drift)
-      const depZ = 70;     // px (depth “breathing”)
-    
-      // symmetric tilt
-      tgtTY = dx * rotY;
-      tgtTX = -dy * rotX;
-    
-      // orbit drift (feels like sphere moving under glass)
-      tgtX = dx * orbX;
-      tgtY = dy * orbY;
-    
-      // depth: forward near center, less at edges
-      const rr = Math.min(1, Math.hypot(dx, dy)); // 0 center -> 1 edges
-      const ease = 1 - (rr * rr);                // smooth falloff
-      tgtZ = ease * depZ;
-    
-      hoverActive = true;
-      ensureSphereAnim();
-    }
-    
-    function ensureSphereAnim(){
-      if (hoverRAF) return;
-    
-      let lastT = performance.now();
-      const tick = (now) => {
-        const dt = Math.min(32, now - lastT);
-        lastT = now;
-    
-        // slow + smooth easing (lower = floatier)
-        const k = 1 - Math.pow(1 - 0.07, dt / 16.67);
-    
-        curTX += (tgtTX - curTX) * k;
-        curTY += (tgtTY - curTY) * k;
-    
-        curX  += (tgtX  - curX ) * k;
-        curY  += (tgtY  - curY ) * k;
-        curZ  += (tgtZ  - curZ ) * k;
-    
-        deckEl.style.setProperty('--tiltX',  curTX.toFixed(3) + 'deg');
-        deckEl.style.setProperty('--tiltY',  curTY.toFixed(3) + 'deg');
-        deckEl.style.setProperty('--hoverX', curX.toFixed(2)  + 'px');
-        deckEl.style.setProperty('--hoverY', curY.toFixed(2)  + 'px');
-        deckEl.style.setProperty('--hoverZ', curZ.toFixed(2)  + 'px');
-    
-        const done =
-          Math.abs(tgtTX - curTX) < 0.01 &&
-          Math.abs(tgtTY - curTY) < 0.01 &&
-          Math.abs(tgtX  - curX ) < 0.20 &&
-          Math.abs(tgtY  - curY ) < 0.20 &&
-          Math.abs(tgtZ  - curZ ) < 0.40;
-    
-        if (!hoverActive && done){
-          hoverRAF = null;
-          return;
-        }
-        hoverRAF = requestAnimationFrame(tick);
-      };
-    
-      hoverRAF = requestAnimationFrame(tick);
-    }
-    
-    function resetSphere(){
-      hoverActive = false;
-      tgtTX = 0; tgtTY = 0;
-      tgtX  = 0; tgtY  = 0; tgtZ = 0;
-      ensureSphereAnim();
-    }
-    
-    // don’t fight with pan/zoom/fullscreen
-    function isInteracting(){
-      return pointers.size > 0 || isFullscreenOpen();
-    }
-    
-    deckEl.addEventListener('mousemove', (e) => {
-      if (isInteracting()) return;
-      setSphereTargetsFromEvent(e);
-    });
-    
-    deckEl.addEventListener('mouseleave', resetSphere);
-
-    // Arrow (freeze drift during slide moments)
-    function setViewStraight(){
-      hoverActive = false;
-      tgtTX = tgtTY = 0;
-      tgtX = tgtY = tgtZ = 0;
-    
-      curTX = curTY = 0;
-      curX = curY = curZ = 0;
-    
-      deckEl.style.setProperty('--tiltX', '0deg');
-      deckEl.style.setProperty('--tiltY', '0deg');
-      deckEl.style.setProperty('--hoverX', '0px');
-      deckEl.style.setProperty('--hoverY', '0px');
-      deckEl.style.setProperty('--hoverZ', '0px');
-    }
-    
-    if (arrowBtn){
-      arrowBtn.addEventListener('mouseenter', setViewStraight);
-      arrowBtn.addEventListener('pointerdown', setViewStraight);
-    
-      arrowBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setViewStraight();
-        next();
-      });
-    }
 
     function focus(){
       if (!viewport) return;
@@ -650,7 +670,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clampPanTarget();
       ensureAnim();
 
-      // IMPORTANT: resync active UI immediately (fixes “gap until arrow click”)
+      // IMPORTANT: resync active UI immediately
       requestAnimationFrame(() => {
         applyInstant(activePos);
         requestAnimationFrame(() => applyInstant(activePos));
