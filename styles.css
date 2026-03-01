@@ -269,6 +269,7 @@ html.ready body{
   width: 100%;
 }
 
+/* Base layer */
 .layer-bay{
   position:absolute;
   top:0;
@@ -280,31 +281,34 @@ html.ready body{
   pointer-events:none;
 }
 
-/* Brand / subtitle: constrained area LEFT of burger + gap */
+/* Brand + subtitle — LEFT side */
 .layer-bay-1,
 .layer-bay-2{
+  left:0;
   right: calc(var(--headerH) + var(--headerRightInset));
-  justify-content: flex-end;  /* sits at the right edge of its own area (left of burger) */
-  z-index: 1;
+  justify-content:flex-start; /* stays on the LEFT */
   padding-left: var(--menuInset, 2px);
+  z-index:1;
 }
 
-/* Monogram slot */
+/* Monogram — FAR RIGHT */
 .layer-bay-3{
-  left: auto;
+  left:auto;
+  right:0;
   width: var(--headerH);
-  justify-content: flex-end; /* flush right */
+  justify-content:flex-end;
   pointer-events:auto;
-  z-index: 2;
+  z-index:2;
 }
 
-/* Burger slot (topmost) */
+/* Burger — FAR RIGHT (above monogram) */
 .layer-bay-4{
-  left: auto;
+  left:auto;
+  right:0;
   width: var(--headerH);
-  justify-content: flex-end; /* flush right */
+  justify-content:flex-end;
   pointer-events:auto;
-  z-index: 3;
+  z-index:3;
 }
 
 .brand-text{
