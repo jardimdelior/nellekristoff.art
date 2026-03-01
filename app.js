@@ -393,32 +393,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Arrow
-    function setViewStraight(){
-      // stop sphere drift immediately
-      hoverActive = false;
-      tgtTX = tgtTY = 0;
-      tgtX = tgtY = tgtZ = 0;
-    
-      // snap to straight (visual)
-      deckEl.style.setProperty('--tiltX', '0deg');
-      deckEl.style.setProperty('--tiltY', '0deg');
-      deckEl.style.setProperty('--hoverX', '0px');
-      deckEl.style.setProperty('--hoverY', '0px');
-      deckEl.style.setProperty('--hoverZ', '0px');
-    }
-    
-    if (arrowBtn){
-      arrowBtn.addEventListener('mouseenter', setViewStraight);
-      arrowBtn.addEventListener('pointerdown', setViewStraight);
-    
-      arrowBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setViewStraight();   // straight during the slide moment
-        next();
-      });
-    }
     // Focus on pointerdown in deck (ignore UI/buttons)
     function isInteractiveTarget(target){
       return !!target.closest('button, a, .tabBtn, .film-arrow, .arrow-slot, .menu, .menu-btn, .edgeTab');
@@ -637,24 +611,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
     deckEl.addEventListener('mouseleave', resetSphere);
-    }
-    
-    // Don't tilt while actively panning/zooming or fullscreen
-    function isInteracting(){
-      return pointers.size > 0 || isFullscreenOpen();
-    }
-    
-    deckEl.addEventListener('mousemove', (e) => {
-      if (isInteracting()) return;
-      setHoverTargetsFromEvent(e);
-    });
-    
-    deckEl.addEventListener('mouseleave', () => {
+
+    // Arrow (freeze drift during slide moments)
+    function setViewStraight(){
       hoverActive = false;
-      hoverTargetX = 0;
-      hoverTargetY = 0;
-      startHoverTilt();
-    });
+      tgtTX = tgtTY = 0;
+      tgtX = tgtY = tgtZ = 0;
+    
+      deckEl.style.setProperty('--tiltX', '0deg');
+      deckEl.style.setProperty('--tiltY', '0deg');
+      deckEl.style.setProperty('--hoverX', '0px');
+      deckEl.style.setProperty('--hoverY', '0px');
+      deckEl.style.setProperty('--hoverZ', '0px');
+    }
+    
+    if (arrowBtn){
+      arrowBtn.addEventListener('mouseenter', setViewStraight);
+      arrowBtn.addEventListener('pointerdown', setViewStraight);
+    
+      arrowBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setViewStraight();
+        next();
+      });
+    }
 
     function focus(){
       if (!viewport) return;
