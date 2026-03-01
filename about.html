@@ -9,186 +9,142 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="favicon.ico" />
 
-  <!-- About-only styling (CSS untouched) -->
   <style>
-    /* Frame grid: header / viewport / footer */
-    .about-stage{
-      width:100%;
-      height:100%;
-      border-radius: var(--cornerRadius);
-      overflow:hidden;
-      position:relative;
-      isolation:isolate;
-      background: rgba(255,255,255,.10);
-      box-shadow: 0 12px 44px rgba(0,0,0,.10);
-    }
-
-    /* "plate" vibe as space-viewport */
-    .about-stage::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius: inherit;
-      pointer-events:none;
-      z-index:0;
-      background:
-        radial-gradient(140% 90% at 50% 55%,
-          rgba(255,255,255,.10) 0%,
-          rgba(0,0,0,.10) 62%,
-          rgba(0,0,0,.22) 100%),
-        linear-gradient(180deg,
-          rgba(255,255,255,.08),
-          rgba(0,0,0,.12));
-      opacity:.95;
-    }
-
-    .about-stage::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius: inherit;
-      pointer-events:none;
-      z-index:1;
-      background:
-        radial-gradient(120% 55% at 50% 56%,
-          rgba(0,0,0,.12) 0%,
-          rgba(0,0,0,.07) 22%,
-          rgba(0,0,0,0) 62%),
-        radial-gradient(120% 120% at 50% 50%,
-          rgba(0,0,0,0) 58%,
-          rgba(0,0,0,.10) 84%,
-          rgba(0,0,0,.18) 100%);
-      mix-blend-mode: multiply;
-      opacity:.85;
-    }
-
+    /* ===== About content inside viewport row ===== */
     .about-wrap{
-      position:relative;
-      z-index:2;
-      height:100%;
-      display:grid;
-      place-items:center;
-      padding: clamp(14px, 3vw, 34px);
+      position:absolute;
+      inset:0;
+      z-index: 6; /* above bg/glass/webgl */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: clamp(10px, 2vw, 18px);
+      pointer-events:auto;
     }
 
+    /* smaller overall area */
     .about-card{
-      width:min(860px, 92vw);
+      width: min(640px, 86vw);      /* smaller than before */
+      max-height: 100%;
+      overflow:auto;                /* never cut */
       background: var(--card);
       border-radius: var(--radius);
       box-shadow: var(--inset), var(--shadow);
-      padding: clamp(18px, 3vw, 28px);
-      position:relative;
-      overflow:hidden;
+      padding: clamp(14px, 2vw, 20px);
+      clip-path: inset(0 round var(--radius));
     }
 
-    .about-card .noise{
-      position:absolute;
-      inset:0;
-      opacity:.09; /* softer than panels */
-      pointer-events:none;
-    }
-
-    .about-head{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom: 10px;
-    }
     .about-title{
-      margin:0;
+      margin: 0 0 10px;
       font-weight: 500;
       letter-spacing: .08em;
       text-transform: uppercase;
-      font-size: clamp(14px, 1.5vw, 18px);
-    }
-    .about-sub{
-      margin:0;
-      opacity:.55;
-      letter-spacing:.08em;
-      text-transform: uppercase;
-      font-size: clamp(10px, 1.05vw, 12px);
-      white-space:nowrap;
+      font-size: clamp(13px, 1.25vw, 16px);
+      opacity: .95;
     }
 
-    .about-body p{
+    .about-text{
       margin: 10px 0 0;
-      opacity:.90;
-      font-size: clamp(12px, 1.2vw, 14px);
+      opacity: .88;
+      font-size: clamp(12px, 1.05vw, 13.5px);
+      line-height: 1.7;
     }
 
-    .about-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 14px;
-    }
-
+    /* ===== Links block (smaller inside viewport) ===== */
     .about-links{
-      margin-top: 18px;
+      margin-top: 14px;
+      width: min(420px, 82vw);      /* make links area smaller */
+      margin-left:auto;
+      margin-right:auto;
       display:flex;
       flex-direction:column;
+      gap: 8px;
     }
 
-    .about-link{
+    /* link pills styled like menu tabs */
+    .glassLink{
+      height: calc(var(--pillH) - 6px);     /* slightly smaller than header pills */
+      min-height: calc(var(--pillH) - 6px);
+
+      border-radius: 2px;
+      border: 1px solid rgba(0,0,0,.35);
+      box-shadow: 0 12px 26px rgba(0,0,0,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
+      backdrop-filter: blur(8px) saturate(130%);
+      -webkit-backdrop-filter: blur(8px) saturate(130%);
+
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      padding:14px 2px 16px;
+      gap: 10px;
+
+      padding: 0 12px;
       text-decoration:none;
-      color:var(--ink);
+      color: rgba(47,42,38,1);
+
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: clamp(10px, 1.0vw, 11.5px);
+
       position:relative;
-      transition: transform .18s ease, opacity .18s ease;
+      isolation:isolate;
+      overflow:hidden;
     }
 
-    .about-link::after{
+    .glassLink::before{
       content:"";
       position:absolute;
-      left:0; right:0; bottom:0;
-      height:1px;
-      background:linear-gradient(
-        to right,
-        transparent,
-        rgba(47,42,38,.18),
-        rgba(47,42,38,.18),
-        transparent
-      );
-      box-shadow:0 2px 6px rgba(0,0,0,.08);
+      inset:-30%;
+      z-index:0;
+      pointer-events:none;
+      background:
+        radial-gradient(40% 35% at 30% 40%, rgba(255,255,255,.25) 0%, rgba(255,255,255,0) 60%),
+        radial-gradient(45% 40% at 70% 60%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 65%),
+        radial-gradient(50% 45% at 50% 50%, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 70%);
+      opacity:.5;
+      filter: blur(14px);
     }
 
-    .about-link:hover{ transform: translateX(4px); }
+    .glassLink::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:1;
+      pointer-events:none;
+      background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.06));
+      mix-blend-mode: soft-light;
+      opacity:.9;
+    }
 
-    .about-link .left{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
+    .glassLink > *{
+      position:relative;
+      z-index:2;
       min-width:0;
     }
-    .about-link .name{
-      font-size: clamp(12px, 1.2vw, 14px);
+
+    .glassLink:hover{
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.10));
+    }
+    .glassLink:active{ transform: translateY(0); }
+
+    .glassLink .name{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
       opacity:.92;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
     }
-    .about-link .note{
-      font-size: clamp(11px, 1.1vw, 13px);
+
+    .glassLink .arrow{
       opacity:.55;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .about-link .arrow{
-      font-size: 15px;
-      opacity:.45;
-      transition: transform .18s ease, opacity .18s ease;
+      font-size: 14px;
       flex: 0 0 auto;
     }
-    .about-link:hover .arrow{
-      transform: translateX(3px);
-      opacity:.8;
+
+    /* about card comfy on tiny screens */
+    @media (max-width: 520px){
+      .about-card{ width: min(560px, 92vw); }
+      .about-links{ width: min(360px, 86vw); }
     }
   </style>
 </head>
@@ -206,7 +162,7 @@
           <nav class="menu" id="menu" aria-label="Site menu">
             <a href="about.html">About</a>
             <a href="#" onclick="contact(event)">Contact</a>
-            <a href="posts.html">Posts</a>
+            <a href="index.html">Home</a>
           </nav>
         </div>
 
@@ -214,17 +170,16 @@
         <div class="header-bay header-bay-right" aria-label="Header bay right">
           <div class="header-layer-stack">
 
-            <!-- Brand -->
-            <div class="layer-bay layer-bay-1">
+            <!-- Brand + Subtitle (kept minimal on About) -->
+            <div class="layer-bay layer-bay-1" aria-label="Layer 1 brand">
               <div class="brand-text">Nelle Kristoff</div>
             </div>
 
-            <!-- Subtitle -->
-            <div class="layer-bay layer-bay-2">
-              <div class="subtitle-inline">Art</div>
+            <div class="layer-bay layer-bay-2" aria-label="Layer 2 subtitle">
+              <div class="subtitle-inline">About</div>
             </div>
 
-            <!-- Monogram (your SVG) -->
+            <!-- Monogram -->
             <div class="layer-bay layer-bay-3" aria-label="Layer 3 monogram">
               <span class="brand-mark" aria-hidden="true">
                 <svg class="icon-monogram"
@@ -237,7 +192,7 @@
               </span>
             </div>
 
-            <!-- Burger (your SVG) -->
+            <!-- Burger -->
             <div class="layer-bay layer-bay-4" aria-label="Layer 4 burger">
               <button class="menu-btn" id="menuBtn"
                       aria-label="Open menu"
@@ -262,105 +217,75 @@
       </div>
     </header>
 
-    <!-- MAIN AREA (row 2) -->
+    <!-- VIEWPORT -->
     <section class="frame-viewportWrap" aria-label="About viewport">
-      <div class="about-stage">
+      <div class="space-viewport" id="viewport" aria-label="Viewport">
+        <div id="spaceBg"></div>
+        <div class="viewport-layer viewport-glass"></div>
+
+        <!-- About content -->
         <div class="about-wrap">
-          <article class="about-card" aria-label="About card">
-            <div class="noise" aria-hidden="true"></div>
+          <article class="about-card" role="article" aria-label="About content">
+            <h2 class="about-title">Bio</h2>
 
-            <header class="about-head">
-              <h1 class="about-title">Bio</h1>
-              <p class="about-sub">Info • Links • Contact</p>
-            </header>
+            <p class="about-text">I’m</p>
 
-            <div class="about-body">
-              <p>I’m</p>
-              <p>
-                For collaborations, licensing, commissions, or questions about a specific artwork,
-                use the contact button below.
-              </p>
+            <p class="about-text">
+              For collaborations, licensing, commissions, or questions about a specific artwork, use the Contact button in the menu.
+            </p>
 
-              <div class="about-actions">
-                <a class="tabBtn" href="#" onclick="contact(event)">Email</a>
-                <a class="tabBtn" href="index.html">View works</a>
-              </div>
+            <!-- LINKS (NO SUBTITLES) -->
+            <div class="about-links" aria-label="External links">
+              <a class="glassLink" href="#" target="_blank" rel="noopener">
+                <span class="name">Instagram</span>
+                <span class="arrow">↗</span>
+              </a>
 
-              <div class="about-links" aria-label="External links">
-                <a class="about-link" href="#" target="_blank" rel="noopener">
-                  <span class="left">
-                    <span class="name">Instagram</span>
-                    <span class="note">Latest works & process</span>
-                  </span>
-                  <span class="arrow">↗</span>
-                </a>
+              <a class="glassLink" href="#" target="_blank" rel="noopener">
+                <span class="name">Adobe</span>
+                <span class="arrow">↗</span>
+              </a>
 
-                <a class="about-link" href="#" target="_blank" rel="noopener">
-                  <span class="left">
-                    <span class="name">Adobe</span>
-                    <span class="note">Selected projects</span>
-                  </span>
-                  <span class="arrow">↗</span>
-                </a>
+              <a class="glassLink" href="#" target="_blank" rel="noopener">
+                <span class="name">Pond5</span>
+                <span class="arrow">↗</span>
+              </a>
 
-                <a class="about-link" href="#" target="_blank" rel="noopener">
-                  <span class="left">
-                    <span class="name">Pond5</span>
-                    <span class="note">Stock photo & video</span>
-                  </span>
-                  <span class="arrow">↗</span>
-                </a>
+              <a class="glassLink" href="https://collect.nellekristoff.art" target="_blank" rel="noopener">
+                <span class="name">Gumroad / Collect</span>
+                <span class="arrow">↗</span>
+              </a>
 
-                <a class="about-link" href="https://collect.nellekristoff.art" target="_blank" rel="noopener">
-                  <span class="left">
-                    <span class="name">Gumroad / Collect</span>
-                    <span class="note">Buy downloadable works</span>
-                  </span>
-                  <span class="arrow">↗</span>
-                </a>
+              <a class="glassLink" href="#" target="_blank" rel="noopener">
+                <span class="name">Fiverr</span>
+                <span class="arrow">↗</span>
+              </a>
 
-                <a class="about-link" href="#" target="_blank" rel="noopener">
-                  <span class="left">
-                    <span class="name">Fiverr</span>
-                    <span class="note">Design</span>
-                  </span>
-                  <span class="arrow">↗</span>
-                </a>
+              <a class="glassLink" href="#" target="_blank" rel="noopener">
+                <span class="name">Upwork</span>
+                <span class="arrow">↗</span>
+              </a>
 
-                <a class="about-link" href="#" target="_blank" rel="noopener">
-                  <span class="left">
-                    <span class="name">Upwork</span>
-                    <span class="note">Projects</span>
-                  </span>
-                  <span class="arrow">↗</span>
-                </a>
+              <a class="glassLink" href="#" target="_blank" rel="noopener">
+                <span class="name">99designs</span>
+                <span class="arrow">↗</span>
+              </a>
 
-                <a class="about-link" href="#" target="_blank" rel="noopener">
-                  <span class="left">
-                    <span class="name">99designs</span>
-                    <span class="note">Design</span>
-                  </span>
-                  <span class="arrow">↗</span>
-                </a>
-
-                <a class="about-link" href="#" target="_blank" rel="noopener">
-                  <span class="left">
-                    <span class="name">Behance</span>
-                    <span class="note">Portfolio & collections</span>
-                  </span>
-                  <span class="arrow">↗</span>
-                </a>
-              </div>
+              <a class="glassLink" href="#" target="_blank" rel="noopener">
+                <span class="name">Behance</span>
+                <span class="arrow">↗</span>
+              </a>
             </div>
           </article>
         </div>
+
       </div>
     </section>
 
     <!-- FOOTER -->
     <footer class="frame-footer" aria-label="Footer">
       <div class="footer-inner">
-        <div class="footer-pill">© 2026 Nelle Kristoff — All rights reserved</div>
+        <span class="footer-pill">© 2026 Nelle Kristoff</span>
       </div>
     </footer>
 
@@ -368,16 +293,16 @@
 </main>
 
 <script>
-window.addEventListener("load", () => document.documentElement.classList.add("ready"));
-
-/* Contact */
+/* same pattern as index */
 window.contact = function contact(e){
   if (e) e.preventDefault();
   window.location.href = "mailto:nellekristoff@gmail.com";
 };
 
-/* Menu toggle (same behavior as index) */
 document.addEventListener("DOMContentLoaded", () => {
+  document.documentElement.classList.add("ready");
+
+  /* Menu toggle */
   const menuBtn = document.getElementById('menuBtn');
   const menu = document.getElementById('menu');
   const header = document.getElementById('siteHeader');
@@ -398,9 +323,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const open = !(header && header.classList.contains('menu-open'));
       setMenu(open);
     });
-
     document.addEventListener('click', () => setMenu(false));
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+  }
+
+  /* subtle background drift (same as index) */
+  const spaceBg = document.getElementById('spaceBg');
+  if (spaceBg){
+    let t = 0;
+    const tick = () => {
+      t += 0.008;
+      const bx = Math.sin(t) * 8;
+      const by = Math.cos(t * 0.8) * 6;
+      spaceBg.style.transform = `translate3d(${bx.toFixed(1)}px, ${by.toFixed(1)}px, 0)`;
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   }
 });
 </script>
