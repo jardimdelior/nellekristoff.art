@@ -149,7 +149,6 @@ html.ready body{
 }
 
 .header-bay-left{
-  flex: 1 1 auto;
   min-width: 0;
   height: 100%;
   display:flex;
@@ -157,7 +156,6 @@ html.ready body{
 }
 
 .header-bay-right{
-  flex: 1 1 auto;
   min-width: 0;
   height: 100%;
   display:flex;
@@ -288,12 +286,16 @@ html.ready body{
   left:0;
   height:100%;
   right: calc(var(--headerH) + var(--headerRightInset));
+  display:flex;
+  align-items:center;
   justify-content:flex-start; /* stays on the LEFT */
   padding-left: var(--menuInset, 2px);
   z-index:1;
   min-width: 0;
+  overflow:hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
   border-right: 1px solid rgba(0,0,0,.22);
-  overflow:visible;
 }
 
 /* Monogram — FAR RIGHT */
@@ -319,6 +321,9 @@ html.ready body{
 }
 
 .brand-text{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: clamp(12px, 2.2vw, 26px);
   letter-spacing: .08em;
   text-transform: uppercase;
