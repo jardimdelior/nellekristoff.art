@@ -195,20 +195,68 @@ html.ready body{
 }
 
 .tabBtn{ padding: 0 14px; }
-
+/* ===== Smoke — Header Menu Buttons ===== */
 .menu a{
   position: relative;
+  isolation: isolate;          /* keeps layers contained */
   overflow: hidden;
   border-radius: 2px;
   padding: 0 10px;
   letter-spacing: .08em;
-
+  
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+  color: rgba(47,42,38,1); /* strong readable text */
   /* fade at the bottom edge (connecting to viewport) */
   -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - var(--menuFadeW)), transparent 100%);
   mask-image: linear-gradient(180deg, #000 0%, #000 calc(100% - var(--menuFadeW)), transparent 100%);
 }
 
-/* Arrows same size as edge tabs */
+/* smoke layer */
+.menu a::before{
+  content:"";
+  position:absolute;
+  inset:-30%;
+  z-index:0;
+  pointer-events:none;
+
+  background:
+    radial-gradient(40% 35% at 30% 40%, rgba(255,255,255,.25) 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(45% 40% at 70% 60%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 65%),
+    radial-gradient(50% 45% at 50% 50%, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 70%);
+
+  opacity:.5;
+  filter: blur(14px);
+}
+
+/* glass sheen layer */
+.menu a::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,.22),
+      rgba(255,255,255,.06)
+    );
+
+  mix-blend-mode: soft-light;
+  opacity:.9;
+}
+
+/* ensure text is always above everything */
+.menu a{
+  z-index:0;
+}
+.menu a > *{
+  position:relative;
+  z-index:2;
+}
+
+/* Arrows size */
 .film-arrow{
   width: var(--edgeTabW);
   height: 50%;
