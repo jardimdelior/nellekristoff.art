@@ -333,7 +333,7 @@ html.ready body{
   justify-content:center;
   opacity:0;
   color: var(--brand);
-  transform: translateX(10px) scaleX(.25);
+  transform: translateX(0px) scaleX(.25);
   transform-origin: 100% 50%;
   transition: opacity .22s ease, transform .32s cubic-bezier(.18,.9,.2,1), filter .22s ease;
 }
