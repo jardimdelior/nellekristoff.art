@@ -212,7 +212,7 @@ html.ready body{
   padding: 10px 8px;
 }
 
-.film-arrow svg{ width: 22px; height: 22px; } /* bigger icon */
+.film-arrow svg{ width: 29px; height: 29px; } /* bigger icon */
 
 .tabBtn:hover,
 .menu a:hover,
