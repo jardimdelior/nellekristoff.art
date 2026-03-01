@@ -35,6 +35,11 @@
   --panelToButtonsGap: 12px;
   --pillH: 40px;
 
+  /* DECK UI (attached pills on panels) */
+  --deckPillH: clamp(26px, 3.6vw, 38px);
+  --deckPillFont: clamp(9px, 1.05vw, 12px);
+  --deckPillPadX: clamp(8px, 1.6vw, 12px);
+
   /* PANEL sizing (height-limited so it fits half-decks) */
   --panelH: clamp(180px, 36vh, 520px);
   --panelW: calc(var(--panelH) * (420 / 297));
@@ -884,8 +889,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.am-title{ font-size: clamp(11px, 1.1vw, 13px); opacity:.92; }
-.am-status{ font-size: clamp(10px, 1.05vw, 12px); opacity:.70; }
+.am-title{ font-size: var(--deckPillFont); opacity:.92; }
+.am-status{ font-size: var(--deckPillFont); opacity:.70; }
 
 /* ===== Select: bottom-right of active panel ===== */
 .active-actions{
@@ -916,10 +921,10 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .active-actions .abtn-primary,
 #selectBtnTop,
 #selectBtnBottom{
-  height: var(--pillH);
-  min-height: var(--pillH);
-  padding: 0 10px;
-  font-size: clamp(10px, 1.05vw, 13px);
+  height: var(--deckPillH);
+  min-height: var(--deckPillH);
+  padding: 0 var(--deckPillPadX);
+  font-size: var(--deckPillFont);
   letter-spacing: .08em;
   border-radius: 2px;
 }
