@@ -394,24 +394,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Arrow
-    if (arrowBtn){
+    function setViewStraight(){
+      // stop sphere drift immediately
+      hoverActive = false;
+      tgtTX = tgtTY = 0;
+      tgtX = tgtY = tgtZ = 0;
     
-      function setTiltStraight(){
-        deckEl.style.setProperty('--tiltX', '0deg');
-        deckEl.style.setProperty('--tiltY', '0deg');
-      }
+      // snap to straight (visual)
+      deckEl.style.setProperty('--tiltX', '0deg');
+      deckEl.style.setProperty('--tiltY', '0deg');
+      deckEl.style.setProperty('--hoverX', '0px');
+      deckEl.style.setProperty('--hoverY', '0px');
+      deckEl.style.setProperty('--hoverZ', '0px');
+    }
+    
+    if (arrowBtn){
+      arrowBtn.addEventListener('mouseenter', setViewStraight);
+      arrowBtn.addEventListener('pointerdown', setViewStraight);
     
       arrowBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setTiltStraight();   // ensure straight before sliding
+        setViewStraight();   // straight during the slide moment
         next();
       });
-    
-      arrowBtn.addEventListener('mouseenter', setTiltStraight);
-      arrowBtn.addEventListener('pointerdown', setTiltStraight);
     }
-
     // Focus on pointerdown in deck (ignore UI/buttons)
     function isInteractiveTarget(target){
       return !!target.closest('button, a, .tabBtn, .film-arrow, .arrow-slot, .menu, .menu-btn, .edgeTab');
@@ -520,33 +527,87 @@ document.addEventListener("DOMContentLoaded", () => {
       setZoomAt(tZoom * factor, cx, cy);
     }, { passive:false });
 
-    // Hover tilt
-    // ===== Smooth hover tilt (visible, cinematic, no twitch) =====
+    
+    // ===== Smooth “sphere drift” hover (orbit XY + tilt + Z depth) =====
     let hoverRAF = null;
-    let hoverTX = 0, hoverTY = 0;                 // current tilt
-    let hoverTargetX = 0, hoverTargetY = 0;       // target tilt
     let hoverActive = false;
     
-    function startHoverTilt(){
-      if (hoverRAF) return;
-      let lastT = performance.now();
+    // current values
+    let curTX = 0, curTY = 0;
+    let curX = 0, curY = 0, curZ = 0;
     
+    // targets
+    let tgtTX = 0, tgtTY = 0;
+    let tgtX = 0, tgtY = 0, tgtZ = 0;
+    
+    function setSphereTargetsFromEvent(e){
+      const r = deckEl.getBoundingClientRect();
+    
+      // normalize mouse to -1..+1
+      let nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+      let ny = ((e.clientY - r.top)  / r.height) * 2 - 1;
+      nx = clamp(nx, -1, 1);
+      ny = clamp(ny, -1, 1);
+    
+      // deadzone removes micro jitter around center
+      const dz = 0.08;
+      const dx = Math.abs(nx) < dz ? 0 : (nx - Math.sign(nx) * dz) / (1 - dz);
+      const dy = Math.abs(ny) < dz ? 0 : (ny - Math.sign(ny) * dz) / (1 - dz);
+    
+      // ===== AMPLITUDES (tune these) =====
+      const rotY = 6.5;    // degrees
+      const rotX = 5.0;    // degrees
+      const orbX = 18;     // px (horizontal drift)
+      const orbY = 14;     // px (vertical drift)
+      const depZ = 70;     // px (depth “breathing”)
+    
+      // symmetric tilt
+      tgtTY = dx * rotY;
+      tgtTX = -dy * rotX;
+    
+      // orbit drift (feels like sphere moving under glass)
+      tgtX = dx * orbX;
+      tgtY = dy * orbY;
+    
+      // depth: forward near center, less at edges
+      const rr = Math.min(1, Math.hypot(dx, dy)); // 0 center -> 1 edges
+      const ease = 1 - (rr * rr);                // smooth falloff
+      tgtZ = ease * depZ;
+    
+      hoverActive = true;
+      ensureSphereAnim();
+    }
+    
+    function ensureSphereAnim(){
+      if (hoverRAF) return;
+    
+      let lastT = performance.now();
       const tick = (now) => {
         const dt = Math.min(32, now - lastT);
         lastT = now;
     
-        // smoothing (lower = slower / smoother)
-        const k = 1 - Math.pow(1 - 0.10, dt / 16.67);
+        // slow + smooth easing (lower = floatier)
+        const k = 1 - Math.pow(1 - 0.07, dt / 16.67);
     
-        hoverTX += (hoverTargetX - hoverTX) * k;
-        hoverTY += (hoverTargetY - hoverTY) * k;
+        curTX += (tgtTX - curTX) * k;
+        curTY += (tgtTY - curTY) * k;
     
-        deckEl.style.setProperty('--tiltX', hoverTX.toFixed(3) + 'deg');
-        deckEl.style.setProperty('--tiltY', hoverTY.toFixed(3) + 'deg');
+        curX  += (tgtX  - curX ) * k;
+        curY  += (tgtY  - curY ) * k;
+        curZ  += (tgtZ  - curZ ) * k;
+    
+        deckEl.style.setProperty('--tiltX',  curTX.toFixed(3) + 'deg');
+        deckEl.style.setProperty('--tiltY',  curTY.toFixed(3) + 'deg');
+        deckEl.style.setProperty('--hoverX', curX.toFixed(2)  + 'px');
+        deckEl.style.setProperty('--hoverY', curY.toFixed(2)  + 'px');
+        deckEl.style.setProperty('--hoverZ', curZ.toFixed(2)  + 'px');
     
         const done =
-          Math.abs(hoverTargetX - hoverTX) < 0.01 &&
-          Math.abs(hoverTargetY - hoverTY) < 0.01;
+          Math.abs(tgtTX - curTX) < 0.01 &&
+          Math.abs(tgtTY - curTY) < 0.01 &&
+          Math.abs(tgtX  - curX ) < 0.20 &&
+          Math.abs(tgtY  - curY ) < 0.20 &&
+          Math.abs(tgtZ  - curZ ) < 0.40;
     
         if (!hoverActive && done){
           hoverRAF = null;
@@ -558,22 +619,24 @@ document.addEventListener("DOMContentLoaded", () => {
       hoverRAF = requestAnimationFrame(tick);
     }
     
-    function setHoverTargetsFromEvent(e){
-      const r = deckEl.getBoundingClientRect();
-      const nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
-      const ny = clamp(((e.clientY - r.top)  / r.height) * 2 - 1, -1, 1);
+    function resetSphere(){
+      hoverActive = false;
+      tgtTX = 0; tgtTY = 0;
+      tgtX  = 0; tgtY  = 0; tgtZ = 0;
+      ensureSphereAnim();
+    }
     
-      // deadzone kills micro jitter
-      const dz = 0.10;
-      const dx = Math.abs(nx) < dz ? 0 : (nx - Math.sign(nx) * dz) / (1 - dz);
-      const dy = Math.abs(ny) < dz ? 0 : (ny - Math.sign(ny) * dz) / (1 - dz);
+    // don’t fight with pan/zoom/fullscreen
+    function isInteracting(){
+      return pointers.size > 0 || isFullscreenOpen();
+    }
     
-      // BIG but smooth (cinematic drift)
-      hoverTargetY = dx * 7.5;    // rotateY strength
-      hoverTargetX = -dy * 6.0;   // rotateX strength
+    deckEl.addEventListener('mousemove', (e) => {
+      if (isInteracting()) return;
+      setSphereTargetsFromEvent(e);
+    });
     
-      hoverActive = true;
-      startHoverTilt();
+    deckEl.addEventListener('mouseleave', resetSphere);
     }
     
     // Don't tilt while actively panning/zooming or fullscreen
