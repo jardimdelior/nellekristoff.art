@@ -276,19 +276,25 @@ html.ready body{
   pointer-events:none;
 }
 
-/* Brand / subtitle / monogram all sit LEFT of burger by the same inset */
+/* Brand / subtitle */
 .layer-bay-1,
 .layer-bay-2{
-  right: var(--headerRightInset);
   position:absolute;
   top:0;
-  left: 0;
-  right: calc(var(--headerH) + 12px); /* reserve space for burger */
-  height: 100%;
+  left:0;
+  height:100%;
+
+  /* IMPORTANT: stop before the burger/monogram slot + keep a gap */
+  right: calc(var(--headerH) + var(--headerRightInset));
+
   display:flex;
   align-items:center;
-  justify-content:flex-start;         /* LEFT aligned */
+
+  /* align the text block against the “stop line” (near burger) */
+  justify-content:flex-end;
+
   pointer-events:none;
+  padding-right: 0;
   padding-left: var(--menuInset, 2px);
 }
 
