@@ -249,7 +249,6 @@ html.ready body{
   line-height: 1;
   margin-top: var(--menuDrop);
   margin-left: var(--menuInset);
-
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
@@ -894,8 +893,10 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display:flex;
   align-items: center;
   justify-content:center;
-  gap:6px;
-  font-size:12.5px;
+  gap: clamp(4px, 1vw, 8px);
+  flex-wrap: wrap;
+  padding: 0 clamp(6px, 2vw, 14px);
+  font-size: clamp(10px, 1.2vw, 12.5px);  /* responsive */
   opacity:.55;
 }
 
@@ -908,14 +909,14 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
   height: var(--pillH);
   min-height: var(--pillH);
-  padding: 0 14px;
+  padding: 0 clamp(10px, 2vw, 14px);      /* responsive */
 
   border-radius: 2px;
   border: 1px solid rgba(0,0,0,.35);
   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.06));
   box-shadow: 0 12px 26px rgba(0,0,0,.12);
 
-  font-size: 12px;
+  font-size: clamp(10px, 1.15vw, 12px);   /* responsive */
   letter-spacing: .08em;
   text-transform: uppercase;
   line-height: 1;
