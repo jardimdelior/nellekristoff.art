@@ -1182,18 +1182,12 @@ body.noscroll .active-meta{
   display:none !important;
 }
 
-/* ======= RESPONSIVE ======= */
 /* =========================================================
-   RESPONSIVE + SAFARI DEBUG PACK (PASTE AT END OF CSS)
-   Includes:
-   - your existing mobile + small blocks
+   RESPONSIVE + SAFARI DEBUG PACK
+   - mobile + small blocks
    - mobile landscape height-limited block (+ footer scaling)
    - Safari edgeTab mask fallback (vertical tabs visible)
-   - Safari burger shrink fix
-   - Footer: never wrap to 2 rows (scroll instead)
 ========================================================= */
-
-/* ======= RESPONSIVE ======= */
 @media (max-width: 760px){
   :root{ 
     --maxFilmH: 72vh;
@@ -1301,7 +1295,7 @@ body.noscroll .active-meta{
     opacity: 1;
   }
 }
-
+/* ======= REDUCED MOTION ======= */
 @media (prefers-reduced-motion: reduce){
   .noise{ animation:none !important; }
 }
