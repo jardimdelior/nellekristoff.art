@@ -1261,14 +1261,26 @@ body.noscroll .active-meta{
   .page{ padding: clamp(10px, 2vw, 18px); }
 }
 
-/* ======= SAFARI FIX: EDGE TABS INVISIBLE (mask-image + var bug) ======= */
+@media (max-width: 420px){
+  :root{
+    --headerRightInset: 0px;  /* give brand more room */
+  }
+
+  .brand-text{
+    font-size: clamp(12px, 4.2vw, 15px);
+    letter-spacing: .05em;
+  }
+}
+
+/* ======= iOS SAFARI FIX: keep vertical tabs + fades WITHOUT mask-image ======= */
 @supports (-webkit-touch-callout: none){
-  .edgeTab{
+
+  /* disable mask-image on iOS Safari (it causes bugs / dark shading) */
+  .edgeTab,
+  .arrow-slot--top-left,
+  .arrow-slot--bottom-right{
     -webkit-mask-image: none !important;
     mask-image: none !important;
-
-    position: relative; /* for overlay fade */
-    overflow: hidden;   /* clip overlay */
   }
 
   /* enforce vertical label rendering */
@@ -1277,24 +1289,63 @@ body.noscroll .active-meta{
     text-orientation: mixed !important;
   }
 
-  /* recreate fade using overlay instead of mask-image */
+  /* IMPORTANT: do NOT set position:relative on .edgeTab */
+  .edgeTab--photo,
+  .edgeTab--digital{
+    overflow: hidden; /* clip the overlay fade */
+  }
+
+  /* faux fade overlays using your page background (NOT black) */
   .edgeTab--photo::after{
     content:"";
     position:absolute;
     inset:0;
     pointer-events:none;
-    background: linear-gradient(90deg, transparent 0, rgba(0,0,0,1) 26px);
-    opacity: 1;
+    background: linear-gradient(90deg,
+      rgba(239,231,220,0) 0%,
+      rgba(239,231,220,1) 26px
+    );
   }
+
   .edgeTab--digital::after{
     content:"";
     position:absolute;
     inset:0;
     pointer-events:none;
-    background: linear-gradient(270deg, transparent 0, rgba(0,0,0,1) 26px);
-    opacity: 1;
+    background: linear-gradient(270deg,
+      rgba(239,231,220,0) 0%,
+      rgba(239,231,220,1) 26px
+    );
+  }
+
+  /* Arrow slot fades (replacing mask-image) */
+  .arrow-slot{
+    overflow: hidden;
+  }
+
+  .arrow-slot--top-left::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background: linear-gradient(90deg,
+      rgba(239,231,220,0) 0%,
+      rgba(239,231,220,1) var(--edgeArrowFade)
+    );
+  }
+
+  .arrow-slot--bottom-right::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background: linear-gradient(270deg,
+      rgba(239,231,220,0) 0%,
+      rgba(239,231,220,1) var(--edgeArrowFade)
+    );
   }
 }
+
 /* ======= REDUCED MOTION ======= */
 @media (prefers-reduced-motion: reduce){
   .noise{ animation:none !important; }
