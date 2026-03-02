@@ -964,10 +964,13 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   align-items: center;
   justify-content:center;
   gap: clamp(4px, 1vw, 8px);
-  flex-wrap: wrap;
   padding: 0 clamp(6px, 2vw, 14px);
   font-size: var(--footerFont);  /* responsive */
   opacity:.55;
+  
+  flex-wrap: nowrap;          /* stop wrapping */
+  white-space: nowrap;
+  min-width: 0;
 }
 
 /* Footer pill styled like edgeTab */
@@ -976,6 +979,9 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   align-items:center;
   justify-content:center;
   gap:6px;
+
+  flex: 0 0 auto;             /* don’t reflow/wrap */
+  white-space: nowrap;
 
   height: var(--footerPillH);
   min-height: var(--footerPillH);
@@ -1172,6 +1178,17 @@ body.noscroll .active-meta{
 }
 
 /* ======= RESPONSIVE ======= */
+/* =========================================================
+   RESPONSIVE + SAFARI DEBUG PACK (PASTE AT END OF CSS)
+   Includes:
+   - your existing mobile + small blocks
+   - mobile landscape height-limited block (+ footer scaling)
+   - Safari edgeTab mask fallback (vertical tabs visible)
+   - Safari burger shrink fix
+   - Footer: never wrap to 2 rows (scroll instead)
+========================================================= */
+
+/* ======= RESPONSIVE ======= */
 @media (max-width: 760px){
   :root{ 
     --maxFilmH: 72vh;
@@ -1183,8 +1200,8 @@ body.noscroll .active-meta{
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
-    --pillH: 34px;
   }
+
   .brand-text{ 
     font-size: clamp(11px, 4.2vw, 16px);
     letter-spacing: .05em;
@@ -1206,8 +1223,8 @@ body.noscroll .active-meta{
     --angleStep: 16deg;
     --zStep: 62px;
     --xStep: 74%;
-    --pillH: 34px;
   }
+
   .brand-text{ 
     font-size: clamp(11px, 4.2vw, 16px);
     letter-spacing: .05em;
@@ -1215,6 +1232,68 @@ body.noscroll .active-meta{
   .subtitle-inline{ 
     font-size: clamp(9px, 3.2vw, 11px);
     letter-spacing: .08em;
+  }
+}
+
+/* ======= MOBILE LANDSCAPE (HEIGHT-LIMITED) ======= */
+/* Prevents viewport/decks from being cut off in landscape phones */
+@media (max-height: 520px) and (orientation: landscape){
+  :root{
+    --maxFilmH: 78vh;
+    --headerH: 36px;
+    --pillH: 32px;
+    --deckGap: clamp(6px, 1.6vh, 12px);
+
+    /* panels shrink more when height is small */
+    --panelH: clamp(140px, 56vh, 320px);
+    --panelW: calc(var(--panelH) * (420 / 297));
+
+    --persp: 3200px;
+    --angleStep: 14deg;
+    --zStep: 56px;
+    --xStep: 72%;
+
+    /* footer scaling in landscape */
+    --footerPillH: 28px;
+    --footerFont: 10px;
+    --footerGap: 2px;
+  }
+
+  .page{ padding: clamp(10px, 2vw, 18px); }
+}
+
+/* ======= SAFARI FIX: EDGE TABS INVISIBLE (mask-image + var bug) ======= */
+@supports (-webkit-touch-callout: none){
+  .edgeTab{
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+
+    position: relative; /* for overlay fade */
+    overflow: hidden;   /* clip overlay */
+  }
+
+  /* enforce vertical label rendering */
+  .edgeTab{
+    writing-mode: vertical-rl !important;
+    text-orientation: mixed !important;
+  }
+
+  /* recreate fade using overlay instead of mask-image */
+  .edgeTab--photo::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background: linear-gradient(90deg, transparent 0, rgba(0,0,0,1) 26px);
+    opacity: 1;
+  }
+  .edgeTab--digital::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background: linear-gradient(270deg, transparent 0, rgba(0,0,0,1) 26px);
+    opacity: 1;
   }
 }
 
