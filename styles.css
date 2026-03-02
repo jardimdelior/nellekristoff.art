@@ -93,6 +93,11 @@ html, body{
   overflow-x: clip;
 }
 
+/* Hide Posts button only on Home page */
+    #menu a[href="posts.html"]{
+      display: none;
+    }
+
 @supports not (overflow: clip){
   .page, .frame, .frame-viewportWrap, .space-viewport{
     overflow-x: hidden;
