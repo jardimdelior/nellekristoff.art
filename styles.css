@@ -613,11 +613,25 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   width: var(--edgeTabW);
   height: 50%;
   padding: 10px 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* the ACTUAL vertical text */
+.edgeTab-label{
+  display:block;
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  display:flex;
   -webkit-writing-mode: vertical-rl;
   -webkit-text-orientation: mixed;
+
+  /* keep the same direction you wanted earlier */
+  transform: rotate(180deg);
+  transform-origin: center;
+
+  white-space: nowrap;
+  line-height: 1;
 }
 
 /* Photography: top-left -> down */
