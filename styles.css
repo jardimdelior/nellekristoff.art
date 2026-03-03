@@ -1140,14 +1140,15 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .fullscreen .fs-meta{
   position:absolute;
   left: var(--printPad, 16px);
-  top: calc(100% - var(--printPad, 16px));
+  bottom: var(--printPad, 16px);
   right:auto;
-  bottom:auto;
+  top:auto;
 
   display:inline-flex;
   align-items:center;
   gap:2px;
 
+  /* match the “deck pill” scale (like Select/Untitled) */
   height: var(--pillH);
   min-height: var(--pillH);
   padding: 0 10px;
@@ -1167,6 +1168,24 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
   /* leave space for Collect on the right */
   max-width: calc(100% - 120px);
+
+  z-index: 5;
+}
+
+/* fade edge like active-meta */
+.fullscreen .fs-meta::after{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:-1px;
+  width: var(--edgeTabFade, 26px);
+  pointer-events:none;
+  background: linear-gradient(
+    to right,
+    rgba(239,231,220,0) 0%,
+    rgba(239,231,220,0.20) 100%
+  );
 }
 
 .fullscreen .fs-title,
@@ -1181,19 +1200,20 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .fullscreen .fs-title{ font-size: clamp(11px, 1.1vw, 13px); opacity:.92; }
 .fullscreen .fs-status{ font-size: clamp(10px, 1.05vw, 12px); opacity:.78; }
 
-/* ===== Attached collect (bottom-right) ===== */
+/* Fullscreen: attached collect (bottom-right) */
 .fullscreen .fs-actions{
   position:absolute;
   right: var(--printPad, 16px);
-  top: calc(100% - var(--printPad, 16px));
+  bottom: var(--printPad, 16px);
   left:auto;
-  bottom:auto;
+  top:auto;
 
   display:flex;
   align-items:center;
   justify-content:flex-end;
 
   pointer-events:none; /* wrapper doesn’t steal clicks */
+  z-index: 5;
 }
 
 .fullscreen #fsCollect{
@@ -1234,10 +1254,15 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   filter: blur(10px);
   pointer-events:none;
 }
+
 .fullscreen .fs-meta > *,
-.fullscreen #fsCollect{
+.fullscreen #fsCollect > *{
   position: relative;
   z-index: 1;
+}
+
+.fullscreen #fsCollect{
+  position: relative;
 }
 
 /* Hide deck UI while fullscreen is open (your working method) */
