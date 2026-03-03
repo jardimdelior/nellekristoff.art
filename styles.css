@@ -863,15 +863,15 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* Top arrow occupies TOP half */
 .deck-layer-top .arrow-slot--top-left{
   top: 0;
-  bottom: auto;
-  height: 50%;
+  bottom: 0;
+  height: auto;
 }
 
 /* Bottom arrow occupies BOTTOM half */
 .deck-layer-bottom .arrow-slot--bottom-right{
   bottom: 0;
-  top: auto;
-  height: 50%;
+  top: 0;
+  height: auto;
 }
 
 .film-arrow svg{ width:18px; height:18px; }
