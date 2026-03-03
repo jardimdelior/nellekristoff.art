@@ -880,7 +880,28 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   height: auto;
 }
 
-.film-arrow svg{ width:18px; height:18px; }
+/* SPLIT MODE */
+.space-viewport:not(.focus-top):not(.focus-bottom) #deckLayerTop .arrow-slot--top-left,
+.space-viewport:not(.focus-top):not(.focus-bottom) #deckLayerBottom .arrow-slot--bottom-right{
+  top: 0;
+  bottom: 0;
+  height: auto;
+}
+
+/* FOCUS MODE */
+.space-viewport.focus-top #deckLayerTop .arrow-slot--top-left{
+  top: 0;
+  bottom: auto;
+  height: 50%;
+}
+
+.space-viewport.focus-bottom #deckLayerBottom .arrow-slot--bottom-right{
+  bottom: 0;
+  top: auto;
+  height: 50%;
+}
+
+.film-arrow svg{ width:22px; height:22px; }
 
 /* ===== Active UI follows active (middle) panel ===== */
 .active-ui{
