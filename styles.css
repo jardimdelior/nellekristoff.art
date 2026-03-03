@@ -620,14 +620,15 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 /* the ACTUAL vertical text */
 .edgeTab-label{
-  display:block;
+  display:inline-block; /* important for reliable transform */
   writing-mode: vertical-rl;
   text-orientation: mixed;
   -webkit-writing-mode: vertical-rl;
   -webkit-text-orientation: mixed;
 
-  /* keep the same direction you wanted earlier */
+  -webkit-transform: rotate(180deg);
   transform: rotate(180deg);
+  -webkit-transform-origin: center;
   transform-origin: center;
 
   white-space: nowrap;
