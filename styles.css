@@ -615,6 +615,9 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   padding: 10px 8px;
   writing-mode: vertical-rl;
   text-orientation: mixed;
+  display:flex;
+  -webkit-writing-mode: vertical-rl;
+  -webkit-text-orientation: mixed;
 }
 
 /* Photography: top-left -> down */
@@ -1290,32 +1293,59 @@ body.noscroll .active-meta{
   }
 
   /* IMPORTANT: do NOT set position:relative on .edgeTab */
-  .edgeTab--photo,
-  .edgeTab--digital{
-    overflow: hidden; /* clip the overlay fade */
-  }
+  /* =========================================================
+   SAFARI / iOS: Force vertical edge tabs + fix iOS “creme overlay”
+========================================================= */
 
-  /* faux fade overlays using your page background (NOT black) */
-  .edgeTab--photo::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    background: linear-gradient(90deg,
-      rgba(239,231,220,0) 0%,
-      rgba(239,231,220,1) 26px
-    );
+/* WebKit sometimes fails vertical writing-mode on inline-flex */
+  .edgeTab{
+    display: flex;                 /* overrides */
+    -webkit-writing-mode: vertical-rl;
+    writing-mode: vertical-rl;
+    -webkit-text-orientation: mixed;
+    text-orientation: mixed;
   }
-
-  .edgeTab--digital::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    background: linear-gradient(270deg,
-      rgba(239,231,220,0) 0%,
-      rgba(239,231,220,1) 26px
-    );
+  
+  /* iOS fallback: fade must sit BEHIND text (used ::before) */
+  @supports (-webkit-touch-callout: none){
+  
+    /* “no mask-image” rule */
+    .edgeTab,
+    .arrow-slot--top-left,
+    .arrow-slot--bottom-right{
+      -webkit-mask-image: none !important;
+      mask-image: none !important;
+    }
+  
+    /* anchor pseudo element */
+    .edgeTab--photo,
+    .edgeTab--digital{
+      position: relative;
+      overflow: hidden;
+    }
+  
+    /* fades BEHIND text */
+    .edgeTab--photo::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background: linear-gradient(90deg,
+        rgba(239,231,220,0) 0%,
+        rgba(239,231,220,1) 26px
+      );
+    }
+  
+    .edgeTab--digital::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background: linear-gradient(270deg,
+        rgba(239,231,220,0) 0%,
+        rgba(239,231,220,1) 26px
+      );
+    }
   }
 
   /* Arrow slot fades (replacing mask-image) */
