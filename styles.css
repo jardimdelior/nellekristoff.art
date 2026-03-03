@@ -595,6 +595,13 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   opacity:.85;
 }
 
+.viewport-glass,
+.space-viewport::after,
+#spaceBg,
+#spaceBg::after{
+  pointer-events:none;
+}
+
 /* ======= EDGE LABELS (IMPORTANT: visible & clickable) ======= */
 .edge-bay{
   position:absolute;
@@ -822,9 +829,10 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* arrows */
 .arrow-slot{
   position:absolute;
-  z-index: 1400;       /* ABOVE .edge-bay (999) */
+  z-index: 6000;       /* ABOVE .edge-bay (999) */
   pointer-events:none; /* slot never blocks */
-  overflow: visible;   /* avoid mask clipping weirdness */
+  overflow: hidden;   /* avoid mask clipping weirdness */
+  width: var(--edgeTabW);
 }
 
 .arrow-slot--top-left{
@@ -848,12 +856,23 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   pointer-events:auto;
   height: 100%;
   min-height: 100%;
-  width: var(--edgeTabW);
+  width: 100%;
   padding: 10px 8px;    
 }
 
-.deck-layer-top .arrow-slot{ height: 100%; }
-.deck-layer-bottom .arrow-slot{ height: 100%; }
+/* Top arrow occupies TOP half */
+.deck-layer-top .arrow-slot--top-left{
+  top: 0;
+  bottom: auto;
+  height: 50%;
+}
+
+/* Bottom arrow occupies BOTTOM half */
+.deck-layer-bottom .arrow-slot--bottom-right{
+  bottom: 0;
+  top: auto;
+  height: 50%;
+}
 
 .film-arrow svg{ width:18px; height:18px; }
 
