@@ -73,7 +73,7 @@
   --overviewBottomTilt: 20deg;
 
   /* edge label */
-  --edgeTabW: 56px;
+  --edgeTabW: clamp(36px, 5vw, 56px);
   --edgeTabFade: 26px;
   /* arrows */
   --edgeArrowFade: 18px;
