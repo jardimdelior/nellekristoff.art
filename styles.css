@@ -848,7 +848,14 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* the actual arrow button is clickable */
 .arrow-slot .film-arrow{
   pointer-events:auto;
+  height: 100%;
+  min-height: 100%;
+  width: var(--edgeTabW);
+  padding: 10px 8px;    
 }
+
+.deck-layer-top .arrow-slot{ height: 100%; }
+.deck-layer-bottom .arrow-slot{ height: 100%; }
 
 .film-arrow svg{ width:18px; height:18px; }
 
