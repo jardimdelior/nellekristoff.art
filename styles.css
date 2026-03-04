@@ -369,7 +369,7 @@ html.ready body{
   display:block;
   height: calc(var(--headerH) - 2px);
   width:auto;
-  margin-right: 1px;
+  margin-right: 0;
 }
 
 /* ===== Brand + subtitle — LEFT side =====
