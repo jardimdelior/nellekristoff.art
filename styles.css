@@ -1172,7 +1172,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display: inline-flex;
   align-items: center;
   gap: 2px;
-
+  width: calc(100% - 140px); /* a bit more room */
   height: var(--deckPillH);
   min-height: var(--deckPillH);
   padding: 0 var(--deckPillPadX);
@@ -1244,7 +1244,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .fullscreen .fs-status{
   color: rgba(255,255,255,.92);
   line-height: 1;
-  max-width: 18ch;
+  max-width: none;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
