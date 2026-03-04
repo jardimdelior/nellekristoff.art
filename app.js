@@ -94,14 +94,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function openFullscreenFromWork(w){
     if (!w || !fullscreen || !fsImg) return;
+  
     fsImg.src = w.src;
     fsImg.alt = w.title || "";
     if (fsTitle) fsTitle.textContent = w.title || "Untitled";
     if (fsStatus) fsStatus.textContent = w.status || "Unveiling soon";
     if (fsCollect) fsCollect.href = w.collect || "https://collect.nellekristoff.art";
+  
     fullscreen.classList.add('open');
     fullscreen.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('noscroll');
+  
+    // ✅ stagger background fade (prevents “everything jumps”)
+    requestAnimationFrame(() => {
+      document.body.classList.add('noscroll');
+    });
   }
 
   function closeFullscreen(){
