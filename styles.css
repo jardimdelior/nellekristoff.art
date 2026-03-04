@@ -1192,6 +1192,17 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display: flex;
 }
 
+/* Inner row can be scaled down */
+.fullscreen .fs-metaInner{
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+
+  transform: scale(var(--fsMetaScale, 1));
+  transform-origin: left center;
+  white-space: nowrap;
+}
+
 .fullscreen .fs-actions{
   position: absolute;
   right: 0;
@@ -1243,8 +1254,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   color: rgba(255,255,255,.92);
   line-height: 1;
   max-width: none;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  overflow:visible;
+  text-overflow:clip;
   white-space:nowrap;
   min-width: 0;
   flex: 1 1 auto;
