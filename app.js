@@ -148,9 +148,9 @@ document.addEventListener("DOMContentLoaded", () => {
     fsImg.src = w.src;
     fsImg.alt = w.title || "";
 
-    fsImg.onload = () => {
+    fsImg.addEventListener("load", () => {
       if (isFullscreenOpen()) fitFullscreenMeta();
-    };
+    }, { once: true });
   
     if (fsTitle)  fsTitle.textContent  = w.title  || "Untitled";
     if (fsStatus) fsStatus.textContent = w.status || "Unveiling soon";
