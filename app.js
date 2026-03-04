@@ -778,6 +778,34 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function fitFullscreenMeta(){
+    const fs = document.getElementById("fullscreen");
+    if(!fs || !fs.classList.contains("open")) return;
+  
+    const meta = fs.querySelector(".fs-meta");
+    const title = fs.querySelector("#fsTitle");
+    const status = fs.querySelector("#fsStatus");
+    if(!meta || !title || !status) return;
+  
+    // reset
+    meta.style.setProperty("--fsMetaScale", 1);
+  
+    // available width inside the pill (minus padding)
+    const padX = parseFloat(getComputedStyle(meta).paddingLeft) + parseFloat(getComputedStyle(meta).paddingRight);
+    const available = Math.max(0, meta.clientWidth - padX);
+  
+    // measure needed width (title + status + gap)
+    const gap = parseFloat(getComputedStyle(meta).gap || 0);
+    const needed = title.scrollWidth + status.scrollWidth + gap;
+  
+    if(available > 0 && needed > 0){
+      const scale = Math.min(1, available / needed);
+      meta.style.setProperty("--fsMetaScale", Math.max(0.72, scale)); // don’t go too tiny
+    }
+  }
+  
+  window.addEventListener("resize", fitFullscreenMeta);
+
   // subtle background drift
   if (spaceBg){
     let t = 0;
