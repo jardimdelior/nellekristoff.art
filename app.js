@@ -147,6 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
   
     fsImg.src = w.src;
     fsImg.alt = w.title || "";
+
+    fsImg.onload = () => {
+      if (isFullscreenOpen()) fitFullscreenMeta();
+    };
   
     if (fsTitle)  fsTitle.textContent  = w.title  || "Untitled";
     if (fsStatus) fsStatus.textContent = w.status || "Unveiling soon";
