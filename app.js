@@ -114,21 +114,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function isFullscreenOpen(){ return fullscreen && fullscreen.classList.contains('open'); }
 
+  function fitFullscreenMeta(){
+    if (!fullscreen || !fullscreen.classList.contains("open")) return;
+  
+    const meta = fullscreen.querySelector(".fs-meta");
+    if (!meta || !fsTitle || !fsStatus) return;
+  
+    // reset scale to measure natural widths
+    meta.style.setProperty("--fsMetaScale", 1);
+  
+    // available width inside the meta pill (minus padding)
+    const cs = getComputedStyle(meta);
+    const padL = parseFloat(cs.paddingLeft) || 0;
+    const padR = parseFloat(cs.paddingRight) || 0;
+    const gap  = parseFloat(cs.gap) || 0;
+  
+    const available = Math.max(0, meta.clientWidth - padL - padR);
+  
+    // measure required width of both spans at scale=1
+    const needed = fsTitle.scrollWidth + fsStatus.scrollWidth + gap;
+  
+    if (available <= 0 || needed <= 0) return;
+  
+    const scale = Math.min(1, available / needed);
+  
+    // clamp so it doesn't get microscopic; adjust 0.72 if you want
+    meta.style.setProperty("--fsMetaScale", Math.max(0.72, scale));
+  }
+
   function openFullscreenFromWork(w){
     if (!w || !fullscreen || !fsImg) return;
   
     fsImg.src = w.src;
     fsImg.alt = w.title || "";
-    if (fsTitle) fsTitle.textContent = w.title || "Untitled";
+  
+    if (fsTitle)  fsTitle.textContent  = w.title  || "Untitled";
     if (fsStatus) fsStatus.textContent = w.status || "Unveiling soon";
     if (fsCollect) fsCollect.href = w.collect || "https://collect.nellekristoff.art";
   
-    fullscreen.classList.add('open');
-    fullscreen.setAttribute('aria-hidden', 'false');
+    fullscreen.classList.add("open");
+    fullscreen.setAttribute("aria-hidden", "false");
   
-    //* stagger background fade *//
+    // Fit AFTER it's open & rendered (measurements become correct)
     requestAnimationFrame(() => {
-      document.body.classList.add('noscroll');
+      fitFullscreenMeta();
+      // one more frame helps when fonts/images settle
+      requestAnimationFrame(fitFullscreenMeta);
+    });
+  
+    // stagger background fade
+    requestAnimationFrame(() => {
+      document.body.classList.add("noscroll");
     });
   }
 
@@ -151,6 +187,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isFullscreenOpen()) closeFullscreen();
+  });
+
+  window.addEventListener("resize", () => {
+    if (isFullscreenOpen()) fitFullscreenMeta();
   });
 
   /* ===== Build a deck ===== */
