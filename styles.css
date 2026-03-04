@@ -1148,7 +1148,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 /* ===== Attached meta (bottom-left) ===== */
 .fullscreen .fs-meta{
   position:absolute;
-  left: var(--printPad, 16px);
+  left: 0;
   bottom: var(--printPad, 16px);
   right:auto;
   top:auto;
@@ -1174,10 +1174,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
   overflow:hidden;
   pointer-events:none;
-
-  /* leave space for Collect on the right */
-  max-width: calc(100% - 120px);
-
+  max-width: calc(100% - 140px); /* leave space for Collect */
   z-index: 5;
 }
 
@@ -1209,10 +1206,35 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .fullscreen .fs-title{ font-size: clamp(11px, 1.1vw, 13px); opacity:.92; }
 .fullscreen .fs-status{ font-size: clamp(10px, 1.05vw, 12px); opacity:.78; }
 
+/* Wrap print card + attached pills */
+.fs-cardWrap{
+  position: relative;
+  width: 100%;
+}
+
+/* IMPORTANT: allow pills to be visible outside the white print card */
+.fullscreen,
+.fullscreen .fs-inner,
+.fs-cardWrap{
+  overflow: visible;
+}
+
+/* Pills: attached OUTSIDE the card border */
+.fullscreen .fs-meta,
+.fullscreen .fs-actions{
+  position: absolute;
+  z-index: 20;
+  bottom: calc(-1 * (var(--pillH) * 0.40)); /* push outside */
+}
+
+/* Make sure Collect stays clickable */
+.fullscreen .fs-actions{ pointer-events: none; }
+.fullscreen #fsCollect{ pointer-events: auto; }
+
 /* Fullscreen: attached collect (bottom-right) */
 .fullscreen .fs-actions{
   position:absolute;
-  right: var(--printPad, 16px);
+  right: 0;
   bottom: var(--printPad, 16px);
   left:auto;
   top:auto;
