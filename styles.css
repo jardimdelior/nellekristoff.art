@@ -381,7 +381,7 @@ html.ready body{
   display:flex;
   align-items:center;
   justify-content:flex-start;
-  padding-left: calc(var(--menuInset, 2px) + var(--logoW, 44px) + 10px); /* space for logo + gap */
+  padding-left: calc(var(--menuInset, 2px) + var(--logoW, 44px) + 4px); /* space for logo + gap */
   z-index:1;
   min-width: 0;
   overflow:hidden;
