@@ -1190,6 +1190,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   min-width: 0;
   width: calc(100% - 160px);
   display: flex;
+  --fsMetaScale: 1;
 }
 
 /* Inner row can be scaled down */
@@ -1260,8 +1261,27 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   min-width: 0;
   flex: 1 1 auto;
 }
-.fullscreen .fs-title{ font-size: clamp(10px, 1.05vw, 13px); opacity:.92; }
-.fullscreen .fs-status{ font-size: clamp(10px, 1.05vw, 13px); opacity:.78; }
+
+.fullscreen .fs-title,
+.fullscreen .fs-status{
+  color: rgba(255,255,255,.92);
+  line-height: 1;
+
+  /* scaling behavior */
+  display: inline-block;
+  transform: scale(var(--fsMetaScale, 1));
+  transform-origin: left center;
+
+  /* no wrapping, no ellipsis */
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+
+  font-size: clamp(10px, 1.05vw, 13px);
+}
+
+.fullscreen .fs-title{ opacity:.92; }
+.fullscreen .fs-status{ opacity:.78; }
 
 /* Wrap print card + attached pills */
 .fs-cardWrap{
