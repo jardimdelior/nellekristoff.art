@@ -1086,19 +1086,25 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   left:30vw;
   width:40vw;
   height:100dvh;
+  
   background: rgba(0,0,0,.92);
-  display:none;
+  display:flex;
   align-items:center;
   justify-content:center;
   z-index:2147483647;
   padding: clamp(14px, 3vw, 34px);
   overflow:auto;
   opacity: 0;
-  transition: opacity .35s ease;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .35s ease, visibility 0s linear .35s;
 }
+
 .fullscreen.open{
-  display:flex;
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity .35s ease, visibility 0s linear 0s;
 }
 
 .fs-inner{
