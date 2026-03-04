@@ -1482,13 +1482,6 @@ body.noscroll #spaceBg{
 .space-viewport.focus-top #deckLayerTop{ z-index: 10 !important; }
 .space-viewport.focus-bottom #deckLayerBottom{ z-index: 10 !important; }
 
-.brandLogo .logo{
-  height: clamp(22px, 2.4vw, 34px);
-  width: auto;
-  color: var(--ink);
-  display: block;
-}
-
 /* ======= REDUCED MOTION ======= */
 @media (prefers-reduced-motion: reduce){
   .noise{ animation:none !important; }
