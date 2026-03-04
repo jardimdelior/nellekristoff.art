@@ -165,7 +165,8 @@ document.addEventListener("DOMContentLoaded", () => {
       arrowBtn,
       works,
       direction,
-      focusClass
+      focusClass,
+      bringFront
     } = opts;
 
     if (!deckEl || !lepEl || !works || !works.length) return null;
@@ -736,6 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
     works: worksTop,
     direction: +1,
     focusClass: 'focus-top',
+    bringFront: bringTopFront, // ✅ ADD
   });
 
   const bottomDeck = createDeck({
@@ -749,6 +751,7 @@ document.addEventListener("DOMContentLoaded", () => {
     works: worksBottom,
     direction: +1,
     focusClass: 'focus-bottom',
+    bringFront: bringBottomFront, // ✅ ADD
   });
 
   // Edge label clicks => focus deck
