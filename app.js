@@ -412,6 +412,30 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    const viewport = document.getElementById('viewport');
+    const deckTop = document.getElementById('deckTop');
+    const deckBottom = document.getElementById('deckBottom');
+    
+    function bringTopFront(){
+      if (!viewport) return;
+      viewport.classList.add('front-top');
+      viewport.classList.remove('front-bottom');
+    }
+    
+    function bringBottomFront(){
+      if (!viewport) return;
+      viewport.classList.add('front-bottom');
+      viewport.classList.remove('front-top');
+    }
+    
+    /* Any interaction should bring that deck to front */
+    ['pointerdown','wheel','touchstart'].forEach(evt=>{
+      deckTop?.addEventListener(evt, bringTopFront, { passive: true });
+      deckBottom?.addEventListener(evt, bringBottomFront, { passive: true });
+    });
+    
+    /* If zoom uses buttons/keys inside each deck, also call bringTopFront/bringBottomFront there */
+
     // Pointer pan/zoom
     let pointers = new Map();
     let lastPan = null;
