@@ -1161,22 +1161,20 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   display:block;
 }
 
-/* ===== Attached meta (bottom-left) ===== */
+/* ===== Attached meta ===== */
+
 .fullscreen .fs-meta{
-  position:absolute;
+  position: absolute;
   left: 0;
-  bottom: var(--printPad, 16px);
-  right:auto;
-  top:auto;
+  bottom: 0; /* sits in the reserved padding area */
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 
-  display:inline-flex;
-  align-items:center;
-  gap:2px;
-
-  /* match the “deck pill” scale (like Select/Untitled) */
-  height: var(--pillH);
-  min-height: var(--pillH);
-  padding: 0 10px;
+  height: var(--deckPillH);
+  min-height: var(--deckPillH);
+  padding: 0 var(--deckPillPadX);
+  font-size: var(--deckPillFont);
 
   border-radius: 2px;
   border: 1px solid rgba(255,255,255,.35);
@@ -1187,11 +1185,41 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
   text-transform: uppercase;
   letter-spacing: .08em;
+  overflow: hidden;
+  pointer-events: none;
 
-  overflow:hidden;
-  pointer-events:none;
-  max-width: calc(100% - 140px); /* leave space for Collect */
-  z-index: 5;
+  max-width: calc(100% - 160px);
+  z-index: 20;
+}
+
+.fullscreen .fs-actions{
+  position: absolute;
+  right: 0;
+  bottom: 0; /* sits in the reserved padding area */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  pointer-events: none;
+  z-index: 20;
+}
+
+.fullscreen #fsCollect{
+  pointer-events: auto;
+
+  height: var(--deckPillH);
+  min-height: var(--deckPillH);
+  padding: 0 var(--deckPillPadX);
+  font-size: var(--deckPillFont);
+
+  border-radius: 2px;
+  letter-spacing: .08em;
+  text-decoration: none;
+
+  color: rgba(255,255,255,.92);
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.07);
+  box-shadow: 0 12px 26px rgba(0,0,0,.22);
 }
 
 /* fade edge like active-meta */
@@ -1219,13 +1247,14 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-.fullscreen .fs-title{ font-size: clamp(11px, 1.1vw, 13px); opacity:.92; }
-.fullscreen .fs-status{ font-size: clamp(10px, 1.05vw, 12px); opacity:.78; }
+.fullscreen .fs-title{ font-size: var(--deckPillFont); opacity:.92; }
+.fullscreen .fs-status{ font-size: var(--deckPillFont); opacity:.78; }
 
 /* Wrap print card + attached pills */
 .fs-cardWrap{
   position: relative;
   width: 100%;
+  padding-bottom: calc(var(--deckPillH) + 12px); /* room for pills under card */
 }
 
 /* IMPORTANT: allow pills to be visible outside the white print card */
@@ -1233,52 +1262,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .fullscreen .fs-inner,
 .fs-cardWrap{
   overflow: visible;
-}
-
-/* Pills: attached OUTSIDE the card border */
-.fullscreen .fs-meta,
-.fullscreen .fs-actions{
-  position: absolute;
-  z-index: 20;
-  bottom: calc(-1 * (var(--pillH) * 0.40)); /* push outside */
-}
-
-/* Make sure Collect stays clickable */
-.fullscreen .fs-actions{ pointer-events: none; }
-.fullscreen #fsCollect{ pointer-events: auto; }
-
-/* Fullscreen: attached collect (bottom-right) */
-.fullscreen .fs-actions{
-  position:absolute;
-  right: 0;
-  bottom: var(--printPad, 16px);
-  left:auto;
-  top:auto;
-
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-
-  pointer-events:none; /* wrapper doesn’t steal clicks */
-  z-index: 5;
-}
-
-.fullscreen #fsCollect{
-  pointer-events:auto;
-
-  height: var(--pillH);
-  min-height: var(--pillH);
-  padding: 0 10px;
-  font-size: clamp(10px, 1.05vw, 13px);
-  letter-spacing: .08em;
-  border-radius: 2px;
-
-  color: rgba(255,255,255,.92);
-  border: 1px solid rgba(255,255,255,.35);
-  background: rgba(255,255,255,.07);
-  box-shadow: 0 12px 26px rgba(0,0,0,.22);
-
-  text-decoration: none;
 }
 
 /* ===== Smoke layer in fullscreen ONLY (won’t affect rest of site) ===== */
@@ -1312,11 +1295,16 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   position: relative;
 }
 
-/* Hide deck UI while fullscreen is open (your working method) */
+/* Hide deck UI while fullscreen is open (working method) */
 body.noscroll .active-ui,
 body.noscroll .active-actions,
 body.noscroll .active-meta{
   display:none !important;
+}
+
+.fullscreen .fs-meta,
+.fullscreen .fs-actions{
+  transform: translateY(2px);
 }
 
 /* =========================================================
