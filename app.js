@@ -679,6 +679,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isFullscreenOpen()) return;
       e.preventDefault();
 
+      if (bringFront) bringFront();
+
       freezeSphereHard();
 
       const rect = deckEl.getBoundingClientRect();
@@ -737,7 +739,7 @@ document.addEventListener("DOMContentLoaded", () => {
     works: worksTop,
     direction: +1,
     focusClass: 'focus-top',
-    bringFront: bringTopFront, // ✅ ADD
+    bringFront: bringTopFront,
   });
 
   const bottomDeck = createDeck({
@@ -751,7 +753,7 @@ document.addEventListener("DOMContentLoaded", () => {
     works: worksBottom,
     direction: +1,
     focusClass: 'focus-bottom',
-    bringFront: bringBottomFront, // ✅ ADD
+    bringFront: bringBottomFront,
   });
 
   // Edge label clicks => focus deck
