@@ -428,9 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
     deckEl.addEventListener('pointerdown', (e) => {
       if (isFullscreenOpen()) return;
       if (isInteractiveTarget(e.target)) return;
-      if (bringFront) bringFront();
-      freezeSphereHard();
-
+      
       if (viewport){
         viewport.classList.remove('focus-top', 'focus-bottom');
         viewport.classList.add(focusClass);
@@ -615,6 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
     deckEl.addEventListener('pointerdown', (e) => {
       if (isFullscreenOpen()) return;
       if (isInteractiveTarget(e.target)) return;
+      if (bringFront) bringFront();
 
       freezeSphereHard();
 
