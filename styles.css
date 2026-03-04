@@ -73,10 +73,10 @@
   --overviewBottomTilt: 20deg;
 
   /* edge label */
-  --edgeTabW: clamp(36px, 5vw, 56px);
+  --edgeTabW: clamp(28px, 4vw, 44px);
   --edgeTabFade: 26px;
   /* arrows */
-  --edgeArrowFade: 18px;
+  --edgeArrowFade: 26px;
 }
 
 html, body{
