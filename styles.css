@@ -1183,14 +1183,15 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   text-transform: uppercase;
   letter-spacing: .08em;
-  overflow: hidden;
+  overflow: visible;
   pointer-events: none;
   z-index: 20;
-  max-width: none;
-  min-width: 0;
-  width: calc(100% - 160px);
+  min-width: max-content !important;
   display: flex;
   --fsMetaScale: 1;
+  width: max-content !important;   /* size to content, like a button */
+  max-width: calc(100% - 160px) !important; /* only prevent collision with Collect */
+  flex: 0 0 auto !important;
 }
 
 /* Inner row can be scaled down */
@@ -1254,18 +1255,6 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .fullscreen .fs-status{
   color: rgba(255,255,255,.92);
   line-height: 1;
-  max-width: none;
-  overflow:visible;
-  text-overflow:clip;
-  white-space:nowrap;
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-.fullscreen .fs-title,
-.fullscreen .fs-status{
-  color: rgba(255,255,255,.92);
-  line-height: 1;
 
   /* scaling behavior */
   display: inline-block;
@@ -1276,8 +1265,10 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   white-space: nowrap;
   overflow: visible;
   text-overflow: clip;
-
   font-size: clamp(10px, 1.05vw, 13px);
+  max-width: none;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .fullscreen .fs-title{ opacity:.92; }
