@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fullscreen.classList.add('open');
     fullscreen.setAttribute('aria-hidden', 'false');
   
-    // ✅ stagger background fade (prevents “everything jumps”)
+    //* stagger background fade *//
     requestAnimationFrame(() => {
       document.body.classList.add('noscroll');
     });
