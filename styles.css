@@ -1446,6 +1446,21 @@ body.noscroll #spaceBg{
   transition: filter .45s ease;
 }
 
+/* Default layer order */
+#deckLayerTop{ z-index: 4; }
+#deckLayerBottom{ z-index: 4; }
+
+/* Bring one deck above the other while still split */
+.space-viewport.front-top #deckLayerTop{ z-index: 7; }
+.space-viewport.front-top #deckLayerBottom{ z-index: 6; }
+
+.space-viewport.front-bottom #deckLayerBottom{ z-index: 7; }
+.space-viewport.front-bottom #deckLayerTop{ z-index: 6; }
+
+/* Focus should always win */
+.space-viewport.focus-top #deckLayerTop{ z-index: 10 !important; }
+.space-viewport.focus-bottom #deckLayerBottom{ z-index: 10 !important; }
+
 /* ======= REDUCED MOTION ======= */
 @media (prefers-reduced-motion: reduce){
   .noise{ animation:none !important; }
