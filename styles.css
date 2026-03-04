@@ -1174,6 +1174,8 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   height: var(--deckPillH);
   min-height: var(--deckPillH);
   padding: 0 var(--deckPillPadX);
+  /* KEY: keep away from the right side */
+  right: calc(var(--deckPillPadX) + 110px);
 
   border-radius: 2px;
   border: 1px solid rgba(255,255,255,.35);
@@ -1183,14 +1185,14 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   text-transform: uppercase;
   letter-spacing: .08em;
-  overflow: visible;
+  overflow: hidden;
   pointer-events: none;
   z-index: 20;
   min-width: max-content !important;
   display: flex;
   --fsMetaScale: 1;
-  width: max-content !important;   /* size to content, like a button */
-  max-width: calc(100% - 160px) !important; /* only prevent collision with Collect */
+  width: auto !important;   /* size to content, like a button */
+  max-width: none !important; /* only prevent collision with Collect */
   flex: 0 0 auto !important;
 }
 
@@ -1219,6 +1221,12 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 .fullscreen #fsCollect{
   pointer-events: auto;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  min-width: 110px; /* must match the lane number */
 
   height: var(--deckPillH);
   min-height: var(--deckPillH);
