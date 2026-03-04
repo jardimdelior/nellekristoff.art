@@ -634,6 +634,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isFullscreenOpen()) return;
       if (!pointers.has(e.pointerId)) return;
       updatePointer(e);
+      if (bringFront) bringFront();
 
       if (pointers.size === 1 && lastPan){
         addPan(e.clientX - lastPan.x, e.clientY - lastPan.y);
