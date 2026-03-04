@@ -48,6 +48,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewport = document.getElementById('viewport');
   const spaceBg  = document.getElementById('spaceBg');
 
+    // ===== Bring active deck to the front (FIX overlap order) =====
+  const deckTopEl = document.getElementById('deckTop');
+  const deckBottomEl = document.getElementById('deckBottom');
+
+  function bringTopFront(){
+    if (!viewport) return;
+    viewport.classList.add('front-top');
+    viewport.classList.remove('front-bottom');
+  }
+
+  function bringBottomFront(){
+    if (!viewport) return;
+    viewport.classList.add('front-bottom');
+    viewport.classList.remove('front-top');
+  }
+
+  // Any interaction makes that deck the front one
+  ['pointerdown','wheel','touchstart'].forEach(evt => {
+    deckTopEl?.addEventListener(evt, bringTopFront, { passive: true });
+    deckBottomEl?.addEventListener(evt, bringBottomFront, { passive: true });
+  });
+
   /* ===== Chrome fullscreen UI guard (tabs overlay) ===== */
   function updateFsTopPad(){
     const isFsLike = window.innerHeight >= screen.height * 0.92;
