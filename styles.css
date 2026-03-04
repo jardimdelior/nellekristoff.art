@@ -682,6 +682,22 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   height: calc(50% - (var(--deckGap) / 2));
 }
 
+/* Base stacking */
+#deckLayerTop{ z-index: 4; }
+#deckLayerBottom{ z-index: 4; }
+
+/* When user interacts with TOP deck, bring it above bottom */
+.space-viewport.front-top #deckLayerTop{ z-index: 7; }
+.space-viewport.front-top #deckLayerBottom{ z-index: 6; }
+
+/* When user interacts with BOTTOM deck, bring it above top */
+.space-viewport.front-bottom #deckLayerBottom{ z-index: 7; }
+.space-viewport.front-bottom #deckLayerTop{ z-index: 6; }
+
+/* Focus mode should still win */
+.space-viewport.focus-top #deckLayerTop{ z-index: 10 !important; }
+.space-viewport.focus-bottom #deckLayerBottom{ z-index: 10 !important; }
+
 .deck-viewport{
   position:absolute;
   inset:0;
