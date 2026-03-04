@@ -1389,8 +1389,8 @@ body.noscroll .menu-btn{
 /* ===== Fullscreen scene: decks dissolve into the space ===== */
 body.noscroll #deckLayerTop,
 body.noscroll #deckLayerBottom{
-  opacity: 0.2 !important;
-  filter: blur(6px) saturate(0.9);
+  opacity: 0.08 !important;
+  filter: blur(2px) saturate(0.95);  /* less dramatic */
   transform: translateZ(0); /* keeps GPU stable */
   transition: opacity .45s ease .08s, filter .45s ease .08s;
   pointer-events: none !important;
@@ -1400,6 +1400,13 @@ body.noscroll #viewportWebgl{ opacity: .10 !important; }  /* calmer */
 body.noscroll #spaceBg{
   filter: brightness(.95) contrast(1.05);
   transition: filter .45s ease;
+}
+
+body.noscroll .brand-text,
+body.noscroll .subtitle-inline{
+  opacity: 0;
+  transform: translateY(-2px) scale(0.99);
+  filter: blur(.5px);
 }
 
 /* ======= REDUCED MOTION ======= */
