@@ -377,7 +377,7 @@ html.ready body{
 .layer-bay-2{
   left:0;
   height:100%;
-  right: calc(var(--headerH) + var(--headerH) + var(--headerRightInset)); /* reserve for monogram+burger */
+  right: calc(var(--headerH) + 1px); /* reserve for monogram+burger */
   display:flex;
   align-items:center;
   justify-content:flex-start;
