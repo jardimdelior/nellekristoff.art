@@ -1169,14 +1169,11 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   position: absolute;
   left: 0;
   bottom: 0; /* sits in the reserved padding area */
-  display: inline-flex;
   align-items: center;
   gap: 2px;
-  width: calc(100% - 140px); /* a bit more room */
   height: var(--deckPillH);
   min-height: var(--deckPillH);
   padding: 0 var(--deckPillPadX);
-  font-size: var(--deckPillFont);
 
   border-radius: 2px;
   border: 1px solid rgba(255,255,255,.35);
@@ -1184,14 +1181,15 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   box-shadow: 0 12px 26px rgba(0,0,0,.22);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
-
   text-transform: uppercase;
   letter-spacing: .08em;
   overflow: hidden;
   pointer-events: none;
-
-  max-width: calc(100% - 160px);
   z-index: 20;
+  max-width: none;
+  min-width: 0;
+  width: calc(100% - 160px);
+  display: flex;
 }
 
 .fullscreen .fs-actions{
@@ -1248,9 +1246,11 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
+  min-width: 0;
+  flex: 1 1 auto;
 }
-.fullscreen .fs-title{ font-size: var(--deckPillFont); opacity:.92; }
-.fullscreen .fs-status{ font-size: var(--deckPillFont); opacity:.78; }
+.fullscreen .fs-title{ font-size: clamp(10px, 1.05vw, 13px); opacity:.92; }
+.fullscreen .fs-status{ font-size: clamp(10px, 1.05vw, 13px); opacity:.78; }
 
 /* Wrap print card + attached pills */
 .fs-cardWrap{
@@ -1295,6 +1295,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 
 .fullscreen #fsCollect{
   position: relative;
+  font-size: clamp(10px, 1.05vw, 13px);
 }
 
 /* Hide deck UI while fullscreen is open (working method) */
