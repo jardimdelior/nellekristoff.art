@@ -14,7 +14,7 @@ window.contact = function contact(e){
 /* Works */
 const worksTop = [
   { src:"images/Untitled4.jpg", title:"Untitled 4", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled4" },
-  { src:"images/Untitled5.png", title:"Untitled 5", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled5.jpg", title:"Untitled 5", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled5" },
   { src:"images/Untitled6.png", title:"Untitled 6", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 
