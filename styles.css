@@ -79,7 +79,6 @@
   --edgeArrowFade: 26px;
   /* logo */
   --logoW: 44px;
-  --logoTight: -10px;
 }
 
 html, body{
@@ -344,7 +343,8 @@ html.ready body{
 /* ===== NEW: LOGO (spans both rows) ===== */
 .layer-bay-0{
   left:0;
-  right: calc(var(--headerH) + var(--headerH) + var(--headerRightInset)); /* reserve for monogram+burger */
+  right: auto; /* reserve for monogram+burger */
+  width: var(--logoW, 44px);       /* the lane width */
   height:100%;
   display:flex;
   align-items:center;
@@ -352,7 +352,6 @@ html.ready body{
   padding-left: var(--menuInset, 2px);
   z-index:2;
   pointer-events:auto;
-  min-width:0;
 }
 
 /* clickable logo */
@@ -383,7 +382,7 @@ html.ready body{
   display:flex;
   align-items:center;
   justify-content:flex-start;
-  padding-left: calc(var(--menuInset, 2px) + var(--logoW, 44px) + var(--logoTight)); /* space for logo + gap */
+  padding-left: calc(var(--menuInset, 2px) + var(--logoW, 44px)); /* space for logo + gap */
   z-index:1;
   min-width: 0;
   overflow:hidden;
