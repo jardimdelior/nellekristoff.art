@@ -153,8 +153,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }, { once: true });
   
     if (fsTitle)  fsTitle.textContent  = w.title  || "Untitled";
-    if (fsStatus) fsStatus.textContent = w.status || "Unveiling soon";
-    if (fsCollect) fsCollect.href = w.collect || "https://collect.nellekristoff.art";
+    if (fsStatus) fsStatus.textContent = (w.status ?? "");
+
+    if (fsCollect){
+      const fallback = "https://collect.nellekristoff.art";
+    
+      let url = (w.collect || "").trim() || fallback;
+    
+      // link is absolute (prevents http://nellekristoff.art/nellegumroad...)
+      if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+    
+      // If fsCollect is an <a>, keep href correct (for copy link / long press)
+      if (fsCollect.tagName === "A") {
+        fsCollect.href = url;
+        fsCollect.target = "_blank";
+        fsCollect.rel = "noopener";
+      }
+    
+      // Always force the click to open the right URL
+      fsCollect.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(url, "_blank");
+      };
+    }
   
     fullscreen.classList.add("open");
     fullscreen.setAttribute("aria-hidden", "false");
