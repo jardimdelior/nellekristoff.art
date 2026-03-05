@@ -13,13 +13,13 @@ window.contact = function contact(e){
 
 /* Works */
 const worksTop = [
-  { src:"images/Untitled4.png", title:"Untitled 4", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
+  { src:"images/Untitled4.png", title:"Untitled 4", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled4" },
   { src:"images/Untitled5.png", title:"Untitled 5", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   { src:"images/Untitled6.png", title:"Untitled 6", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
 
 const worksBottom = [
-  { src:"images/Untitled1.jpg", title:"Untitled 1", status:"Live", collect:"https://nellekristoff.gumroad.com/l/Untitled1" },
+  { src:"images/Untitled1.jpg", title:"Untitled 1", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled1" },
   { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
