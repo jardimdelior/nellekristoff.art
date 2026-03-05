@@ -19,7 +19,7 @@ const worksTop = [
 ];
 
 const worksBottom = [
-  { src:"images/Untitled1.png", title:"Untitled 1", status:"", collect:"https://nellekristoff.gumroad.com/l/Untitled1" },
+  { src:"images/Untitled1.jpg", title:"Untitled 1", status:"", collect:"https://nellekristoff.gumroad.com/l/Untitled1" },
   { src:"images/Untitled2.png", title:"Untitled 2", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
   { src:"images/Untitled3.png", title:"Untitled 3", status:"Unveiling soon", collect:"https://collect.nellekristoff.art" },
 ];
