@@ -19,6 +19,10 @@ const worksTop = [
   { src:"images/Untitled7.jpg", title:"Untitled 7", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled7" },
   { src:"images/Untitled8.jpg", title:"Untitled 8", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled8" },
   { src:"images/Untitled9.jpg", title:"Untitled 9", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled9" },
+  { src:"images/Untitled10.jpg", title:"Untitled 10", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled10" },
+  { src:"images/Untitled11.jpg", title:"Untitled 11", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled11" },
+  { src:"images/Untitled12.jpg", title:"Untitled 12", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled12" },
+  { src:"images/Untitled13.jpg", title:"Untitled 13", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled13" },
 ];
 
 const worksBottom = [
