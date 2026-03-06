@@ -18,6 +18,7 @@ const worksTop = [
   { src:"images/Untitled6.jpg", title:"Untitled 6", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled6" },
   { src:"images/Untitled7.jpg", title:"Untitled 7", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled7" },
   { src:"images/Untitled8.jpg", title:"Untitled 8", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled8" },
+  { src:"images/Untitled9.jpg", title:"Untitled 9", status:"->", collect:"https://nellekristoff.gumroad.com/l/Untitled9" },
 ];
 
 const worksBottom = [
