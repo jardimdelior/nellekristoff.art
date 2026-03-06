@@ -1212,7 +1212,7 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   min-height: var(--deckPillH);
   padding: 0 var(--deckPillPadX);
   /* KEY: keep away from the right side */
-  right: calc(var(--deckPillPadX) + 110px);
+  right: calc(var(--deckPillPadX) + 10px);
 
   border-radius: 2px;
   border: 1px solid rgba(255,255,255,.35);
