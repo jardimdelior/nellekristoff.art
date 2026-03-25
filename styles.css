@@ -1136,8 +1136,9 @@ html.ready .space-viewport{ opacity:1; transform:none; }
 .fullscreen{
   position:fixed;
   top:0;
-  left:30vw;
-  width:40vw;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(46vw, 820px);
   height:100dvh;
   
   background: rgba(0,0,0,.92);
@@ -1158,6 +1159,20 @@ html.ready .space-viewport{ opacity:1; transform:none; }
   visibility: visible;
   pointer-events: auto;
   transition: opacity .35s ease, visibility 0s linear 0s;
+}
+
+@media (max-width: 760px){
+  .fullscreen{
+    width: 82vw;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 520px){
+  .fullscreen{
+    width: 92vw;
+    padding: 14px;
+  }
 }
 
 .fs-inner{
